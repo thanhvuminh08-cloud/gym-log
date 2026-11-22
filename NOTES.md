@@ -13,7 +13,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Claude] Tăng `VERSION` trong `sw.js` để thiết bị nhận CSS tab Huy chương mới.
+- [cho Codex] `.tabs` ở Tiến độ giờ có 3 nút, đang xuống dòng (Huy chương nằm riêng 1 hàng) ở 375px — nên để 3 nút trên 1 hàng (css/app.css).
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)
