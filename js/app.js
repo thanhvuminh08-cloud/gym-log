@@ -12,42 +12,80 @@ function onError(e) {
 addEventListener('error', (e) => onError(e.error || e.message));
 addEventListener('unhandledrejection', (e) => onError(e.reason));
 
-const ROUTES = {
-  '': () => import('./views/home.js'),
+const VIEWS = {
+  home: () => import('./views/home.js'),
+  hero: () => import('./views/hero.js'),
   workout: () => import('./views/workout.js'),
   history: () => import('./views/history.js'),
   templates: () => import('./views/templates.js'),
   progress: () => import('./views/progress.js'),
   settings: () => import('./views/settings.js'),
   report: () => import('./views/report.js'),
-  hero: () => import('./views/hero.js'),
-  'nhap-mon': () => import('./views/dao.js'),
+  dao: () => import('./views/dao.js'),
 };
+
+// 5 mục (NAV trong lore.js) + Nhập môn. Mỗi route nhận các đoạn hash sau tên, trả danh sách [view, params]
+// render nối tiếp trong #main. Tạm gắn view cũ làm tab con; gộp/viết giao diện mới ở đợt 2–3 (VISION.md).
+const ROUTES = {
+  '': () => [['home'], ['hero']], // Động phủ = Hôm nay + Động phủ cũ (tạm xếp chồng)
+  workout: () => [['workout']], // Bế quan
+  'cong-phap': ([id]) => [['templates', id ? [id] : []]], // Công pháp: #/cong-phap/<id|new>
+  // Tu luyện ký: Nhật ký #/ky[/<id>] · Tuần ký #/ky/tuan[/<offset>] · Công đức bạ #/ky/cong-duc
+  ky: ([a, ...p]) => (a === 'tuan' ? [['report', p]] : a === 'cong-duc' ? [['progress', ['medal']]] : [['history', a ? [a] : []]]),
+  // Tàng thư: Tiến độ #/tang-thu[/<tab>[/<exId>]] · Cài đặt #/tang-thu/cai-dat
+  'tang-thu': ([a, ...p]) => (a === 'cai-dat' ? [['settings']] : [['progress', a ? [a, ...p] : []]]),
+  'nhap-mon': (p) => [['dao', p]],
+};
+
+// Route cũ → hash mới, để link/bookmark cũ không gãy. Nhận các đoạn (đã mã hoá) sau tên route cũ.
+const ALIASES = {
+  hero: () => '#/',
+  history: ([id]) => `#/ky${id ? `/${id}` : ''}`,
+  report: ([off]) => `#/ky/tuan${off ? `/${off}` : ''}`,
+  progress: ([tab, ...p]) => (tab === 'medal' ? '#/ky/cong-duc' : ['#/tang-thu', tab, ...p].filter(Boolean).join('/')),
+  templates: ([id]) => `#/cong-phap${id ? `/${id}` : ''}`,
+  settings: () => '#/tang-thu/cai-dat',
+};
+
+/** Tên route mới mà một data-r (mới, hoặc cũ khi markup nav chưa đổi) trỏ tới — để tô mục nav đang mở. */
+const navKey = (r = '') => (ALIASES[r] ? ALIASES[r]([]).replace(/^#\/?/, '').split('/')[0] : r);
 
 const main = document.getElementById('main');
 let cleanup;
 
 async function route() {
-  const [name = '', ...params] = location.hash.replace(/^#\/?/, '').split('/');
+  const [name = '', ...raw] = location.hash.replace(/^#\/?/, '').split('/');
+  if (ALIASES[name]) return location.replace(ALIASES[name](raw)); // thay mục lịch sử; hashchange gọi lại route()
+  const params = raw.map(decodeURIComponent);
   // Lần đầu (chưa Nhập môn, chưa bấm "Để sau", không có buổi đang tập): vào thẳng Nhập môn.
   if (!name) {
     const s = settings.get();
     if (!s.dao && !s.daoSkip && !(await activeWorkout())) return location.replace('#/nhap-mon');
   }
-  const load = ROUTES[name] || ROUTES[''];
+  const key = ROUTES[name] ? name : '';
+  const views = ROUTES[key](key === name ? params : []);
   cleanup?.();
   cleanup = null;
   main.onclick = main.oninput = main.onchange = main.onsubmit = null;
   document.querySelectorAll('nav a').forEach((a) => {
-    const current = a.dataset.r === (ROUTES[name] ? name : '');
+    const current = navKey(a.dataset.r) === key;
     a.classList.toggle('on', current);
     if (current) a.setAttribute('aria-current', params.length ? 'location' : 'page');
     else a.removeAttribute('aria-current');
   });
   try {
-    const loading = document.getElementById(`loading-${name || 'home'}`);
+    const loading = document.getElementById(`loading-${key || 'home'}`) || document.getElementById(`loading-${views[0][0]}`);
     if (loading) main.replaceChildren(loading.content.cloneNode(true));
-    cleanup = await (await load()).render(main, params.map(decodeURIComponent));
+    const mods = await Promise.all(views.map(([v]) => VIEWS[v]()));
+    if (views.length === 1) cleanup = await mods[0].render(main, views[0][1] || []);
+    else {
+      // Nhiều view: mỗi view một khung riêng (event delegation của view gắn trên khung đó).
+      const boxes = views.map(([v]) => Object.assign(document.createElement('div'), { className: `view-part view-${v}` }));
+      main.replaceChildren(...boxes);
+      const stops = [];
+      for (let i = 0; i < views.length; i++) stops.push(await mods[i].render(boxes[i], views[i][1] || []));
+      cleanup = () => stops.forEach((f) => typeof f === 'function' && f());
+    }
     countUp(main);
   } catch (e) {
     console.error(e);

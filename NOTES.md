@@ -22,7 +22,8 @@
 - Khoá Công pháp: đã Nhập môn → `pickExercise` (màn Tập, Giáo án) chỉ hiện bài trong `dao.path`, chip theo mạch, không "Tạo bài mới" (`.modal[data-locked=path]`, dòng `.pick-lock` dẫn tới Sửa Công pháp); `startWorkout` từ giáo án/buổi cũ bỏ bài ngoài Công pháp và báo toast (`lockedPath`, `filterByPath` trong js/dao.js).
 - Luyện thể (RPG.md 5c): mạch dùng Bế mạch → Luyện Bì → Luyện Nhục → Luyện Cân → Luyện Cốt → Luyện Tủy · Sơ thành → Viên mãn (`temper()`); Tu vi giữ cảnh giới. Sự kiện `kind: tuvi|temper|verify`, chỉ Tu vi độ kiếp; mạch lên bậc = "Thối thể".
 
-- Hướng mới (22/11): app thành **Luyện Thể Ký**, tu tiên là chủ đề chính; huy chương → Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi; nav 5 mục. Xem `VISION.md` (bước 1 là của Claude).
+- Hướng mới (22/11): app thành **Luyện Thể Ký**, tu tiên là chủ đề chính; huy chương → Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi; nav 5 mục. Xem `VISION.md`.
+- Luyện Thể Ký bước 1 (Claude, 22/11): `js/lore.js` (NAV/PHAM/term/gloss), `TIER_LABEL = PHAM`, router `ROUTES` 5 mục + `ALIASES` route cũ (`location.replace`); `#/` tạm xếp chồng home + hero. Hợp đồng chi tiết cuối VISION.md.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -52,6 +53,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
+- [cho Codex] Luyện Thể Ký bước 2: nav 5 mục từ `NAV` (lore.js), tên app, gộp Động phủ, khung 3 tab Tu luyện ký, giao diện phẩm/Công đức bạ, đổi link sang route mới — xem "Hợp đồng chi tiết" cuối VISION.md.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 

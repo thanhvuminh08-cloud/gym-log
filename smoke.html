@@ -62,7 +62,7 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
-  await step('Kết thúc → trang chi tiết', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/history/'))); });
+  await step('Kết thúc → trang chi tiết', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/ky/'))); });
   await step('Lưu thành giáo án', async () => { (await until(() => $('[data-act=tpl]'))).click(); await wait(200); await go('#/templates'); return w.document.body.innerText.includes('Smoke A'); });
   await step('Tập lại từ giáo án, hiện số liệu lần trước', async () => {
     await go('#/'); (await until(() => $('[data-act=tpl]'))).click();
@@ -86,7 +86,7 @@ try {
   await step('Phát hiện PR', async () => { fillSets([60, 75]); await check(0); await check(1); return $$('.set:not(.head) .check')[1].textContent.includes('PR'); });
   await step('Ăn mừng: hàng set PR có .celebrate[data-celebrate=gold]', () => !!$('.set.celebrate[data-celebrate=gold]'));
   await step('Toast cổ vũ khi vượt', () => $$('.toast').some((t) => t.textContent.includes('PR mới')));
-  await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/history/'))); });
+  await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/ky/'))); });
   await step('Tổng kết: huy chương vàng + 1/1 bài vượt', async () => !!(await until(() => $('.tier[data-tier=gold]'))) && $('.overload')?.textContent.includes('1/1'));
   await step('Luật so sánh quá tải', async () => {
     const { compare } = await import('./js/overload.js');
@@ -101,9 +101,34 @@ try {
     if (bad.length) lines.push('  ' + bad.join(' '));
     return !bad.length;
   });
-  for (const r of ['#/', '#/history', '#/progress', '#/templates', '#/settings']) {
-    await step(`Render ${r}`, async () => { await go(r); return !$('.error') && $('#main').innerText.trim().length > 20; });
+  for (const r of ['#/', '#/cong-phap', '#/ky', '#/ky/tuan', '#/ky/cong-duc', '#/tang-thu', '#/tang-thu/cai-dat']) {
+    await step(`Render ${r}`, async () => { await go(r); return w.location.hash === r && !$('.error') && $('#main').innerText.trim().length > 20; });
   }
+  await step('Route cũ chuyển sang route mới (5 mục Luyện Thể Ký)', async () => {
+    const wid = (await (await w.eval("import('./js/db.js')")).all('workouts')).find((x) => x.end)?.id;
+    const pairs = [['#/hero', '#/', '.cultivation'], ['#/history', '#/ky', 'a.card[href^="#/history/"]'], [`#/history/${wid}`, `#/ky/${wid}`, 'section[data-muscle]'],
+      ['#/report', '#/ky/tuan', '.report-stats'], ['#/report/-1', '#/ky/tuan/-1', '.report-stats, .empty, h1'], ['#/progress', '#/tang-thu', '.tabs'],
+      ['#/progress/overview', '#/tang-thu/overview', '.year-grid'], ['#/progress/medal', '#/ky/cong-duc', '.medals'],
+      ['#/templates', '#/cong-phap', '[href="#/templates/new"]'], ['#/templates/new', '#/cong-phap/new', 'input'], ['#/settings', '#/tang-thu/cai-dat', '[data-k=weekGoal]']];
+    const bad = [];
+    for (const [from, to, sel] of pairs) {
+      await go(from);
+      if (!(await until(() => w.location.hash === to && $(sel))) || $('.error')) bad.push(`${from}→${w.location.hash}`);
+    }
+    const back = w.history.length; await go('#/settings'); await until(() => w.location.hash === '#/tang-thu/cai-dat');
+    if (w.history.length !== back + 1) bad.push('chuyển hướng thêm mục lịch sử');
+    await go('#/ky/tuan'); if (!$('nav a.on')) bad.push('nav không tô mục đang mở');
+    if (bad.length) lines.push('  ' + bad.join(' '));
+    return !bad.length;
+  });
+  await step('lore.js: 5 mục NAV, phẩm thay huy chương, term/gloss', async () => {
+    const L = await import('./js/lore.js'), { TIER_LABEL } = await import('./js/overload.js');
+    const got = [L.NAV.map((n) => n.route).join(' '), TIER_LABEL.gold, TIER_LABEL.bronze, L.term('streak', 4), L.term('weeks', 6), L.term('rest'),
+      L.term('ledger'), !!L.gloss('milestone'), L.gloss('x')].join(',');
+    const want = ['#/ #/workout #/cong-phap #/ky #/tang-thu', 'Thượng phẩm', 'Hạ phẩm', 'Liên kích ×4', 'Đạo tâm 6 tuần', 'Điều tức', 'Công đức bạ', true, ''].join(',');
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Hôm nay: thẻ Sức mạnh có ~1RM + sparkline', async () => {
     await go('#/'); const c = await until(() => $('.lift-card[data-muscle=chest]'));
     return !!c && Number(c.querySelector('b').dataset.count) > 70 && !!c.querySelector('svg.spark path') && c.getAttribute('href').startsWith('#/progress/ex/');
@@ -400,14 +425,14 @@ try {
     if (!(await next(6))) throw new Error('bước 6');
     const rank = $('.dao-rank strong')?.textContent, days = $$('.dao-schedule li').length;
     $('[data-act=daoSave]').click();
-    const done = await until(() => w.location.hash === '#/hero' && $('.cultivation-meridian'), 5000);
+    const done = await until(() => w.location.hash === '#/' && $('.cultivation-meridian'), 5000);
     const s = S(), tpl = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp'));
     const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
     const got = [!!done, !!rank, days, s.dao.name, s.dao.path.back.join('+'), s.dao.tested.length, tpl.length, Object.keys(s.schedule).join(''), s.weekGoal,
       s.dao.templateIds.length, !!seen, !!$('dialog.breakthrough-modal[open]'), $('.cultivation-navigation')?.textContent.includes('Sửa Công pháp'),
       !!$('.cultivation-meridian[data-muscle=legs] .cultivation-tested')].join(',');
     // Làm lại Nhập môn: ghi đè giáo án cũ, không nhân đôi.
-    await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/hero', 5000);
+    await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/' && $('.cultivation-meridian'), 5000);
     const tpl2 = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp')).length;
     const want = ['true', 'true', 4, 'Thanh Vân', 'x-barbell-row+x-pull-up', 4, 4, '1245', 4, 4, 'true', 'false', 'true', 'true'].join(',');
     if (got !== want || tpl2 !== 4) lines.push(`  ${got} | lại ${tpl2}\n  ≠ ${want}`);

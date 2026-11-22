@@ -1,6 +1,7 @@
 // Quá tải lũy tiến: so một bài với lần tập trước, xếp cấp vàng/bạc/đồng.
 // Hàm thuần (không đụng DB) để dùng cả lúc tập lẫn tính lại từ lịch sử (đợt 2: kho huy chương).
 import { e1rm, fmtNum } from './util.js';
+import { PHAM } from './lore.js';
 
 const done = (sets) => sets.filter((s) => s.done !== false && +s.r > 0).map((s) => ({ w: +s.w || 0, r: +s.r }));
 const STEP = 2.5;
@@ -8,7 +9,7 @@ const E1_TOL = 0.98; // tăng tạ mà e1RM tụt ≤2% vẫn tính là vượt
 export const GOLD_PCT = 5; // vàng = ~1RM vượt kỷ lục cũ ≥ 5%
 
 export const TIERS = { gold: 3, silver: 2, bronze: 1 };
-export const TIER_LABEL = { gold: '🥇 Vàng', silver: '🥈 Bạc', bronze: '🥉 Đồng' };
+export const TIER_LABEL = PHAM; // Thượng/Trung/Hạ phẩm, nguồn tên ở lore.js
 
 /** Số liệu tóm tắt của một bài: set nặng nhất, e1RM, volume. */
 export function summary(sets) {

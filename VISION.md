@@ -61,3 +61,27 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 - Không tiền ảo, không gacha, không vật phẩm mua bán, không bảng xếp hạng.
 - Không dùng tên nhân vật, tông môn, pháp bảo, cốt truyện hay hình ảnh của truyện/phim cụ thể nào.
 - Không đổi DB, không đổi URL triển khai.
+
+## Hợp đồng chi tiết (Claude bước 1 xong, 22/11) — cho Codex bước 2
+**`js/lore.js`** — nguồn tên duy nhất, Codex import thay vì gõ chữ cứng:
+- `NAV`: mảng 5 `{key, r, label, route, icon}` theo thứ tự thanh nav. Nav nên dựng `<a href="${route}" data-r="${r}"><svg><use href="#${icon}"/></svg>${label}</a>` (hoặc giữ markup tĩnh trong `index.html` nhưng `href`/`data-r` phải khớp `route`/`r`). `r`: `''`, `workout`, `cong-phap`, `ky`, `tang-thu`. Icon tạm dùng sprite có sẵn (`i-home i-dumbbell i-layers i-calendar i-trend`) — Codex đổi được, nhớ sửa luôn `icon` trong `NAV`.
+- `PHAM.gold|silver|bronze` → "Thượng/Trung/Hạ phẩm". `TIER_LABEL` (overload.js) = `PHAM`, đã bỏ emoji. Giao diện đọc phẩm từ `data-tier="gold|silver|bronze"` (giữ nguyên).
+- `term(k, n?)`: `start` Bế quan · `rest` Điều tức · `finish` Xuất quan · `streak` Liên kích (`term('streak',4)` → "Liên kích ×4") · `weeks` Đạo tâm (`term('weeks',6)` → "Đạo tâm 6 tuần") · `milestone` Thạch bi · `ledger` Công đức bạ; cũng nhận `gold|silver|bronze`.
+- `gloss(k)`: dòng nghĩa thật cho cùng các khoá trên + `gold|silver|bronze` (khoá lạ → `''`). Bật/tắt "Chú giải" là việc Claude bước 3; Codex chỉ cần chỗ đặt dòng nhỏ (vd. `<small class="gloss">`).
+
+**Router (`js/app.js`)** — `ROUTES` (route mới → view) + `ALIASES` (route cũ → hash mới, `location.replace`, không thêm mục lịch sử):
+| Hash mới | View tạm gắn | Hash cũ chuyển tới |
+|---|---|---|
+| `#/` Động phủ | `home` rồi `hero` xếp chồng, mỗi view một khung `div.view-part.view-home` / `.view-hero` | `#/hero` |
+| `#/workout` Bế quan | `workout` | — |
+| `#/cong-phap[/<id>\|/new]` | `templates` | `#/templates[/…]` |
+| `#/ky[/<id>]` Nhật ký | `history` | `#/history[/…]` |
+| `#/ky/tuan[/<offset>]` Tuần ký | `report` | `#/report[/…]` |
+| `#/ky/cong-duc` Công đức bạ | `progress` tab `medal` | `#/progress/medal` |
+| `#/tang-thu[/<tab>[/<exId>]]` | `progress` | `#/progress[/…]` |
+| `#/tang-thu/cai-dat` | `settings` | `#/settings` |
+| `#/nhap-mon[/…]` | `dao` (giữ nguyên) | — |
+- Nav tô mục bằng `data-r`; tạm thời router hiểu cả `data-r` cũ (vd. `history` → `ky`). Template tải: `loading-<r>` (vd. `loading-ky`, `loading-tang-thu`), không có thì dùng `loading-<view>` cũ.
+- Link trong view còn trỏ route cũ vẫn chạy (qua chuyển hướng); Codex đổi sang route mới khi sửa markup bước 2. Khung 3 tab Tu luyện ký: dùng link `#/ky`, `#/ky/tuan`, `#/ky/cong-duc` (router đã có), không cần `data-tab`.
+- Động phủ xếp chồng là tạm: bước 2 Codex gộp markup Hôm nay + Động phủ (bỏ thẻ `[data-hero-link]` và link "← Hôm nay" của hero), giữ `[data-hero-profile]`, `[data-quests] [data-quest]`, `.cultivation-meridian[data-muscle]`, `dialog.breakthrough-modal`, `[data-act=empty|tpl]` mà smoke dựa vào.
+- Còn emoji huy chương ở `js/report.js` (chữ chia sẻ) và markup `progress.js`/`report.js` — Claude đổi chữ chia sẻ ở bước 3, Codex đổi markup ở bước 2.
