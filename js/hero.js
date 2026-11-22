@@ -304,8 +304,10 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
       pct: T.eq ? Math.min(100, Math.round((r.realEq / T.eq) * 100)) : 0, target };
   });
 
-  const wSum = MERIDIANS.reduce((a, m) => a + m.w, 0);
-  const tuvi = rank(meridians.reduce((a, m, i) => a + m.p * MERIDIANS[i].w, 0) / wSum);
+  // Tu vi theo các mạch đã khai (p > 0): mạch chưa tập không kéo Tu vi xuống (người dùng chốt 23/11).
+  const open = meridians.map((m, i) => [m, MERIDIANS[i].w]).filter(([m]) => m.p > 0);
+  const wSum = open.reduce((a, [, w]) => a + w, 0);
+  const tuvi = { ...rank(wSum ? open.reduce((a, [m, w]) => a + m.p * w, 0) / wSum : 0), opened: open.length, of: MERIDIANS.length };
   const cc = meridians.map((m) => m.canCo).filter((v) => v != null);
   const canCo = cc.length ? Math.round(cc.reduce((a, b) => a + b, 0) / cc.length) : null;
   // Thử thách Bình cảnh: mạch có mốc kg gần chạm nhất (phần đã đi trong cảnh giới cao nhất; hoà → trọng số lớn hơn).

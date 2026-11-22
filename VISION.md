@@ -177,4 +177,5 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
   - Nhiệm vụ chỉ nhắc bài người dùng đã tập hoặc đã chọn.
 - **O5 (sửa nhỏ):** các chữ ở mục 7; Lịch tập khi chưa có giáo án → 1 dòng "Tạo giáo án hoặc Nhập môn để đặt lịch"; nhắc sao lưu sau ≥3 buổi.
 
-**Thứ tự đề xuất:** O5 + bỏ gọn ở O4 (nhanh) → O1 → O2 → O3. Cần người dùng chốt: Tu vi nên đo *sức mạnh các mạch đã tập* (đề xuất) hay giữ *đủ 7 mạch*?
+**Thứ tự đề xuất:** O5 + bỏ gọn ở O4 (nhanh) → O1 → O2 → O3.
+- ✅ 23/11 người dùng chốt: Tu vi = trung bình trọng số các mạch đã khai (p > 0), `tuvi.opened/of`; Thất mạch ghi "Theo x/7 mạch đã khai". Mạch vẫn cần đủ 2 bài (giữ). Còn lại của O1: hỏi cân nặng một lần (thiếu cân nặng thì mạch tạ chưa tính được) — gộp với O2/O3.

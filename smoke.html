@@ -326,7 +326,7 @@ try {
       none.needsWeight, none.needsSex, none.meridians.length,
       // Mạch = trung bình 2 bài mạnh nhất: Squat 1,67×BW một mình chỉ ra Luyện Khí; Bình cảnh chỉ sang bài thứ hai.
       m.legs.need, m.legs.lifts.map((l) => l.label).join('|'), m.legs.next.name, m.legs.next.pair, m.triceps.need, m.triceps.next].join(',');
-    const want = ['Kết Đan · Sơ kỳ', 32, 'Luyện Khí · Sơ kỳ', 13, 18, true, 470, 3, 87, 520,
+    const want = ['Kết Đan · Sơ kỳ', 32, 'Luyện Khí · Trung kỳ', 14, 18, true, 470, 3, 87, 520,
       'Luyện Bì · Đại thành', 17, 90, 37.5, 'Luyện Bì · Tiểu thành', 19, false, 20, 0.5, 'Luyện Bì · Sơ thành',
       'Luyện Bì · Sơ thành', 20, 0.667, 470, 1.125, '0.60', true, true, 7, // Bụng: Plank 60 giây thật → TB 2 bài = 0,667
       1, 'Luyện Cân · Sơ thành', 'Front Squat', false, 2, null].join(',');
@@ -348,6 +348,17 @@ try {
     const got3 = [H.breakthroughs({ tuvi: [0, 0] }, fake(0, 2)).length, H.breakthroughs({ tuvi: [0, 2] }, fake(1, 0)).map((e) => `${e.from}>${e.to}`).join(), H.breakthroughs({ tuvi: [2, 3] }, fake(3, 0))[0].tribulation].join(',');
     if (got3 !== '0,Phàm nhân>Luyện Khí · Sơ kỳ,true') { lines.push(`  Phàm nhân: ${got3}`); return false; }
     return got2 === want2;
+  });
+  await step('Tu vi theo mạch đã khai: chỉ tập Chân → Tu vi = cấp mạch Chân, 1/7 mạch', async () => {
+    const H = await import('./js/hero.js'), { DEFAULT_EXERCISES: ex } = await import('./js/exercises.js');
+    const id = (n) => ex.find((e) => e.name === n).id, now = new Date(2026, 2, 2, 9).getTime();
+    const sets = (w, r) => [{ w, r, done: true }];
+    const wk = { id: 'w', start: now - 1e5, end: now - 1e4, entries: [{ exerciseId: id('Squat'), sets: sets(140, 5) }, { exerciseId: id('Front Squat'), sets: sets(110, 5) }] };
+    const p = H.hero({ workouts: [wk], exercises: ex, body: [{ date: now - 2e5, weight: 80 }], sex: 'm', now });
+    const legs = p.meridians.find((m) => m.key === 'legs');
+    const got = [p.tuvi.opened, p.tuvi.of, p.tuvi.p === H.rank(legs.p).p, p.tuvi.realm.i > 0].join(',');
+    if (got !== '1,7,true,true') lines.push(`  ${got}`);
+    return got === '1,7,true,true';
   });
   await step('Nhập môn: Công pháp ≥2 bài/mạch, Trắc linh căn, giáo án tự sinh', async () => {
     const G = await import('./js/dao.js'), { DEFAULT_EXERCISES: ex } = await import('./js/exercises.js');
@@ -371,7 +382,7 @@ try {
       a.profile.meridians.find((m) => m.key === 'legs').best.tested, plan.templates.map((t) => `${t.name}:${t.items.length}`).join('/'),
       Object.entries(plan.schedule).map(([d, t]) => `${d}=${plan.templates.findIndex((x) => x.id === t)}`).join(' '),
       plan.templates[0].items[0].reps + '×' + plan.templates[0].items[0].sets, tl.length, tl.find((t) => t.name === 'Dips').bodyweight].join(',');
-    const want = [true, 'back:1', true, 'Kết Đan · Trung kỳ', 'Ngực', 'Luyện Cân · Đại thành', 'Luyện Cân · Đại thành', true, // Vai khai tới Nguyên Anh → hư cảnh, giới hạn Kết Đan
+    const want = [true, 'back:1', true, 'Kết Đan · Hậu kỳ', 'Ngực', 'Luyện Cân · Đại thành', 'Luyện Cân · Đại thành', true, // Vai khai tới Nguyên Anh → hư cảnh, giới hạn Kết Đan
       'Giáo án · Thượng thân A:5/Giáo án · Hạ thân A:3/Giáo án · Thượng thân B:5/Giáo án · Hạ thân B:3', '1=0 2=1 4=2 5=3', '5×4', 14, true].join(','); // 14 = 12 bài tạ + Plank, Hanging Leg Raise
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
     return got === want;
@@ -508,7 +519,7 @@ try {
     fill('x-squat', 140, 5); fill('x-front-squat', 110, 3); fill('x-bench-press-on', 100, 5); fill('x-pull-up', 20, 5);
     if (!(await next(6))) throw new Error('bước 6');
     const rank = $('.dao-rank strong')?.textContent, days = $$('.dao-schedule li').length;
-    $('[data-act=daoSave]').click();
+    $$('dialog[open]').forEach((d) => d.close()); $('[data-act=daoSave]').click(); // đóng màn Thối thể còn chờ từ bước trước
     const done = await until(() => w.location.hash === '#/' && $('.tuvi-strip'), 5000);
     const ceremonyShown = !!$('dialog.breakthrough-modal[open]');
     if (done) done.click();

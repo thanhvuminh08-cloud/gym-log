@@ -268,6 +268,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
         <div>
           <h2>${termLabel('tuvi')}</h2>
           <strong>${h(tuvi.label)}</strong>
+          <small class="muted" data-opened="${tuvi.opened}">Theo ${tuvi.opened}/${tuvi.of} mạch đã khai</small>
           ${canCo != null ? `<p class="cultivation-condition${shaky ? ' is-shaky' : ''}">${termLabel('canCo')} <b>${canCo}%</b>${shaky ? ' · Lung lay' : ''}</p>` : ''}
         </div>
       </div>
