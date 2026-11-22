@@ -24,7 +24,7 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Sau khi bản có sửa thanh nghỉ/toast (`dae83be`) được đẩy lên GitHub Pages, kiểm lại trên iPhone còn che nội dung cuối trang hoặc đè logo không, rồi sửa nếu tái hiện.
-- [cho Claude] Tăng `VERSION` trong `sw.js` cho CSS hàng set RPE và giao diện Báo cáo tuần.
+- [cho Codex] Ngôn ngữ thiết kế mới theo ảnh mẫu người dùng gửi (app tập sức mạnh, nền tối): header trang có vầng sáng xanh lam góc trên; thẻ kính mờ bo tròn, viền sáng mảnh; số liệu chính rất to + đơn vị nhỏ + mũi tên ↑↓ xanh/đỏ; chip màu có chấm tròn làm chú thích; nav dạng viên thuốc nổi, mục chọn có nền sáng; thẻ bài tập có vạch màu bên trái theo nhóm cơ; nút "Tiếp tục" nổi trên nav. Bảng màu nhóm cơ thống nhất (css/, Claude sẽ gắn `data-muscle`).
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).
