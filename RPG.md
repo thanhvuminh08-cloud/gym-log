@@ -151,3 +151,8 @@ Bụng: cảnh giới theo Linh khí mạch — ngưỡng Luyện Khí/Trúc Cơ
 - **Bụng đo được** (`CORE_TESTS`): Plank theo giây (45/90/150/240/360), Hanging Leg Raise, Ab Wheel theo rep. Mạch Bụng = max(Linh khí mạch, TB 2 bài đo). Buổi thật cũng tính (Plank 60 giây ghi rep = 60).
 - **Nhiệm vụ "Xác chứng mạch X"** (`kind:'verify'`, `exerciseId`) đứng trước Khai mạch / Vượt lần trước khi còn lời khai chưa chứng minh; detail có mốc cụ thể "Squat ~1RM 126 kg (vd. 110 kg × 5)".
 - Hợp đồng thêm: `hero().claims = [{exerciseId, name, meridian, label (mức khai gốc), verified, capped, pct (% đã đạt), target:{kg, alt, added, perHand}|{reps, unit}}]`, `hero().unverified`, `hero().verified` (id); mỗi mạch `unverified`; mỗi `lifts[]` thêm `unverified, capped, reps, unit` (Bụng: `reps` + `unit` thay cho ratio/kg). `G.testList` thêm bài Bụng `{core:true, unit}`. `G.assess` thêm `unverified, claims, linhKhi`.
+
+### 5c. Luyện thể — bậc của mạch (tách khỏi cảnh giới Tu vi)
+Tu vi (Luyện Khí → Hoá Thần, Sơ kỳ → Đại viên mãn) được **đúc lên từ** 7 mạch, nên mạch không dùng tên cảnh giới nữa mà dùng con đường luyện thể: **Bế mạch → Luyện Bì → Luyện Nhục → Luyện Cân → Luyện Cốt → Luyện Tủy**, độ thuần thục **Sơ thành → Tiểu thành → Đại thành → Viên mãn** (`TEMPERS`, `MASTERY`, `temper(p)` — cùng ngưỡng p, chỉ đổi tên). Áp dụng cho `meridians[]`, `lifts[]`, `claims[]`, `next.realm` (Bình cảnh "→ Luyện Cốt").
+- Sự kiện: Tu vi → `kind:'tuvi'` (Đột phá / Độ kiếp); mạch → `kind:'temper'`, **không bao giờ độ kiếp**, tiêu đề modal "Thối thể"; Xác chứng → `kind:'verify'`. Mọi sự kiện có `level` (0–5) cho ấn triện/tranh.
+- Hư cảnh: mạch tự khai tối đa **Luyện Cân · Viên mãn**; hỏi lại khi khai từ **Luyện Cốt**.

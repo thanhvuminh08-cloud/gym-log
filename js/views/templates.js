@@ -2,25 +2,86 @@ import { all, get, put, del } from '../db.js';
 import { h, uid, exMap, settings, toast } from '../util.js';
 import { pickExercise } from '../picker.js';
 import { startWorkout } from './workout.js';
+import { NAV, term } from '../lore.js';
+import { pathOptions } from '../dao.js';
+import { cleanSchedule } from '../schedule.js';
+
+const days = [[1, 'T2'], [2, 'T3'], [3, 'T4'], [4, 'T5'], [5, 'T6'], [6, 'T7'], [0, 'CN']];
+
+function pathPreview(dao, exercises) {
+  return dao?.at
+    ? `<ul class="plan-meridians">${pathOptions(exercises).map(({ key, name, options }) => {
+      const selected = options.filter((exercise) => dao.path?.[key]?.includes(exercise.id));
+      return `<li data-muscle="${key}"><b>${h(name)}</b><span>${selected.map((exercise) => h(exercise.name)).join(' · ') || 'Chưa chọn bài'}</span></li>`;
+    }).join('')}</ul>`
+    : '<p class="muted">Chọn các bài cho từng mạch trong Nhập môn.</p>';
+}
 
 export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
   if (id) return edit(el, id, ex);
   const list = (await all('templates')).sort((a, b) => a.name.localeCompare(b.name));
-  el.innerHTML = `<h1>Giáo án</h1>
+  const { dao, schedule, weekGoal, monthGoal } = settings.get(), plan = cleanSchedule(schedule);
+  const { label, icon } = NAV.find((item) => item.key === 'cong-phap');
+  el.innerHTML = `<header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${label}</h1></header>
+  <section class="card plan-overview">
+    <h2>Thất mạch</h2>${pathPreview(dao, Object.values(ex))}
+    <a class="btn ghost" href="#/nhap-mon${dao?.at ? '/4' : ''}">${dao?.at ? 'Sửa Công pháp' : 'Nhập môn'}</a>
+  </section>
+  <section class="card plan-overview">
+    <h2>Lịch bế quan</h2>
+    <ul class="plan-week">${days.map(([day, name]) => `<li${day in plan ? ' class="scheduled"' : ''}><b>${name}</b>
+      <small>${day in plan ? h(list.find((t) => t.id === plan[day])?.name || 'Tập tự do') : 'Nghỉ'}</small></li>`).join('')}</ul>
+    <div class="schedule-settings" data-schedule>
+      <p class="muted small">Đánh dấu ngày bế quan để xem lời nhắc ở Động phủ.</p>
+      ${days.map(([day, name]) => `
+      <div class="schedule-option" data-day="${day}">
+        <label><input type="checkbox" data-f="on" ${day in plan ? 'checked' : ''}> <span>${name}</span></label>
+        <select data-f="tpl" aria-label="Giáo án ${name}">
+          <option value="">Tự do</option>
+          ${list.map((t) => `<option value="${h(t.id)}" ${plan[day] === t.id ? 'selected' : ''}>${h(t.name)}</option>`).join('')}
+        </select>
+      </div>`).join('')}
+    </div>
+  </section>
+  <section class="card plan-overview settings-options" data-goals>
+    <h2>Mục tiêu bế quan</h2>
+    <label class="row"><span class="grow">Số buổi mỗi tuần</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(weekGoal)}"></label>
+    <label class="row"><span class="grow">Số buổi mỗi tháng</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(monthGoal)}"></label>
+  </section>
+  <h2>Giáo án</h2>
   ${list.map((t) => `<div class="card"><div class="row"><b class="grow">${h(t.name)}</b>
-      <a class="btn ghost" href="#/templates/${h(t.id)}">Sửa</a><button data-id="${h(t.id)}">Tập</button></div>
+      <a class="btn ghost" href="#/cong-phap/${h(t.id)}">Sửa</a><button data-id="${h(t.id)}">${term('start')}</button></div>
       <div class="small muted">${t.items.map((i) => `${h(ex[i.exerciseId]?.name || '?')} ${i.sets}×${i.reps}`).join(' · ')}</div></div>`).join('')
     || `<section class="card empty-state">
       <span class="tile-icon empty-illustration is-template"><svg aria-hidden="true"><use href="#i-layers"/></svg></span>
       <h2>Chưa có giáo án</h2>
       <p class="muted">Tạo giáo án để lưu bài tập và số set cho các buổi sau.</p>
-      <a class="btn primary" href="#/templates/new">+ Tạo giáo án</a>
+      <a class="btn primary" href="#/cong-phap/new">+ Tạo giáo án</a>
     </section>`}
-  ${list.length ? '<a class="btn primary wide" href="#/templates/new">+ Tạo giáo án</a>' : ''}`;
+  ${list.length ? '<a class="btn primary wide" href="#/cong-phap/new">+ Tạo giáo án</a>' : ''}`;
   el.onclick = (ev) => {
     const b = ev.target.closest('button[data-id]');
     if (b) startWorkout({ template: list.find((t) => t.id === b.dataset.id) });
+  };
+  // Lịch bế quan (settings.schedule) và mục tiêu buổi (weekGoal/monthGoal) — chuyển từ Cài đặt sang đây.
+  el.onchange = (ev) => {
+    const t = ev.target, row = t.closest('[data-schedule] [data-day]');
+    if (row) {
+      const on = row.querySelector('[data-f=on]');
+      if (t.dataset.f === 'tpl') on.checked = true; // chọn giáo án = bật ngày đó
+      const next = cleanSchedule(settings.get().schedule);
+      if (on.checked) next[row.dataset.day] = row.querySelector('[data-f=tpl]').value; else delete next[row.dataset.day];
+      settings.set({ schedule: next });
+      toast('Đã lưu lịch bế quan');
+      return render(el, []); // vẽ lại lưới tuần
+    }
+    if (t.dataset.k === 'weekGoal' || t.dataset.k === 'monthGoal') {
+      const n = Math.max(1, Math.round(Number(t.value)) || 1);
+      settings.set({ [t.dataset.k]: n });
+      t.value = n;
+      toast('Đã lưu mục tiêu');
+    }
   };
 }
 
@@ -28,7 +89,7 @@ async function edit(el, id, ex) {
   const t = id === 'new' ? { id: uid(), name: '', items: [] } : await get('templates', id);
   if (!t) { el.innerHTML = '<p>Không tìm thấy giáo án.</p>'; return; }
   const draw = () => {
-    el.innerHTML = `<a href="#/templates" class="small">← Giáo án</a>
+    el.innerHTML = `<a href="#/cong-phap" class="small">← Công pháp</a>
     <h1>${id === 'new' ? 'Giáo án mới' : 'Sửa giáo án'}</h1>
     <input class="title-input" data-f="name" placeholder="Tên (vd: Push A)" value="${h(t.name)}">
     ${t.items.map((it, i) => `<div class="card" data-i="${i}">
@@ -63,10 +124,10 @@ async function edit(el, id, ex) {
     else if (act === 'save') {
       if (!t.name.trim()) return toast('Nhập tên giáo án');
       await put('templates', { ...t, name: t.name.trim() });
-      toast('Đã lưu'); location.hash = '#/templates'; return;
+      toast('Đã lưu'); location.hash = '#/cong-phap'; return;
     } else if (act === 'del') {
       if (!confirm('Xoá giáo án này?')) return;
-      await del('templates', t.id); location.hash = '#/templates'; return;
+      await del('templates', t.id); location.hash = '#/cong-phap'; return;
     }
     draw();
   };

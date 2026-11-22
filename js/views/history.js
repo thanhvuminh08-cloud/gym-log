@@ -4,6 +4,9 @@ import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
 import { analyzeWorkout, TIER_LABEL } from '../overload.js';
 import { muscleKey } from '../insights.js';
+import { medals } from '../medals.js';
+import { gloss, term } from '../lore.js';
+import { journalHeader, phamSeal } from './sections.js';
 
 export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
@@ -11,31 +14,35 @@ export async function render(el, [id]) {
 
   const list = await finished();
   let month = '';
-  el.innerHTML = `<h1>Lịch sử</h1>` + (list.map((w) => {
+  el.innerHTML = journalHeader('journal') + (list.map((w) => {
     const m = new Date(w.start).toLocaleDateString('vi-VN', { month: 'long', year: 'numeric' });
     const head = m !== month ? `<h2>${(month = m)}</h2>` : '';
-    return `${head}<a class="card" href="#/history/${h(w.id)}"><b>${h(w.name)}</b>
+    return `${head}<a class="card" href="#/ky/${h(w.id)}"><b>${h(w.name)}</b>
       <div class="muted small">${fmtDate(w.start)} · ${fmtDur(w.end - w.start)} · ${setCount(w)} set · ${fmtNum(volume(w))} kg</div>
       <div class="small">${w.entries.map((e) => h(ex[e.exerciseId]?.name || '?')).join(', ')}</div></a>`;
   }).join('') || `<section class="card empty-state">
     <span class="tile-icon empty-illustration"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span>
     <h2>Chưa có buổi tập hoàn thành</h2>
-    <p class="muted">Bắt đầu ở Hôm nay và hoàn thành buổi đầu tiên để lưu vào lịch sử.</p>
-    <a class="btn primary" href="#/">Về Hôm nay</a>
+    <p class="muted">Hoàn thành buổi tập đầu tiên để ghi vào Nhật ký.</p>
+    <a class="btn primary" href="#/">Về Động phủ</a>
   </section>`);
 }
 
 async function detail(el, id, ex) {
   const w = await get('workouts', id);
   if (!w) { el.innerHTML = '<p>Không tìm thấy buổi tập.</p>'; return; }
-  const ov = analyzeWorkout(w, await finished());
+  const sessions = await finished();
+  const ov = analyzeWorkout(w, sessions);
+  const ledger = medals(sessions.filter((session) => session.end <= w.end), w.end);
+  const stones = ledger.milestones.filter((item) => item.reached?.workoutId === w.id);
   const nCmp = ov.filter((o) => !o.first).length, nUp = ov.filter((o) => o.res).length;
-  const tierRow = (o) => o.res ? `<div class="tier small summary-medal" data-tier="${o.res.tier}"><strong>${TIER_LABEL[o.res.tier]}</strong><span>${h(o.res.msg)}</span></div>`
+  const tierRow = (o) => o.res ? `<div class="tier small summary-medal" data-tier="${o.res.tier}">${phamSeal()}<strong>${TIER_LABEL[o.res.tier]}</strong><span>${h(o.res.msg)}</span></div>`
     : `<div class="tier small muted" data-tier="${o.first ? 'first' : 'none'}">${o.first ? 'Lần đầu tập bài này' : 'Chưa vượt lần trước'}</div>`;
   const sets = setCount(w), kg = volume(w);
   el.innerHTML = `
-  <a href="#/history" class="small">← Lịch sử</a>
-  <h1>${h(w.name)}</h1>
+  ${journalHeader('journal')}
+  <a href="#/ky" class="small">← Nhật ký</a>
+  <h2>${h(w.name)}</h2>
   <p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p>
   <div class="stats workout-summary">
     <div><b data-count="${sets}">${sets}</b><small>Set hoàn thành</small></div>
@@ -46,6 +53,11 @@ async function detail(el, id, ex) {
       <small>${nCmp ? 'Bài vượt lần trước' : 'Chưa có lần trước'}</small>
     </div>
   </div>
+  ${ledger.streak.cur || stones.length ? `<section class="card ledger-summary">
+    ${ledger.streak.cur ? `<b>${term('streak', ledger.streak.cur)}</b><small class="gloss">${gloss('streak')}</small>` : ''}
+    ${stones.length ? `<h3>${term('milestone')} mới</h3><ul>${stones.map((item) => `<li>${h(ex[item.exerciseId]?.name || 'Bài đã xoá')} · ${fmtNum(item.reached.kg)} kg</li>`).join('')}</ul>` : ''}
+    <a class="btn ghost" href="#/ky/cong-duc">${term('ledger')}</a>
+  </section>` : ''}
   ${w.entries.map((e, ei) => {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));
     return `<section class="card" data-muscle="${muscleKey(ex[e.exerciseId])}"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>
@@ -68,6 +80,6 @@ async function detail(el, id, ex) {
       await put('templates', { id: uid(), name, items: w.entries.map((e) => ({ exerciseId: e.exerciseId, sets: e.sets.length, reps: e.sets[0]?.r || 8, rest: e.rest })) });
       toast('Đã lưu giáo án');
     }
-    if (act === 'del' && confirm('Xoá vĩnh viễn buổi tập này?')) { await del('workouts', w.id); location.hash = '#/history'; }
+    if (act === 'del' && confirm('Xoá vĩnh viễn buổi tập này?')) { await del('workouts', w.id); location.hash = '#/ky'; }
   };
 }

@@ -19,6 +19,12 @@
 - Tu luyện đợt 2 nối xong: `loadProfile()` kèm `profile.weekly` (quests); `ceremony(profile)` (views/hero.js) so `gym.heroSeen` → mở tối đa 3 màn Đột phá/Độ kiếp (dialog gắn body, sống qua đổi trang), lần đầu / chưa đủ cân nặng-giới tính chỉ lưu mốc; gọi khi vào Động phủ và sau Kết thúc buổi. `gym.questSeen` {week, done} → `nhiem-vu.mp3` khi nhiệm vụ vừa xong. Âm (js/sfx.js): `music()` lặp dong-phu khi ở Động phủ (cleanup route dừng, tạm dừng khi ẩn tab), `sfx()` một lần; bị chặn tự phát → thử lại ở lần chạm đầu. Mặc định `music: false`, `sfx: true`. Độ kiếp rung + dot-pha ở 1,05/1,65/2,25 s.
 - Tu luyện đợt 3 (RPG.md mục 5): `js/dao.js` tính hồ sơ, cảnh giới và giáo án/lịch Công pháp. `#/nhap-mon` sáu bước đã nối dữ liệu thật: bản nháp sessionStorage `gym.daoDraft`; lần đầu mở (chưa `dao`/`daoSkip`, không có buổi dở) router chuyển tới; "Nhận công pháp" lưu cân nặng nếu đổi, `settings.dao` (+`templateIds`, làm lại thì ghi đè giáo án cũ), `schedule`, `weekGoal`, đặt mốc `gym.heroSeen` (không ăn mừng cảnh giới khởi đầu); Động phủ hiện hai bài mạnh nhất, số bài còn thiếu và nhãn tự khai.
 - Hư cảnh & Xác chứng (RPG.md 5b): tự khai tối đa Kết Đan (`TEST_CAP`) tới khi buổi thật đạt 90% (`VERIFY`) → sự kiện Đột phá `verify`; `START_XP` Công lực khởi đầu; Bụng đo bằng Plank/Leg Raise/Ab Wheel (`CORE_TESTS`); nhiệm vụ `kind:verify`; bước 5 hỏi lại khi khai lố (`G.doubts`). Smoke xoá `gym.daoDraft` khi bắt đầu.
+- Khoá Công pháp: đã Nhập môn → `pickExercise` (màn Tập, Giáo án) chỉ hiện bài trong `dao.path`, chip theo mạch, không "Tạo bài mới" (`.modal[data-locked=path]`, dòng `.pick-lock` dẫn tới Sửa Công pháp); `startWorkout` từ giáo án/buổi cũ bỏ bài ngoài Công pháp và báo toast (`lockedPath`, `filterByPath` trong js/dao.js).
+- Luyện thể (RPG.md 5c): mạch dùng Bế mạch → Luyện Bì → Luyện Nhục → Luyện Cân → Luyện Cốt → Luyện Tủy · Sơ thành → Viên mãn (`temper()`); Tu vi giữ cảnh giới. Sự kiện `kind: tuvi|temper|verify`, chỉ Tu vi độ kiếp; mạch lên bậc = "Thối thể".
+
+- Hướng mới (22/11): app thành **Luyện Thể Ký**, tu tiên là chủ đề chính; huy chương → Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi; nav 5 mục. Xem `VISION.md`.
+- Luyện Thể Ký bước 1 (Claude, 22/11): `js/lore.js` (NAV/PHAM/term/gloss), `TIER_LABEL = PHAM`, router `ROUTES` 5 mục + `ALIASES` route cũ (`location.replace`); `#/` tạm xếp chồng home + hero. Hợp đồng chi tiết cuối VISION.md.
+- Luyện Thể Ký bước 3 (Claude, 22/11): lịch bế quan + mục tiêu buổi chuyển từ Cài đặt sang Công pháp (`[data-schedule]`, `[data-goals]`); "Chú giải" `settings.gloss` (mặc định bật, thay `lore`) → `<html data-no-gloss>` ẩn `.gloss`; chữ chia sẻ Tuần ký dùng tên phẩm; bỏ `LORE/term` cũ trong js/hero.js (dùng lore.js); Bế quan: đánh dấu set xong → ô trống của set kế tự điền kg × rep.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -44,12 +50,16 @@
 - Động phủ dùng hồ sơ thật; nhiệm vụ, Thử thách Bình cảnh và hai nghi lễ xem thử dùng mẫu có nhãn. Hình núi, sương và sáu cảnh giới là SVG tự vẽ. Có thể đổi giới tính trong Cài đặt.
 - Âm thanh tự tổng hợp bằng Node.js và mã hoá bằng FFmpeg, không dùng bản thu hay mẫu âm thanh bên ngoài. Tệp trong `assets/audio/`: `dong-phu.mp3`, `loi-kiep.mp3`, `dot-pha.mp3`, `nhiem-vu.mp3`.
 - Nhập môn có nghi lễ đá linh căn, bảy mạch sáng lần lượt và ấn triện; hiện mốc Xác chứng bên cạnh Hư cảnh. Tiêu đề dùng Noto Serif tiếng Việt ngoại tuyến, theo giấy phép OFL trong `assets/fonts/`.
+- Luyện thể có bảng bậc riêng ở Thất mạch và nghi lễ Thối thể tông đồng; dòng `.pick-lock` có nút Sửa Công pháp dễ chạm.
+- Luyện Thể Ký dùng năm mục từ `NAV`, một trang Động phủ, ba tab Tu luyện ký, ấn phẩm kim/ngọc/đồng và Thạch bi theo mốc tạ thật.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
+- [cho Codex] Công pháp: khối lịch bế quan (`[data-schedule]`) và "Mục tiêu bế quan" (`[data-goals]`) vừa chuyển từ Cài đặt sang, đang dùng lại class cũ — chỉnh cho hợp trang; Động phủ: `<p class="gloss">` đang chứa tên buổi dở, Chú giải tắt sẽ ẩn mất tên (js/views/home.js).
+- [cho Codex] Luyện Thể Ký bước 4 (VISION.md): đánh bóng ấn phẩm và tranh Thạch bi, thử trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 
 ## Ý tưởng sau khi dùng thực tế
-- Chơi thử vai fan tiên hiệp (22/11, Trắc linh căn + Khai mạch đã làm ở đợt 3): Set sau không tự điền theo set trước. Microcopy tu tiên nên mời bật ở lần đầu vào Động phủ.
+- Chơi thử vai fan tiên hiệp (22/11): set sau tự điền — đã làm ở Luyện Thể Ký bước 3; microcopy luôn bật nên bỏ ý "mời bật".
 - (ghi thêm ở đây khi tập)

@@ -2,6 +2,7 @@
 import { analyzeWorkout, summary, TIERS } from './overload.js';
 import { volume, setCount, doneSets } from './stats.js';
 import { fmtNum, fmtDur, fmtShort } from './util.js';
+import { PHAM } from './lore.js';
 
 const DAY = 864e5;
 const WD = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
@@ -73,16 +74,16 @@ export const pct = (a, b) => (b ? `${a >= b ? '+' : ''}${fmtNum(((a - b) / b) * 
 
 /** Bản văn bản để chia sẻ / sao chép. */
 export function reportText(r) {
-  const L = [`📊 Báo cáo tuần ${fmtShort(r.start)}–${fmtShort(r.end - 1)}`];
+  const L = [`📜 Tuần ký ${fmtShort(r.start)}–${fmtShort(r.end - 1)}`];
   const d = (k) => { const p = pct(r.cur[k], r.prev[k]); return p ? ` (${p})` : ''; };
   L.push(`• ${r.cur.sessions} buổi${r.days.length ? ` (${r.days.map((x) => x.day).join(', ')})` : ''}, ${fmtDur(r.cur.time)}`);
   L.push(`• ${r.cur.sets} set${d('sets')} · ${fmtNum(r.cur.vol)} kg${d('vol')}`);
-  if (r.compared) L.push(`• Vượt lần trước: ${r.beats}/${r.compared} bài · 🥇${r.medals.gold} 🥈${r.medals.silver} 🥉${r.medals.bronze}`);
+  if (r.compared) L.push(`• Vượt lần trước: ${r.beats}/${r.compared} bài · ${Object.entries(PHAM).map(([k, n]) => `${n} ${r.medals[k]}`).join(' · ')}`);
   if (r.rpe) L.push(`• RPE trung bình: ${fmtNum(r.rpe)}`);
   if (r.weight) L.push(`• Cân nặng: ${fmtNum(r.weight.kg)} kg${r.weight.delta != null ? ` (${r.weight.delta >= 0 ? '+' : ''}${fmtNum(r.weight.delta)})` : ''}`);
   if (r.exercises.length) {
     L.push('', 'Bài tập:');
-    for (const e of r.exercises) L.push(`- ${e.name}: ${e.sets} set, top ${fmtNum(e.top.w)}×${e.top.r}${e.best ? ` — ${e.best.msg}` : ''}`);
+    for (const e of r.exercises) L.push(`- ${e.name}: ${e.sets} set, top ${fmtNum(e.top.w)}×${e.top.r}${e.best ? ` — ${PHAM[e.best.tier]}: ${e.best.msg}` : ''}`);
   }
   return L.join('\n');
 }

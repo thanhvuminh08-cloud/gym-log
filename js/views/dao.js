@@ -10,7 +10,7 @@ const STEPS = [
   ['Nhập môn', 'Sơn môn đã mở. Nếu hữu duyên, hãy để lại một đạo hiệu và bắt đầu con đường tu luyện của riêng mình.'],
   ['Thân thể', 'Dùng thông tin cơ thể để ước lượng cảnh giới khởi đầu.'],
   ['Đạo hạnh', 'Chọn mục tiêu và số buổi tập phù hợp với bạn.'],
-  ['Chọn Công pháp', 'Mỗi mạch cần ít nhất hai bài được xét cảnh giới.'],
+  ['Chọn Công pháp', 'Mỗi mạch cần ít nhất hai bài được xét bậc Luyện thể.'],
   ['Trắc linh căn', 'Nhập mức tạ và số rep tốt nhất gần đây. Có thể để trống từng bài.'],
   ['Nghi lễ Trắc linh căn', 'Đá linh căn soi Thất mạch và ghi lại cảnh giới khởi đầu của đạo hữu.'],
 ];
@@ -94,6 +94,7 @@ function showResult(result, plan, exerciseNames) {
       <strong>${h(tuvi.label)}</strong><p>${h(verdict)}</p>
       ${top ? `<p class="dao-talent">Thiên phú: mạch ${h(top.name)} · ${h(top.label)}</p>` : ''}
     </div>
+    <h3>Luyện thể · Thất mạch</h3>
     <ul class="dao-result-branches">${meridians.map((m, index) => `<li data-muscle="${h(m.key)}" style="--dao-order:${index}">
       <div class="dao-branch-result"><b>${h(m.name)}</b><span>${h(m.label)}${m.need > 0 ? `<small>Còn thiếu ${m.need} bài</small>` : ''}</span></div>
       ${m.unverified ? `<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>${claimRows(claims, m.key)}` : ''}
@@ -127,7 +128,7 @@ function stepContent({ step, dao, sex, weight, groups, validation, tests, result
     case 3:
       return `<div class="dao-fields">
         ${choiceCards('experience', 'Thời gian tu đạo', G.EXPERIENCE, dao.experience)}
-        ${choiceCards('goal', 'Đạo tâm', G.GOALS, dao.goal)}
+        ${choiceCards('goal', 'Chí hướng', G.GOALS, dao.goal)}
         ${choiceCards('days', 'Số buổi bế quan mỗi tuần', Object.entries(G.DAYS).map(([id, plan]) => ({
           id, label: `${id} buổi`, real: plan.days.map((day) => day ? `T${day + 1}` : 'CN').join(' · '),
         })), dao.days)}
@@ -148,7 +149,7 @@ function stepActions({ step, dao, validation, editing }, preview) {
   return `<div class="dao-actions">
     ${step === 1 && !editing ? button('daoSkip', 'Để sau', 'ghost', '#/') : ''}
     ${step > 1 ? button('daoBack', 'Quay lại', 'ghost', route(step === 6 && novice ? 4 : step - 1)) : ''}
-    ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/hero') + button('daoSave', 'Nhận công pháp', 'primary', '#/hero')
+    ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/') + button('daoSave', 'Nhận công pháp', 'primary', '#/')
       : button('daoNext', 'Tiếp tục', 'primary dao-next', route(step === 4 && novice ? 6 : step + 1, step !== 3 && novice), step === 4 && validation?.ok === false)}
     ${preview && step === 3 ? button('daoNext', 'Tiếp tục', 'primary dao-next-new', route(4, true)) : ''}
     ${preview && step === 4 && validation?.ok ? button('daoNext', 'Tiếp tục', 'primary dao-next-blocked', '', true) : ''}
@@ -158,7 +159,7 @@ function stepActions({ step, dao, validation, editing }, preview) {
 export function daoView(state, { preview = false } = {}) {
   const [title, intro] = STEPS[state.step - 1];
   return `<article class="dao-wizard cultivation${preview ? ' dao-preview' : ''}">
-    ${state.editing || preview ? '<a class="cultivation-back small" href="#/hero">← Động phủ</a>' : ''}
+    ${state.editing || preview ? '<a class="cultivation-back small" href="#/">← Động phủ</a>' : ''}
     <header class="dao-cover">
       <div class="dao-cover-top"><span>Bước ${state.step} / ${STEPS.length}</span>${preview ? '<span class="cultivation-data-badge">Số liệu mẫu</span>' : ''}</div>
       <h1>${title}</h1>
@@ -290,21 +291,21 @@ export async function render(el, [part] = []) {
       const why = missing(step) || (step === 4 && !G.validatePath(draft.dao.path, data.exercises).ok ? 'Mỗi mạch cần ít nhất 2 bài' : '');
       if (why) return toast(why);
       if (step === 5) {
-        // Khai lố (từ Nguyên Anh, hoặc > 15 rep) → hỏi lại; tu vi tự khai vẫn chỉ là hư cảnh cho tới khi xác chứng.
+        // Khai lố (từ Luyện Cốt, hoặc > 15 rep) → hỏi lại; tu vi tự khai vẫn chỉ là hư cảnh cho tới khi xác chứng.
         const sus = G.doubts({ dao: draft.dao, exercises: data.exercises, body: draft.weight > 0 ? [{ date: Date.now(), weight: draft.weight }] : data.body, sex: draft.sex });
         const list = sus.map((s) => `${s.name}: ${s.label}${s.reps > 15 ? ` (${s.reps} rep)` : ''}`).join('\n');
-        if (sus.length && !confirm(`Đạo hữu chắc chứ?\n${list}\n\nTu vi tự khai chỉ là hư cảnh (tối đa Kết Đan) cho tới khi tập thật đạt 90% mức khai.`)) return;
+        if (sus.length && !confirm(`Đạo hữu chắc chứ?\n${list}\n\nMức tự khai chỉ là hư cảnh (mạch tối đa Luyện Cân · Viên mãn) cho tới khi tập thật đạt 90% mức khai.`)) return;
       }
       goStep(step === 4 && skipsTest(draft) ? 6 : step + 1);
     } else if (act === 'daoSkip') {
       if (!settings.get().dao) settings.set({ daoSkip: Date.now() });
       forget();
-      location.hash = settings.get().dao ? '#/hero' : '#/';
+      location.hash = '#/';
     } else if (act === 'daoSave') {
       ev.target.disabled = true;
       await saveDao();
       window.scrollTo(0, 0);
-      location.hash = '#/hero';
+      location.hash = '#/';
     }
   };
 }
