@@ -9,6 +9,7 @@ const archive = [
   ['overview', '#/tang-thu', 'Tổng quan'],
   ['ex', '#/tang-thu/ex', 'Bài tập'],
   ['body', '#/tang-thu/body', 'Thân trọng'],
+  ['that-mach', '#/tang-thu/that-mach', 'Thất mạch'],
   ['library', '#/tang-thu/library', 'Thư viện'],
   ['settings', '#/tang-thu/cai-dat', 'Cài đặt'],
 ];

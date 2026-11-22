@@ -305,7 +305,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
 const view = (profile) => heroView(profile, { weekly: profile.weekly, challenge: profile.challenge, demo: false });
 
 export async function render(el, profile) {
-  profile ??= await loadProfile();
+  if (!profile?.tuvi) profile = await loadProfile(); // router truyền mảng params, Động phủ truyền hồ sơ sẵn
   el.innerHTML = view(profile);
   ceremony(profile).then(({ quests: fresh }) => fresh.forEach((id) => el.querySelector(`[data-quest="${id}"]`)?.classList.add('celebrate')));
   el.onclick = el.onchange = null; // bỏ handler của màn trước (main dùng chung)

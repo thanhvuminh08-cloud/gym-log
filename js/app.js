@@ -15,6 +15,7 @@ addEventListener('unhandledrejection', (e) => onError(e.reason));
 
 const VIEWS = {
   home: () => import('./views/home.js'),
+  hero: () => import('./views/hero.js'),
   workout: () => import('./views/workout.js'),
   history: () => import('./views/history.js'),
   templates: () => import('./views/templates.js'),
@@ -32,14 +33,14 @@ const ROUTES = {
   'cong-phap': ([id]) => [['templates', id ? [id] : []]], // Công pháp: #/cong-phap/<id|new>
   // Tu luyện ký: Nhật ký #/ky[/<id>] · Tuần ký #/ky/tuan[/<offset>] · Công đức bạ #/ky/cong-duc
   ky: ([a, ...p]) => (a === 'tuan' ? [['report', p]] : a === 'cong-duc' ? [['progress', ['medal']]] : [['history', a ? [a] : []]]),
-  // Tàng thư: Tiến độ #/tang-thu[/<tab>[/<exId>]] · Cài đặt #/tang-thu/cai-dat
-  'tang-thu': ([a, ...p]) => (a === 'cai-dat' ? [['settings']] : [['progress', [a || 'overview', ...p]]]),
+  // Tàng thư: Tiến độ #/tang-thu[/<tab>[/<exId>]] · Thất mạch #/tang-thu/that-mach · Cài đặt #/tang-thu/cai-dat
+  'tang-thu': ([a, ...p]) => (a === 'cai-dat' ? [['settings']] : a === 'that-mach' ? [['hero']] : [['progress', [a || 'overview', ...p]]]),
   'nhap-mon': (p) => [['dao', p]],
 };
 
 // Route cũ → hash mới, để link/bookmark cũ không gãy. Nhận các đoạn (đã mã hoá) sau tên route cũ.
 const ALIASES = {
-  hero: () => '#/',
+  hero: () => '#/tang-thu/that-mach', // trang Động phủ chi tiết cũ = Thất mạch
   history: ([id]) => `#/ky${id ? `/${id}` : ''}`,
   report: ([off]) => `#/ky/tuan${off ? `/${off}` : ''}`,
   progress: ([tab, ...p]) => (tab === 'medal' ? '#/ky/cong-duc' : ['#/tang-thu', tab, ...p].filter(Boolean).join('/')),

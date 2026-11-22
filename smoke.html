@@ -101,12 +101,12 @@ try {
     if (bad.length) lines.push('  ' + bad.join(' '));
     return !bad.length;
   });
-  for (const r of ['#/', '#/cong-phap', '#/ky', '#/ky/tuan', '#/ky/cong-duc', '#/tang-thu', '#/tang-thu/cai-dat']) {
+  for (const r of ['#/', '#/cong-phap', '#/ky', '#/ky/tuan', '#/ky/cong-duc', '#/tang-thu', '#/tang-thu/that-mach', '#/tang-thu/cai-dat']) {
     await step(`Render ${r}`, async () => { await go(r); return w.location.hash === r && !$('.error') && $('#main').innerText.trim().length > 20; });
   }
   await step('Route cũ chuyển sang route mới (5 mục Luyện Thể Ký)', async () => {
     const wid = (await (await w.eval("import('./js/db.js')")).all('workouts')).find((x) => x.end)?.id;
-    const pairs = [['#/hero', '#/', '.cultivation'], ['#/history', '#/ky', 'a.card[href^="#/ky/"]'], [`#/history/${wid}`, `#/ky/${wid}`, 'section[data-muscle]'],
+    const pairs = [['#/hero', '#/tang-thu/that-mach', '.cultivation-meridian'], ['#/history', '#/ky', 'a.card[href^="#/ky/"]'], [`#/history/${wid}`, `#/ky/${wid}`, 'section[data-muscle]'],
       ['#/report', '#/ky/tuan', '.report-stats'], ['#/report/-1', '#/ky/tuan/-1', '.report-stats, .empty, h1'], ['#/progress', '#/tang-thu', '.tabs'],
       ['#/progress/overview', '#/tang-thu/overview', '.year-grid'], ['#/progress/medal', '#/ky/cong-duc', '.medals'],
       ['#/templates', '#/cong-phap', '[href="#/cong-phap/new"]'], ['#/templates/new', '#/cong-phap/new', 'input'], ['#/settings', '#/tang-thu/cai-dat', '[data-k=gloss]']];
@@ -427,7 +427,7 @@ try {
     if (!card || card.textContent.includes('mẫu')) throw new Error('Động phủ chưa có nhiệm vụ thật');
     const zero = Object.fromEntries(['tuvi', 'chest', 'back', 'shoulders', 'legs', 'biceps', 'triceps', 'core'].map((k) => [k, [0, 0]]));
     w.localStorage.setItem(`gym.heroSeen.${DB}`, JSON.stringify(zero));
-    await go('#/hero');
+    await go('#/ky'); await go('#/'); // Động phủ (bản gọn) vẫn phải bật Đột phá + hiện Nhiệm vụ tuần
     const dlg = await until(() => $('dialog.breakthrough-modal[open]'));
     const quests = $$('[data-quests] [data-quest]').length, sample = !!$('.cultivation-demo, .cultivation-data-badge');
     if (!dlg || quests !== 3 || sample) throw new Error(`modal ${!!dlg}, ${quests} nhiệm vụ, mẫu ${sample}`);

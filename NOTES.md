@@ -25,6 +25,7 @@
 - Hướng mới (22/11): app thành **Luyện Thể Ký**, tu tiên là chủ đề chính; huy chương → Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi; nav 5 mục. Xem `VISION.md`.
 - Luyện Thể Ký bước 1 (Claude, 22/11): `js/lore.js` (NAV/PHAM/term/gloss), `TIER_LABEL = PHAM`, router `ROUTES` 5 mục + `ALIASES` route cũ (`location.replace`); `#/` tạm xếp chồng home + hero. Hợp đồng chi tiết cuối VISION.md.
 - Luyện Thể Ký bước 3 (Claude, 22/11): lịch bế quan + mục tiêu buổi chuyển từ Cài đặt sang Công pháp (`[data-schedule]`, `[data-goals]`); "Chú giải" `settings.gloss` (mặc định bật, thay `lore`) → `<html data-no-gloss>` ẩn `.gloss`; chữ chia sẻ Tuần ký dùng tên phẩm; bỏ `LORE/term` cũ trong js/hero.js (dùng lore.js); Bế quan: đánh dấu set xong → ô trống của set kế tự điền kg × rep.
+- Động phủ gọn (22/11): người dùng thấy Động phủ dài ~5 màn → rút còn ~1,5 màn, Thất mạch/Luyện thể/Bình cảnh sang tab Tàng thư › Thất mạch `#/tang-thu/that-mach` (route đã gắn, `#/hero` chuyển tới đây). Xem VISION.md "Động phủ gọn".
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -56,6 +57,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
+- [cho Codex] Động phủ gọn (VISION.md, mục cuối): rút Động phủ còn ~1,5 màn, Thất mạch đồ/Luyện thể/Bình cảnh chỉ còn ở `#/tang-thu/that-mach` (thêm `archiveHeader`), giữ `ceremony()` + `[data-quests]` ở `#/` (js/views/home.js, js/views/hero.js).
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 

@@ -85,3 +85,13 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 - Link trong view còn trỏ route cũ vẫn chạy (qua chuyển hướng); Codex đổi sang route mới khi sửa markup bước 2. Khung 3 tab Tu luyện ký: dùng link `#/ky`, `#/ky/tuan`, `#/ky/cong-duc` (router đã có), không cần `data-tab`.
 - Động phủ xếp chồng là tạm: bước 2 Codex gộp markup Hôm nay + Động phủ (bỏ thẻ `[data-hero-link]` và link "← Hôm nay" của hero), giữ `[data-hero-profile]`, `[data-quests] [data-quest]`, `.cultivation-meridian[data-muscle]`, `dialog.breakthrough-modal`, `[data-act=empty|tpl]` mà smoke dựa vào.
 - Còn emoji huy chương ở `js/report.js` (chữ chia sẻ) và markup `progress.js`/`report.js` — Claude đổi chữ chia sẻ ở bước 3, Codex đổi markup ở bước 2.
+
+## Động phủ gọn (22/11, từ phản hồi dùng thật: trang dài ~5 màn, lướt mỏi tay)
+Động phủ chỉ trả lời **"hôm nay làm gì, đang ở đâu"** — mục tiêu ≤ ~1,5 màn ở 375 px.
+1. Thẻ **Bế quan / Tiếp tục** gộp với lời nhắc lịch hôm nay (`[data-schedule-today]` giữ `data-state`).
+2. **Ấn Tu vi** thu thành một dải (cảnh giới · Công lực · thanh tiến độ), bấm → `#/tang-thu/that-mach`.
+3. **Nhiệm vụ tuần** gọn 3 dòng (`[data-quests] [data-quest]`).
+4. **Một hàng số**: buổi tuần này / mục tiêu · Khí huyết (`[data-readiness-score]`) · Liên kích.
+5. Form cân nặng/giới tính (`[data-hero-profile]`) chỉ hiện khi thiếu (như hiện nay).
+- **Chuyển đi:** Thất mạch đồ, bảng Luyện thể, Thử thách Bình cảnh → tab **Thất mạch** `#/tang-thu/that-mach` (Claude đã gắn: view `hero` đầy đủ; `#/hero` cũ chuyển tới đây). Bỏ khỏi Động phủ: Giáo án (có ở Công pháp), Tập gần đây (Tu luyện ký), Sức mạnh (Tàng thư › Tổng quan), 7 ngày qua/Mục tiêu (gộp vào hàng số).
+- **Hợp đồng:** Động phủ vẫn phải gọi `ceremony(profile)` (export từ `js/views/hero.js`) để nghi lễ Đột phá bật khi mở `#/` — smoke "Động phủ đợt 2" kiểm ở `#/`. Có thể tách phần nhỏ trong hero.js thành hàm export (vd. `tuviStrip`, `questBoard`) để home.js dùng; trang Thất mạch thêm `archiveHeader('that-mach')`. Smoke cần `.lift-card` ở `#/` → đổi bước "Hôm nay: thẻ Sức mạnh" sang `#/tang-thu/overview` khi bỏ thẻ (Codex sửa smoke cùng commit, hoặc ghi Việc chờ cho Claude).
