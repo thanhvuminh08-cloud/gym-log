@@ -76,9 +76,9 @@ label.row { padding: 6px 0; }
   background: var(--tier-bg, var(--bg));
   overflow-wrap: anywhere;
 }
-.tier[data-tier="gold"] { --tier-text: #ffe099; --tier-line: #d9a732; --tier-bg: #322819; }
-.tier[data-tier="silver"] { --tier-text: #dae4f2; --tier-line: #96a9c2; --tier-bg: #232c39; }
-.tier[data-tier="bronze"] { --tier-text: #ffc9a5; --tier-line: #b87956; --tier-bg: #33241f; }
+:is(.tier, .report-ex)[data-tier="gold"] { --tier-text: #ffe099; --tier-line: #d9a732; --tier-bg: #322819; }
+:is(.tier, .report-ex)[data-tier="silver"] { --tier-text: #dae4f2; --tier-line: #96a9c2; --tier-bg: #232c39; }
+:is(.tier, .report-ex)[data-tier="bronze"] { --tier-text: #ffc9a5; --tier-line: #b87956; --tier-bg: #33241f; }
 .tier[data-tier="first"] { --tier-text: #b5c9e1; --tier-line: #617c9d; --tier-bg: #1e2936; }
 
 /* Huy chương */
@@ -170,15 +170,16 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 
 /* Buổi tập */
 .top { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: calc(4px + env(safe-area-inset-top)) 0 10px; border-bottom: 1px solid var(--line); }
-.set { display: grid; grid-template-columns: 26px minmax(0, 1fr) minmax(46px, 74px) minmax(42px, 64px) 44px; gap: 6px; align-items: center; margin: 6px 0; }
+.set { display: grid; grid-template-columns: 22px minmax(0, 1fr) clamp(40px, 12vw, 70px) clamp(36px, 10vw, 56px) clamp(50px, 16vw, 104px) 44px; gap: 5px; align-items: center; margin: 6px 0; }
 .set.head { margin-bottom: 0; padding-block: 5px; }
 .set.head span:nth-child(n+3) { text-align: center; }
 .set .n { text-align: center; color: var(--muted); }
 .set .prev { font-size: .85rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.set input { text-align: center; padding: 6px; }
+.set input { text-align: center; padding: 3px; }
+.set .rpe { min-width: 0; padding-inline: 4px; font-size: .875rem; text-overflow: ellipsis; }
 .set .check { padding: 0; min-height: 42px; font-weight: 700; }
 .set .check:active { filter: brightness(.85); }
-.set.done input { border-color: transparent; background: var(--accent-soft); }
+.set.done :is(input, .rpe) { border-color: transparent; background: var(--accent-soft); }
 .set.done .check { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
 .set.done .check.pr { background: var(--pr); border-color: var(--pr); }
 .set.celebrate[data-celebrate="gold"] { --burst: #ffd76f; --burst-glow: rgb(255 215 111 / .62); --burst-scale: 1.018; }
@@ -236,6 +237,26 @@ nav a:focus-visible { outline-offset: -3px; border-radius: 8px; }
 .chart text { fill: var(--muted); font-size: 10px; }
 .chart-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; margin-bottom: 8px; }
 .chart-head b { font-size: clamp(1.5rem, 5vw, 2.2rem); font-variant-numeric: tabular-nums; }
+
+/* Báo cáo tuần */
+.report-top { gap: 10px; padding-bottom: 12px; text-align: center; }
+.report-top h1 { margin: 0; font-size: clamp(1.6rem, 5vw, 2.5rem); }
+.report-top p { margin: 4px 0 0; color: var(--cool); font-size: .9rem; font-variant-numeric: tabular-nums; }
+.report-top button { width: 44px; min-height: 44px; flex: none; background: var(--card); font-size: 1.6rem; line-height: 1; }
+.report-stats { margin-block: 14px; }
+.report-stats > div { padding-inline: 9px; }
+.report-stats b { color: var(--cool); }
+.report-stats > div > .report-delta { margin-top: 3px; padding-top: 5px; border-top: 1px solid var(--line); font-size: .75rem; line-height: 1.25; }
+.report-summary { padding-block: 3px; }
+.report-summary .row { padding-block: 9px; align-items: baseline; }
+.report-summary .row + .row { border-top: 1px solid var(--line); }
+.report-summary .row > b { text-align: end; font-variant-numeric: tabular-nums; }
+.report-ex { border-inline-start: 3px solid var(--tier-line, var(--line)); }
+.report-ex :is(.grow, .muted), .report-day .grow { overflow-wrap: anywhere; }
+.report-ex > .row { margin-bottom: 4px; }
+.report-ex > .row .muted, .report-day > .muted { text-align: end; }
+.report-ex .target { margin-bottom: 0; color: var(--tier-text, var(--accent)); background: var(--tier-bg, var(--accent-soft)); }
+.report-share { margin-top: 16px; }
 
 .toast { position: fixed; top: calc(var(--header-height) + 8px); inset-inline: 12px; width: fit-content; max-width: min(32rem, calc(100% - 24px)); margin-inline: auto; background: #24303a; border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; z-index: 50; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
 

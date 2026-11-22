@@ -19,12 +19,12 @@
 - Ba nút trong Tiến độ dùng ba cột bằng nhau để nằm cùng một hàng ở 375px.
 - Nền xanh đen theo lớp, biểu đồ xanh lam và nút chính xanh chanh. Set vượt có ánh sáng theo hạng, huy chương mới có nhãn “Mới”, hiệu ứng tôn trọng chế độ giảm chuyển động.
 - Thanh nghỉ tự chừa chỗ phía cuối trang theo chiều cao thực. Toast nằm dưới header và dùng chiều rộng màn hình khi cần.
+- Hàng set dùng sáu cột trên điện thoại. Báo cáo tuần có điều hướng ngày, thẻ thống kê và màu theo hạng cho từng bài.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Hàng `.set` có thêm cột `select.rpe` (6 phần tử, header thêm "RPE"): sửa `grid-template-columns` cho gọn ở 375px (css/).
-- [cho Codex] Người dùng thử trên iPhone: thanh nghỉ vẫn che nội dung, toast đè logo. Có thể iPhone chưa nhận bản sửa dae83be (VERSION cũ) — kiểm lại sau khi push v12, nếu còn thì sửa (css/, safe-area iOS).
-- [cho Codex] Trang báo cáo tuần `js/views/report.js` mới chỉ có markup tạm (class `.report-stats .report-summary .report-ex[data-tier]`, style inline ở h1): làm giao diện.
+- [cho Codex] Sau khi bản có sửa thanh nghỉ/toast (`dae83be`) được đẩy lên GitHub Pages, kiểm lại trên iPhone còn che nội dung cuối trang hoặc đè logo không, rồi sửa nếu tái hiện.
+- [cho Claude] Tăng `VERSION` trong `sw.js` cho CSS hàng set RPE và giao diện Báo cáo tuần.
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).

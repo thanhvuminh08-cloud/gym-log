@@ -7,12 +7,15 @@ export async function render(el, [off = '0']) {
   const offset = Math.min(0, Number(off) || 0);
   const [workouts, bodies, exs] = await Promise.all([all('workouts'), all('body'), all('exercises')]);
   const r = weekReport(workouts, bodies, exMap(exs), weekStart(Date.now(), offset));
-  const delta = (k) => { const p = pct(r.cur[k], r.prev[k]); return p ? `<small class="muted">${h(p)} so với tuần trước</small>` : ''; };
+  const delta = (k) => { const p = pct(r.cur[k], r.prev[k]); return p ? `<small class="muted report-delta">${h(p)} so với tuần trước</small>` : ''; };
 
   el.innerHTML = `
-  <header class="top row">
+  <header class="top row report-top">
     <button class="ghost icon" data-act="week" data-k="${offset - 1}" aria-label="Tuần trước">‹</button>
-    <h1 class="grow" style="text-align:center">Tuần ${h(fmtShort(r.start))}–${h(fmtShort(r.end - 1))}</h1>
+    <div class="grow">
+      <h1>Báo cáo tuần</h1>
+      <p>${h(fmtShort(r.start))} – ${h(fmtShort(r.end - 1))}</p>
+    </div>
     <button class="ghost icon" data-act="week" data-k="${offset + 1}" aria-label="Tuần sau" ${offset ? '' : 'disabled'}>›</button>
   </header>
   <div class="stats week-stats report-stats">
@@ -37,9 +40,9 @@ export async function render(el, [off = '0']) {
       ${e.best ? `<div class="small target">${h(e.best.msg)}</div>` : ''}
     </section>`).join('')}
   <h2 class="section-heading">Buổi tập</h2>
-  ${r.days.map((d) => `<a class="card row" href="#/history/${h(d.id)}"><span class="grow">${h(d.name)}</span><span class="muted small">${h(d.day)} ${h(fmtShort(d.t))}</span></a>`).join('')}
-  <button class="primary wide" data-act="share">Chia sẻ / sao chép báo cáo</button>` : `
-  <section class="card empty-state"><h2>Tuần này chưa có buổi tập</h2><p class="muted">Buổi đã kết thúc trong tuần sẽ được tổng kết ở đây.</p></section>`}`;
+  ${r.days.map((d) => `<a class="card row report-day" href="#/history/${h(d.id)}"><span class="grow">${h(d.name)}</span><span class="muted small">${h(d.day)} ${h(fmtShort(d.t))}</span></a>`).join('')}
+  <button class="primary wide report-share" data-act="share">Chia sẻ / sao chép báo cáo</button>` : `
+  <section class="card empty-state"><h2>Tuần này chưa có buổi tập</h2><p class="muted">Các buổi tập đã kết thúc trong tuần sẽ hiện ở đây.</p></section>`}`;
 
   el.onclick = async (ev) => {
     const b = ev.target.closest('button[data-act]');
