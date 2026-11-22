@@ -188,7 +188,8 @@ nav a:focus-visible { outline-offset: -3px; border-radius: 8px; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }
 .chip { flex: none; min-height: 34px; padding: 4px 12px; border-radius: 999px; font-size: .85rem; }
 .chip.on, .tabs .on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; margin-bottom: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 4px; margin-bottom: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
+.tabs button { padding-inline: 6px; }
 
 /* Biểu đồ */
 .chart { width: 100%; height: auto; display: block; }
