@@ -12,7 +12,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Style quá tải lũy tiến (css/app.css): `.target` (dòng mục tiêu dưới tên bài, màn tập — nổi bật nhẹ màu accent); `.tier[data-tier=gold|silver|bronze|first|none]` (dòng huy chương mỗi bài ở chi tiết lịch sử — vàng/bạc/đồng); `.stats .overload` (ô "x/y bài vượt lần trước"). Không đổi class/data-*.
+- [cho Claude] Tăng `VERSION` trong `sw.js` để thiết bị nhận CSS quá tải lũy tiến mới.
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)

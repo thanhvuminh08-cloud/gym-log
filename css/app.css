@@ -47,7 +47,27 @@ label.row { padding: 6px 0; }
 .stats div { background: var(--card); border: 1px solid var(--line); border-radius: var(--r); padding: 10px; text-align: center; }
 .stats b { display: block; font-size: 1.25rem; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .stats small { color: var(--muted); font-size: .8rem; }
+.stats:has(.overload) { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.stats .overload { background: var(--accent-soft); border-color: #4f6736; }
+.stats .overload b { color: var(--accent); }
+.stats .overload small { color: var(--text); }
+@media (max-width: 480px) {
+  .stats:has(.overload) { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
 .pill { display: inline-block; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; margin: 3px 4px 0 0; }
+.tier[data-tier] {
+  margin: 8px 0 4px;
+  padding: 6px 9px;
+  border-inline-start: 2px solid var(--tier-line, var(--line));
+  border-radius: 0 8px 8px 0;
+  color: var(--tier-text, var(--muted));
+  background: var(--tier-bg, var(--bg));
+  overflow-wrap: anywhere;
+}
+.tier[data-tier="gold"] { --tier-text: #ffe099; --tier-line: #d9a732; --tier-bg: #322819; }
+.tier[data-tier="silver"] { --tier-text: #dae4f2; --tier-line: #96a9c2; --tier-bg: #232c39; }
+.tier[data-tier="bronze"] { --tier-text: #ffc9a5; --tier-line: #b87956; --tier-bg: #33241f; }
+.tier[data-tier="first"] { --tier-text: #b5c9e1; --tier-line: #617c9d; --tier-bg: #1e2936; }
 
 /* Khung ứng dụng */
 .icon-library { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
@@ -119,6 +139,14 @@ label.row { padding: 6px 0; }
 .entry .row:first-child { margin-bottom: 8px; flex-wrap: wrap; }
 .entry .row:first-child b { min-width: 95px; overflow-wrap: anywhere; }
 .entry input.tiny { width: 48px; }
+.target {
+  margin: 4px 0 8px;
+  padding: 6px 9px;
+  border-radius: 8px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  overflow-wrap: anywhere;
+}
 
 /* Đồng hồ nghỉ */
 .rest-bar { position: fixed; left: 50%; transform: translate(-50%, 140%); visibility: hidden; bottom: calc(var(--nav) + 10px + env(safe-area-inset-bottom)); width: min(608px, calc(100% - 32px)); display: flex; gap: 6px; align-items: center; background: var(--raised); border: 1px solid var(--accent); border-radius: 14px; padding: 8px; z-index: 20; transition: transform .2s, visibility .2s; }
