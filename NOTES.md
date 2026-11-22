@@ -31,6 +31,7 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
+- [cho Codex] Giao diện nhắc lịch tập theo ngày trong tuần (số liệu giả, Claude nối sau). (1) Cài đặt: khối `section[data-schedule]`, 7 hàng T2→CN `[data-day=1..6,0]` (theo `getDay()`), mỗi hàng có `input[type=checkbox][data-f=on]` (ngày tập) + `select[data-f=tpl]` (giáo án, option `value=""` = "Tự do"). (2) Hôm nay, ngay dưới nút bắt đầu: thẻ `.schedule-reminder[data-schedule-today]` có 3 trạng thái `data-state=due|done|rest` (cần tập / đã tập hôm nay / nghỉ), tên giáo án, nút tập dùng lại `button[data-act=tpl][data-id]` hoặc `[data-act=empty]`; dải tuần `[data-week-plan]` 7 ô `i[data-day][data-state=done|planned|missed|rest|today]`. Chưa đặt lịch → thẻ mời đặt lịch, link `#/settings`. (js/views/home.js, js/views/settings.js, css/app.css)
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).
