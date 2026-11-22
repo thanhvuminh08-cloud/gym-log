@@ -47,7 +47,7 @@ export function weekReport(workouts, bodies, ex, start) {
       if (res) { beats++; medals[res.tier]++; }
       const cur = byEx.get(e.exerciseId) || { exerciseId: e.exerciseId, name: ex[e.exerciseId]?.name || '?', sets: 0, vol: 0, top: null, e1: 0, best: null };
       cur.sets += s.n; cur.vol += s.vol;
-      if (s.e1 > cur.e1) { cur.e1 = s.e1; cur.top = s.top; }
+      if (!cur.top || s.e1 > cur.e1) { cur.e1 = s.e1; cur.top = s.top; } // bài không tạ (~1RM = 0) vẫn có set tốt nhất
       if (res && (!cur.best || TIERS[res.tier] > TIERS[cur.best.tier])) cur.best = res;
       byEx.set(e.exerciseId, cur);
     });

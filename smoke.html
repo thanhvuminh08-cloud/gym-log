@@ -458,6 +458,13 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want && reportText(r).includes('Bench: 2 set') && reportText(r).includes('Thượng phẩm') && !/🥇|🥈|🥉/.test(reportText(r));
   });
+  await step('Báo cáo tuần với bài không tạ (0 kg) không lỗi', async () => {
+    const { weekReport, weekStart, reportText } = await import('./js/report.js');
+    const t0 = new Date(2026, 0, 5, 18).getTime();
+    const ws = [{ id: 'z', name: 'Z', start: t0, end: t0 + 36e5, entries: [{ exerciseId: 'ab', sets: [{ w: '0', r: '12', done: true }, { w: '', r: '10', done: true }] }] }];
+    const r = weekReport(ws, [], { ab: { name: 'Ab Wheel' } }, weekStart(t0));
+    return r.exercises[0]?.top?.r === 12 && reportText(r).includes('Ab Wheel: 2 set');
+  });
   // Import trong iframe → cùng module với app, DB_NAME = gym-smoke.
   const mod = (p) => w.eval(`import('./js/${p}')`);
   await step('Hôm nay nhắc sao lưu khi chưa sao lưu (chỉ khi đã ≥3 buổi)', async () => {
