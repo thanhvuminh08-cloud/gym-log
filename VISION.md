@@ -113,3 +113,17 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 3. ✅ **Claude** — D: dữ liệu thật + `#/workout` không bật về; E: bỏ chuyển thẳng Nhập môn lần đầu (sửa smoke bước 1); C: tên giáo án tự sinh, nhãn Chí hướng trong `js/dao.js`; smoke đủ luồng.
    - Làm rồi (22/11): `#/workout` chưa có buổi → trang chọn (lịch hôm nay · giáo án · lặp lại buổi gần nhất có bài · buổi trống); lần đầu ở Động phủ, không ép Nhập môn; giáo án tự sinh "Giáo án · …" (đổi tên bộ cũ khi mở app); Chí hướng tăng cơ = "Luyện cơ".
 4. **Người dùng** — đưa bạn thử 3 việc không hướng dẫn: ghi một buổi tập · xem lại buổi hôm trước · tìm xem mình có tiến bộ không. Ghi chỗ bị kẹt vào NOTES "Ý tưởng sau khi dùng thực tế".
+
+## Hồn tu tiên — hình ảnh, chuyển động, âm thanh (23/11, người dùng giao Codex)
+**Yêu cầu:** làm *tất cả* hiệu ứng hình ảnh, animation, âm thanh hợp chất tu tiên hơn. Được dùng nội dung do AI tạo tuỳ ý (ảnh, nhạc, âm hiệu ứng), được thay ảnh/âm thanh đã có nếu bản mới tốt hơn.
+
+**Chỗ cần hồn (đã có móc logic):** đánh dấu set xong (`celebrate(el, tier)`, `tap()`), PR (`.check.pr`, `.celebrate[data-celebrate=gold]`), kết thúc buổi + Phẩm, Đột phá cảnh giới (`sfx('dotPha')`), Lôi kiếp/Bình cảnh (`loiKiep`), nhiệm vụ xong (`nhiemVu`), nghi lễ Nhập môn, nhạc Động phủ (`music()`), chuyển trang, đồng hồ nghỉ/Điều tức (`.rest-bar`, cảnh báo ≤10s), trang Bế quan chọn cách bắt đầu, thẻ lần đầu.
+
+**Ràng buộc:**
+- Ghi set phải nhanh: hiệu ứng trên đường ghi set ≤ ~600 ms, không chặn chạm/nhập; hiệu ứng dài chỉ ở mốc lớn (đột phá, kết thúc buổi, Nhập môn), có thể chạm để bỏ qua.
+- `prefers-reduced-motion` → tắt chuyển động lớn. Âm thanh theo công tắc `sfx`/`music`, rung theo `vibrate` (Cài đặt).
+- Ngoại tuyến: mọi tệp mới thêm vào `FILES` trong `sw.js`, tăng `VERSION`. Ảnh ≤ 200 KB (ưu tiên SVG/WebP), mỗi âm hiệu ứng ≤ ~60 KB, nhạc nền ≤ ~600 KB.
+- Nội dung AI: ghi công cụ/nguồn 1 dòng trong NOTES "Giao diện". Không dùng nhạc/ảnh/nhân vật của phim, truyện, game có thật.
+- Giữ `data-*` và class mà logic dựa vào (AGENTS.md). Âm mới: thêm tên vào `SRC` trong `js/sfx.js` (việc một dòng, tự làm). Cần chỗ gọi `sfx()`/sự kiện mới trong logic → 1 dòng "Việc chờ cho Claude", Claude gắn + thêm smoke.
+
+**Thứ tự:** 1. **Codex** — tự lập danh sách hiệu ứng theo mức ưu tiên ghi vào đây, làm, smoke PASS, commit `ui:`. 2. **Claude** — gắn các điểm gọi mới, smoke.
