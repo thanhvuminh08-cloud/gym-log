@@ -23,7 +23,18 @@ function ensureBar() {
   if (bar) return bar;
   bar = document.createElement('div');
   bar.className = 'rest-bar';
-  bar.innerHTML = `<button data-d="-15">−15</button><div class="rest-time"></div><button data-d="15">+15</button><button data-skip>Bỏ qua</button>`;
+  bar.innerHTML = `
+    <button data-d="-15">−15</button>
+    <div class="rest-clock">
+      <svg class="rest-ring" viewBox="0 0 36 36" aria-hidden="true" focusable="false">
+        <circle class="rest-ring-track" cx="18" cy="18" r="15"/>
+        <circle class="rest-ring-progress" cx="18" cy="18" r="15" pathLength="100" transform="rotate(-90 18 18)"/>
+        <path class="rest-ring-hands" d="M18 11v7l4 3"/>
+      </svg>
+      <div class="rest-time"></div>
+    </div>
+    <button data-d="15">+15</button>
+    <button data-skip>Bỏ qua</button>`;
   bar.addEventListener('click', (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
