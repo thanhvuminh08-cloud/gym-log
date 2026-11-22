@@ -38,12 +38,14 @@
 - Hôm nay và Tiến độ có khung chờ khi tải; nội dung khi đổi trang xuất hiện nhẹ nếu cho phép chuyển động.
 - Lịch sử, Giáo án, Tiến độ và Huy chương có minh hoạ và hướng dẫn khi chưa có dữ liệu.
 - Nút và liên kết dùng vùng chạm tối thiểu 44 px và có phản hồi khi nhấn.
-- Động phủ và thẻ Tu luyện ở Hôm nay dùng số thật (`loadProfile()` trong js/views/hero.js); form `[data-hero-profile]` chỉ hiện khi thiếu cân nặng/giới tính, lưu vào bảng body + `settings.sex`. Đổi giới tính sau này: chưa có chỗ (đợt 2).
+- Động phủ dùng hồ sơ thật; nhiệm vụ, Thử thách Bình cảnh và hai nghi lễ xem thử dùng mẫu có nhãn. Hình núi, sương và sáu cảnh giới là SVG tự vẽ. Có thể đổi giới tính trong Cài đặt.
+- Âm thanh tự tổng hợp bằng Node.js và mã hoá bằng FFmpeg, không dùng bản thu hay mẫu âm thanh bên ngoài. Tệp trong `assets/audio/`: `dong-phu.mp3`, `loi-kiep.mp3`, `dot-pha.mp3`, `nhiem-vu.mp3`.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Codex] Đợt 2 Tu luyện: màn Đột phá/Độ kiếp, nhiệm vụ tuần, thử thách Bình cảnh (× 5 rep), ô Cài đặt `lore` + `sex` — số giả theo "Hợp đồng đợt 2" cuối RPG.md (js/views/hero.js, home.js, settings.js, css).
+- [cho Claude] Tu luyện đợt 2: truyền `weekly` và `profile.challenge` vào `heroView(profile, { weekly, challenge: profile.challenge, demo: false })`, truyền `weekly` vào `heroCard(profile.tuvi, false, weekly)`; nối `gym.heroSeen` và mở `breakthroughModal(event)` bằng `showModal()` khi vào Động phủ hoặc xong buổi, xử lý đóng và thêm smoke.
+- [cho Claude] Nối âm Động phủ từ `assets/audio/`: `dong-phu.mp3` lặp khi ở Động phủ (dừng khi rời trang); `loi-kiep.mp3` phát lúc mở màn Độ kiếp, rung tại ba tia khoảng 1,05 / 1,65 / 2,25 giây; `dot-pha.mp3` phát lúc hào quang hiện (ngay khi mở Đột phá hoặc sau khoảng 2,25 giây ở Độ kiếp); `nhiem-vu.mp3` phát khi nhiệm vụ vừa hoàn thành. Tôn trọng `settings.music`, `settings.sfx`, cài đặt rung và lần chạm đầu trên iOS. Bỏ dòng báo âm thanh xem trước ở Cài đặt sau khi nối.
 
 
 ## Ý tưởng sau khi dùng thực tế

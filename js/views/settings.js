@@ -37,6 +37,18 @@ export async function render(el) {
     <label class="row">Âm báo hết giờ nghỉ<span class="grow"></span><input type="checkbox" data-k="sound" ${s.sound ? 'checked' : ''}></label>
     <label class="row">Rung khi hết giờ nghỉ<span class="grow"></span><input type="checkbox" data-k="vibrate" ${s.vibrate ? 'checked' : ''}></label>
   </section>
+  <h2 id="cultivation-settings">Con Đường Tu Luyện</h2>
+  <section class="card settings-options cultivation-settings" aria-labelledby="cultivation-settings">
+    <label class="row"><span class="grow">Lời tu tiên</span><input type="checkbox" data-k="lore" ${s.lore ? 'checked' : ''}></label>
+    <label class="row"><span class="grow">Giới tính</span><select data-k="sex">
+      <option value="" disabled ${!s.sex ? 'selected' : ''}>Chưa chọn</option>
+      <option value="m" ${s.sex === 'm' ? 'selected' : ''}>Nam</option>
+      <option value="f" ${s.sex === 'f' ? 'selected' : ''}>Nữ</option>
+    </select></label>
+    <label class="row"><span class="grow">Nhạc nền Động phủ</span><input type="checkbox" data-k="music" ${s.music ? 'checked' : ''}></label>
+    <label class="row"><span class="grow">Âm hiệu ứng tu luyện</span><input type="checkbox" data-k="sfx" ${s.sfx ? 'checked' : ''}></label>
+    <p class="muted small">Bản xem trước lưu tuỳ chọn âm thanh.</p>
+  </section>
   <h2>Dữ liệu</h2>
   <section class="card">
     <p class="small">Dữ liệu chỉ lưu trên thiết bị này. Hãy sao lưu định kỳ (gửi file vào Drive/Zalo của bạn).</p>

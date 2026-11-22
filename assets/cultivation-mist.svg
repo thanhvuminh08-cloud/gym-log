@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 340" preserveAspectRatio="xMidYMax slice">
+  <defs>
+    <linearGradient id="fog" x2="0" y2="1">
+      <stop stop-color="#91c5b2" stop-opacity=".12"/>
+      <stop offset="1" stop-color="#102021" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="rock" x2="0" y2="1">
+      <stop stop-color="#16322e"/>
+      <stop offset="1" stop-color="#081515"/>
+    </linearGradient>
+  </defs>
+  <path fill="url(#fog)" d="M0 179c126-53 207 13 329 14 117 2 133-29 228-38 76-8 134 24 203 13v172H0z"/>
+  <path fill="url(#rock)" d="M0 263l37-27 28 11 44 31 64 26 53 4 17 32H0zm760-55-53 12-46 45-22-8-64 41-28 42h213z"/>
+  <g fill="none" stroke="#a3cdb8" stroke-linecap="round" opacity=".57">
+    <path d="M579 130h47c-10-9-4-20 9-21 12 0 16 10 12 16 5-6 18-4 22 4h51m-49 13h61"/>
+    <path d="M29 216h36c-2-6 7-13 14-10 2-11 19-14 26-4 6-2 16 2 18 12h57m-68 10h31"/>
+    <path d="M132 271c104-22 172 8 226 2s128-22 192-16m-327 36c100 13 145-15 225-9"/>
+  </g>
+</svg>
