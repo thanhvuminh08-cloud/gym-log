@@ -14,6 +14,7 @@ const until = async (fn, ms = 3000) => { for (let t = 0; t < ms; t += 50) { cons
 
 await new Promise((r) => { const q = indexedDB.deleteDatabase(DB); q.onsuccess = q.onerror = q.onblocked = r; });
 localStorage.removeItem('gym.restEnd');
+const seenBak = localStorage.getItem('gym.medalSeen'); localStorage.removeItem('gym.medalSeen');
 frame.src = `index.html?db=${DB}#/`;
 await new Promise((r) => (frame.onload = r));
 const w = frame.contentWindow, $ = (s) => w.document.querySelector(s), $$ = (s) => [...w.document.querySelectorAll(s)];
@@ -43,6 +44,7 @@ try {
   });
   await step('Hiện mục tiêu quá tải từ lần trước', () => !!$('.target')?.textContent.includes('65kg × 9'));
   await step('Phát hiện PR', async () => { fillSets([60, 75]); await check(0); await check(1); return $$('.set:not(.head) .check')[1].textContent.includes('PR'); });
+  await step('Ăn mừng: hàng set PR có .celebrate[data-celebrate=gold]', () => !!$('.set.celebrate[data-celebrate=gold]'));
   await step('Toast cổ vũ khi vượt', () => $$('.toast').some((t) => t.textContent.includes('PR mới')));
   await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/history/'))); });
   await step('Tổng kết: huy chương vàng + 1/1 bài vượt', async () => !!(await until(() => $('.tier[data-tier=gold]'))) && $('.overload')?.textContent.includes('1/1'));
@@ -64,9 +66,13 @@ try {
   await step('Biểu đồ tiến độ có dữ liệu', async () => { await go('#/progress'); return !!(await until(() => $('svg.chart path'))); });
   await step('Tab Huy chương: 1 vàng, 1 lần vượt, mốc tạ 70kg', async () => {
     $('[data-tab=medal]').click();
-    const g = await until(() => $('.medals .tier[data-tier=gold] b'));
-    return g?.textContent === '1' && $('.streaks .overload b')?.textContent === '1' && !!$('.milestone')?.textContent.includes('70 kg')
+    const g = await until(() => $('.medals .tier[data-tier=gold] b')?.textContent === '1' && $('.medals .tier[data-tier=gold] b'));
+    return !!g && !!(await until(() => $('.streaks .overload b')?.textContent === '1')) && !$('[data-new]') && !!$('.milestone')?.textContent.includes('70 kg')
       && !!$('.medal-row[href^="#/history/"]');
+  });
+  await step('Huy chương mới (sau lần xem trước) có data-new', async () => {
+    w.localStorage.setItem('gym.medalSeen', '1'); await go('#/'); await go('#/progress/medal');
+    return !!(await until(() => $('.medal-row[data-new]'))) && !!$('.medals .tier[data-tier=gold][data-new]');
   });
   await step('Luật huy chương: chuỗi, mốc, tuần', async () => {
     const { medals } = await import('./js/medals.js');
@@ -83,6 +89,7 @@ try {
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
   w.localStorage.removeItem('gym.restEnd');
+  if (seenBak === null) w.localStorage.removeItem('gym.medalSeen'); else w.localStorage.setItem('gym.medalSeen', seenBak);
   frame.src = 'about:blank'; await wait(100);
   indexedDB.deleteDatabase(DB);
   log(true, '(đã xoá DB smoke)');

@@ -35,7 +35,7 @@ async function detail(el, id, ex) {
   <a href="#/history" class="small">← Lịch sử</a>
   <h1>${h(w.name)}</h1>
   <p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p>
-  <div class="stats"><div><b>${setCount(w)}</b><small>set</small></div><div><b>${fmtNum(volume(w))}</b><small>kg khối lượng</small></div><div><b>${w.entries.length}</b><small>bài</small></div>${nCmp ? `<div class="overload"><b>${nUp}/${nCmp}</b><small>bài vượt lần trước</small></div>` : ''}</div>
+  <div class="stats"><div><b data-count="${setCount(w)}">${setCount(w)}</b><small>set</small></div><div><b data-count="${volume(w)}">${fmtNum(volume(w))}</b><small>kg khối lượng</small></div><div><b data-count="${w.entries.length}">${w.entries.length}</b><small>bài</small></div>${nCmp ? `<div class="overload"><b>${nUp}/${nCmp}</b><small>bài vượt lần trước</small></div>` : ''}</div>
   ${w.entries.map((e, ei) => {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));
     return `<section class="card"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>

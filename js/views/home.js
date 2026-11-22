@@ -30,9 +30,9 @@ export async function render(el) {
     <section>
       <h2 class="section-heading">7 ngày qua</h2>
       <div class="stats week-stats">
-        <div><span class="tile-icon">${icon('calendar')}</span><b>${week.length}</b><small>Buổi tập</small></div>
-        <div><span class="tile-icon">${icon('layers')}</span><b>${week.reduce((a, w) => a + setCount(w), 0)}</b><small>Set hoàn thành</small></div>
-        <div><span class="tile-icon">${icon('dumbbell')}</span><b>${fmtNum(week.reduce((a, w) => a + volume(w), 0))}<small> kg</small></b><small>Tổng khối lượng</small></div>
+        <div><span class="tile-icon">${icon('calendar')}</span><b data-count="${week.length}">${week.length}</b><small>Buổi tập</small></div>
+        <div><span class="tile-icon">${icon('layers')}</span><b data-count="${week.reduce((a, w) => a + setCount(w), 0)}">${week.reduce((a, w) => a + setCount(w), 0)}</b><small>Set hoàn thành</small></div>
+        <div><span class="tile-icon">${icon('dumbbell')}</span><b data-count="${week.reduce((a, w) => a + volume(w), 0)}">${fmtNum(week.reduce((a, w) => a + volume(w), 0))}<small> kg</small></b><small>Tổng khối lượng</small></div>
       </div>
     </section>
     <div class="dashboard-lists">

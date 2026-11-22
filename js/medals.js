@@ -36,7 +36,7 @@ export function medals(workouts, now = Date.now()) {
       if (!o.res) continue;
       beats++;
       counts[o.res.tier]++;
-      recent.push({ workoutId: w.id, t: w.start, exerciseId: o.exerciseId, tier: o.res.tier, msg: o.res.msg });
+      recent.push({ workoutId: w.id, t: w.start, end: w.end, exerciseId: o.exerciseId, tier: o.res.tier, msg: o.res.msg });
     }
     // Mốc tạ: lần đầu set nặng nhất chạm mốc.
     for (const e of w.entries) {

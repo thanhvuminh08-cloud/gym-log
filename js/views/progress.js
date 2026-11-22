@@ -1,5 +1,5 @@
 import { all, put, del } from '../db.js';
-import { h, uid, fmtDate, fmtShort, fmtNum, exMap } from '../util.js';
+import { h, uid, fmtDate, fmtShort, fmtNum, exMap, countUp } from '../util.js';
 import { finished, series, records } from '../stats.js';
 import { lineChart } from '../chart.js';
 import { medals } from '../medals.js';
@@ -17,6 +17,7 @@ export async function render(el, [tab] = []) {
   const used = Object.keys(counts).filter((id) => ex[id]).sort((a, b) => counts[b] - counts[a]);
   if (!used.includes(state.exId)) state.exId = used[0] || '';
 
+  let seen; // mốc "đã xem huy chương", đọc 1 lần mỗi lần vào trang để đổi tab qua lại không mất dấu "mới"
   const draw = async () => {
     let body = '';
     if (state.tab === 'ex') {
@@ -30,27 +31,34 @@ export async function render(el, [tab] = []) {
         body = `<select data-f="exId">${used.map((id) => `<option value="${h(id)}" ${id === state.exId ? 'selected' : ''}>${h(ex[id].name)} (${counts[id]})</option>`).join('')}</select>
         <div class="chips">${Object.entries(METRICS).map(([k, v]) => `<button class="chip${k === state.metric ? ' on' : ''}" data-m="${k}">${v}</button>`).join('')}</div>
         <section class="card">${lineChart(s.map((p) => ({ t: p.t, v: p[state.metric] })), { unit: ' kg' })}</section>
-        <div class="stats"><div><b>${fmtNum(r.e1rm)}</b><small>~1RM tốt nhất</small></div><div><b>${fmtNum(r.w)}</b><small>tạ nặng nhất</small></div><div><b>${fmtNum(r.vol)}</b><small>set tốt nhất (kg×rep)</small></div></div>`;
+        <div class="stats"><div><b data-count="${r.e1rm}">${fmtNum(r.e1rm)}</b><small>~1RM tốt nhất</small></div><div><b data-count="${r.w}">${fmtNum(r.w)}</b><small>tạ nặng nhất</small></div><div><b data-count="${r.vol}">${fmtNum(r.vol)}</b><small>set tốt nhất (kg×rep)</small></div></div>`;
       }
     } else if (state.tab === 'medal') {
       const m = medals(done);
       const name = (id) => h(ex[id]?.name || 'Bài đã xoá');
+      // Huy chương mới kể từ lần mở tab trước (lần đầu mở: không đánh dấu gì).
+      if (seen === undefined) {
+        seen = Infinity;
+        try { seen = Number(localStorage.getItem('gym.medalSeen')) || Infinity; localStorage.setItem('gym.medalSeen', Date.now()); } catch {}
+      }
+      const fresh = m.recent.filter((r) => r.end > seen), isNew = (r) => (fresh.includes(r) ? ' data-new' : '');
+      const newTier = (t) => (fresh.some((r) => r.tier === t) ? ' data-new' : '');
       body = !m.compared && !m.milestones.length ? `<section class="card empty-state">
         <span class="tile-icon"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
         <h2>Chưa có huy chương</h2>
         <p class="muted">Tập lại một bài và vượt lần trước để nhận huy chương đầu tiên.</p>
       </section>` : `<div class="stats medals">
-          <div class="tier" data-tier="gold"><b>${m.counts.gold}</b><small>🥇 Vàng</small></div>
-          <div class="tier" data-tier="silver"><b>${m.counts.silver}</b><small>🥈 Bạc</small></div>
-          <div class="tier" data-tier="bronze"><b>${m.counts.bronze}</b><small>🥉 Đồng</small></div></div>
+          <div class="tier" data-tier="gold"${newTier('gold')}><b data-count="${m.counts.gold}">${m.counts.gold}</b><small>🥇 Vàng</small></div>
+          <div class="tier" data-tier="silver"${newTier('silver')}><b data-count="${m.counts.silver}">${m.counts.silver}</b><small>🥈 Bạc</small></div>
+          <div class="tier" data-tier="bronze"${newTier('bronze')}><b data-count="${m.counts.bronze}">${m.counts.bronze}</b><small>🥉 Đồng</small></div></div>
         <div class="stats streaks">
-          <div class="overload"><b>${m.beats}</b><small>lần vượt</small></div>
-          <div class="streak"><b>${m.streak.cur}</b><small>buổi vượt liên tiếp · kỷ lục ${m.streak.best}</small></div>
-          <div class="streak"><b>${m.weeks.cur}</b><small>tuần tập liên tiếp · kỷ lục ${m.weeks.best}</small></div></div>
+          <div class="overload"><b data-count="${m.beats}">${m.beats}</b><small>lần vượt</small></div>
+          <div class="streak"><b data-count="${m.streak.cur}">${m.streak.cur}</b><small>buổi vượt liên tiếp · kỷ lục ${m.streak.best}</small></div>
+          <div class="streak"><b data-count="${m.weeks.cur}">${m.weeks.cur}</b><small>tuần tập liên tiếp · kỷ lục ${m.weeks.best}</small></div></div>
         ${m.milestones.length ? `<h2>Mốc tạ</h2>${m.milestones.map((x) => `<div class="card row milestone">
           <span class="grow"><b>${name(x.exerciseId)}</b><br><small class="muted">${x.reached ? `Mốc ${fmtNum(x.reached.kg)} kg · ${fmtShort(x.reached.t)}` : 'Chưa đạt mốc'}${x.next ? ` · tiếp: ${fmtNum(x.next)} kg (còn ${fmtNum(x.next - x.best)})` : ''}</small></span>
           <b>${fmtNum(x.best)} kg</b></div>`).join('')}` : ''}
-        ${m.recent.length ? `<h2>Huy chương gần đây</h2>${m.recent.slice(0, 20).map((r) => `<a class="card row medal-row" href="#/history/${h(r.workoutId)}">
+        ${m.recent.length ? `<h2>Huy chương gần đây</h2>${m.recent.slice(0, 20).map((r) => `<a class="card row medal-row"${isNew(r)} href="#/history/${h(r.workoutId)}">
           <span class="grow"><b>${name(r.exerciseId)}</b><span class="tier small" data-tier="${r.tier}">${TIER_LABEL[r.tier]} · ${h(r.msg)}</span></span>
           <small class="muted">${fmtShort(r.t)}</small></a>`).join('')}` : ''}`;
     } else {
@@ -64,6 +72,7 @@ export async function render(el, [tab] = []) {
     }
     el.innerHTML = `<h1>Tiến độ</h1>
       <div class="tabs"><button class="${state.tab === 'ex' ? 'on' : ''}" data-tab="ex">Bài tập</button><button class="${state.tab === 'body' ? 'on' : ''}" data-tab="body">Cơ thể</button><button class="${state.tab === 'medal' ? 'on' : ''}" data-tab="medal">Huy chương</button></div>${body}`;
+    countUp(el);
   };
 
   el.onchange = (ev) => { if (ev.target.dataset.f === 'exId') { state.exId = ev.target.value; draw(); } };

@@ -37,4 +37,34 @@ export const settings = {
   },
 };
 
-export const exMap = (list) => Object.fromEntries(list.map((e) => [e.id, e]));
+const calm = () => matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+const BUZZ = { gold: [80, 60, 80, 60, 160], silver: [80, 60, 120], bronze: [90] };
+
+/** Ăn mừng: rung theo cấp (nếu bật rung) + gắn `.celebrate[data-celebrate=tier]` ~1.2s cho Codex làm hiệu ứng. */
+export function celebrate(el, tier = 'bronze') {
+  if (settings.get().vibrate && navigator.vibrate) navigator.vibrate(BUZZ[tier] || BUZZ.bronze);
+  if (!el) return;
+  el.classList.add('celebrate');
+  el.dataset.celebrate = tier;
+  setTimeout(() => { el.classList.remove('celebrate'); delete el.dataset.celebrate; }, 1200);
+}
+
+/** Đếm tăng dần cho các phần tử `[data-count]` (số nằm ở text node đầu). Bỏ qua nếu giảm chuyển động. */
+export function countUp(root, ms = 700) {
+  for (const el of root.querySelectorAll('[data-count]:not([data-counted])')) {
+    el.dataset.counted = '';
+    const to = Number(el.dataset.count), node = el.firstChild;
+    if (calm() || !(to > 0) || node?.nodeType !== 3) continue;
+    const fmt = (v) => (Number.isInteger(to) ? Math.round(v).toLocaleString('vi-VN') : fmtNum(v));
+    const t0 = performance.now();
+    const tick = (now) => {
+      const k = Math.min(1, (now - t0) / ms);
+      node.textContent = fmt(to * (1 - (1 - k) ** 3));
+      if (k < 1 && node.isConnected) requestAnimationFrame(tick);
+    };
+    node.textContent = fmt(0);
+    requestAnimationFrame(tick);
+  }
+}
+
+export const exMap =(list) => Object.fromEntries(list.map((e) => [e.id, e]));

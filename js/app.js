@@ -1,5 +1,6 @@
 import { seed } from './db.js';
 import * as timer from './timer.js';
+import { countUp } from './util.js';
 
 const ROUTES = {
   '': () => import('./views/home.js'),
@@ -27,6 +28,7 @@ async function route() {
   });
   try {
     cleanup = await (await load()).render(main, params.map(decodeURIComponent));
+    countUp(main);
   } catch (e) {
     console.error(e);
     main.innerHTML = `<p class="error">Lỗi: ${String(e.message || e)}</p>`;
