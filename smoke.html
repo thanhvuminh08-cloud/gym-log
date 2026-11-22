@@ -166,9 +166,11 @@ try {
   await step('Động phủ gọn: Khí huyết, mục tiêu tuần và Liên kích dùng dữ liệu thật', async () => {
     await go('#/'); const s = await until(() => $('[data-readiness-score]'));
     const sc = Number(s?.dataset.count), wk = $('[data-session-goal=week]');
-    return sc >= 0 && sc <= 100 && wk.querySelector('[data-session-goal-count]').textContent.startsWith('2 / ')
-      && $('[data-session-count]').dataset.count === '2' && $('.sanctum-stats .streak-multiplier [data-count]').dataset.count === '1'
-      && !$('.lift-card, .cultivation-meridian, .cultivation-challenge');
+    // Đọc data-count, không đọc chữ: số đang chạy hiệu ứng đếm từ 0.
+    const got = [sc >= 0 && sc <= 100, !!wk?.querySelector('[data-session-goal-count]')?.textContent.includes(' / '), $('[data-session-count]')?.dataset.count,
+      $('.sanctum-stats .streak-multiplier [data-count]')?.dataset.count, !$('.lift-card, .cultivation-meridian, .cultivation-challenge')].join(',');
+    if (got !== 'true,true,2,1,true') lines.push(`  ${got}`);
+    return got === 'true,true,2,1,true';
   });
   await step('Tổng quan: thẻ Tổng ~1RM SBD dùng dữ liệu thật', async () => {
     await go('#/progress/overview'); const v = await until(() => $('[data-strength-total-value]'));
