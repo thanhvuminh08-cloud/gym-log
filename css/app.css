@@ -1,4 +1,12 @@
+@font-face {
+  font-family: "Noto Serif VI";
+  src: url("../assets/fonts/noto-serif-vi-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-display: swap;
+}
+
 :root {
+  --cultivation-serif: "Noto Serif VI", Cambria, "Times New Roman", serif;
   --bg: #0a0f14; --card: #141d27; --raised: #1c2935; --line: #34485d; --text: #f1f5f8; --muted: #aab8c5;
   --accent: #c5f464; --accent-ink: #18220b; --accent-soft: #26351c; --danger: #ff8e91; --pr: #fbbf24;
   --cool: #79c8ff;
@@ -493,11 +501,11 @@ a.card.cultivation-link {
   border-color: var(--ink-line); background: var(--mist) center bottom / cover, var(--mountains) center 58% / cover #12282e;
 }
 .cultivation-link-copy { display: grid; gap: 2px; }
-.cultivation-link strong { font: 700 1.18rem/1.2 Georgia, "Times New Roman", serif; color: var(--gold); }
+.cultivation-link strong { font: 700 1.18rem/1.2 var(--cultivation-serif); color: var(--gold); }
 .cultivation-link small { color: var(--text); }
 .cultivation-link > svg, .cultivation-link .cultivation-link-quests { color: var(--jade); }
 .cultivation-back { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; color: var(--jade); }
-.cultivation h1, .cultivation h2, .cultivation h3 { font-family: Georgia, "Times New Roman", serif; }
+.cultivation h1, .cultivation h2, .cultivation h3 { font-family: var(--cultivation-serif); font-weight: 700; }
 .cultivation h2 { color: var(--gold); }
 .cultivation-cover {
   position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: space-between; gap: 28px;
@@ -514,17 +522,19 @@ a.card.cultivation-link {
 .cultivation-rank h2 { margin: 0 0 2px; font-size: 1rem; }
 .cultivation-rank strong { display: block; font-size: clamp(1.05rem, 4vw, 1.35rem); }
 .cultivation-seal {
+  --seal-font: 1rem;
   --seal: #8e433a; --seal-edge: #f5b59b; --seal-mark: repeating-linear-gradient(0deg, transparent 0 5px, #fff2 6px 7px);
   display: grid; place-items: center; width: 60px; aspect-ratio: 1; flex: none; padding: 5px;
   border: 1px solid var(--seal-edge); border-radius: 7px; box-shadow: inset 0 0 0 3px var(--seal), inset 0 0 0 4px var(--seal-edge);
-  background: var(--seal-mark), var(--seal); color: #fff1e6; text-align: center; font: 700 1rem/1.05 Georgia, "Times New Roman", serif;
+  background: var(--seal-mark), var(--seal); color: #fff1e6; text-align: center;
+  font: 700 var(--seal-font)/1.16 var(--cultivation-serif); overflow-wrap: normal; word-break: normal; hyphens: none;
 }
 .cultivation-seal[data-realm="1"] { --seal: #8c3539; --seal-edge: #f2a69e; --seal-mark: repeating-linear-gradient(38deg, transparent 0 7px, #fff2 8px 9px); }
 .cultivation-seal[data-realm="2"] { --seal: #7d2939; --seal-edge: #e9a29d; --seal-mark: repeating-conic-gradient(from 45deg, #fff1 0 25%, transparent 0 50%) center / 10px 10px; }
 .cultivation-seal[data-realm="3"] { --seal: #a03e27; --seal-edge: #ffd692; --seal-mark: repeating-radial-gradient(circle, transparent 0 8px, #ffe59b44 9px 10px); }
-.cultivation-seal[data-realm="4"] { --seal: #84244a; --seal-edge: #ffbeaf; --seal-mark: repeating-linear-gradient(-38deg, transparent 0 6px, #fff2 7px 8px); }
+.cultivation-seal[data-realm="4"] { --seal: #84244a; --seal-edge: #ffbeaf; --seal-mark: repeating-linear-gradient(-38deg, transparent 0 6px, #fff2 7px 8px); font-size: calc(var(--seal-font) * .76); }
 .cultivation-seal[data-realm="5"] { --seal: #9c262f; --seal-edge: #ffde9b; --seal-mark: repeating-conic-gradient(#ffe7ac44 0 10deg, transparent 10deg 25deg); }
-.cultivation-link .cultivation-seal { width: 48px; font-size: .82rem; }
+.cultivation-link .cultivation-seal { width: 48px; --seal-font: .82rem; }
 .cultivation-condition { margin: 4px 0 0; color: var(--jade); font-size: .85rem; }
 .cultivation-condition.is-shaky { color: var(--gold); }
 .cultivation-panel, .cultivation-meridian { background: linear-gradient(135deg, #162c31, #101b23 75%); border-color: var(--ink-line); }
@@ -582,7 +592,7 @@ a.card.cultivation-link {
 .challenge-goal p { margin: 0; }
 .challenge-goal strong { display: block; color: #ffebbc; font-size: clamp(1.25rem, 6vw, 2.15rem); font-variant-numeric: tabular-nums; }
 .challenge-goal small { color: #e4d1a8; }
-.challenge-next { color: var(--gold); font: 700 1.2rem Georgia, "Times New Roman", serif; }
+.challenge-next { color: var(--gold); font: 700 1.2rem var(--cultivation-serif); }
 .challenge-progress { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; margin-top: 14px; color: var(--gold); }
 .challenge-progress .cultivation-meter { --jade: #f2cb7d; height: 9px; }
 .cultivation-scroll {
@@ -601,19 +611,19 @@ a.card.cultivation-link {
 .quest-list h3 { font-size: 1.06rem; }
 .quest-list p { color: #5d3f31; font-size: .85rem; }
 .quest-status { display: grid; justify-items: end; gap: 3px; font-variant-numeric: tabular-nums; }
-.quest-stamp { padding: 2px 5px; color: #811d25; border: 2px double #811d25; border-radius: 3px; font: 700 .77rem Georgia, serif; transform: rotate(-7deg); }
+.quest-stamp { padding: 2px 5px; color: #811d25; border: 2px double #811d25; border-radius: 3px; font: 700 .77rem var(--cultivation-serif); transform: rotate(-7deg); }
 .cultivation-demo { display: none; margin: 12px 0 18px; }
 .cultivation-demo h2 { margin: 0 0 7px; }
 @supports selector(:popover-open) {
   .cultivation-demo { display: block; }
 }
 .cultivation-atlas { margin-top: 16px; border: 1px solid var(--ink-line); border-radius: 14px; padding: 0 12px 5px; background: #101e24; }
-.cultivation-atlas summary { padding: 10px 0; min-height: 44px; color: var(--gold); font: 700 1.12rem/1.4 Georgia, serif; cursor: pointer; }
+.cultivation-atlas summary { padding: 10px 0; min-height: 44px; color: var(--gold); font: 700 1.12rem/1.4 var(--cultivation-serif); cursor: pointer; }
 .cultivation-atlas summary:active { color: var(--jade); }
 .cultivation-atlas ul { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; list-style: none; margin: 0 0 8px; padding: 0; }
 .cultivation-atlas li { position: relative; min-width: 0; border: 1px solid var(--ink-line); border-radius: 10px; background: #0b171c; padding: 6px; text-align: center; color: var(--gold); }
 .cultivation-portrait { display: block; width: 100%; height: auto; }
-.cultivation-atlas .cultivation-seal { position: absolute; inset: 6px auto auto 6px; width: 36px; font-size: .6rem; }
+.cultivation-atlas .cultivation-seal { position: absolute; inset: 6px auto auto 6px; width: 36px; padding: 3px; --seal-font: .6rem; }
 @media (min-width: 600px) {
   .cultivation-meridians { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cultivation-atlas ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
@@ -621,7 +631,6 @@ a.card.cultivation-link {
 
 /* Nhập môn */
 .dao-wizard { max-width: 590px; margin-inline: auto; }
-.dao-wizard :is(h1, h2, h3) { font-family: Cambria, "Times New Roman", serif; }
 .dao-cover {
   padding: clamp(16px, 5vw, 26px); border: 1px solid var(--ink-line); border-radius: var(--r);
   box-shadow: inset 0 0 0 4px #162521, 0 12px 24px #0005;
@@ -703,7 +712,7 @@ a.card.cultivation-link {
 .breakthrough-content { display: grid; justify-items: center; gap: 7px; padding: 8px 15px 18px; text-align: center; overflow-wrap: anywhere; }
 .breakthrough-kind, .breakthrough-content h2, .breakthrough-real { margin: 0; }
 .breakthrough-kind { color: var(--jade); font-size: .85rem; }
-.breakthrough-content h2 { font: 700 clamp(2rem, 9vw, 3.15rem)/1.05 Georgia, serif; color: var(--gold); }
+.breakthrough-content h2 { font: 700 clamp(2rem, 9vw, 3.15rem)/1.16 var(--cultivation-serif); color: var(--gold); }
 .breakthrough-ranks { display: grid; gap: 2px; color: #c7d1c9; }
 .breakthrough-ranks strong { color: #ffe5a6; font-size: 1.15rem; }
 .breakthrough-real { padding: 5px 8px; background: #0b181a; border-radius: 8px; font-size: .88rem; }
