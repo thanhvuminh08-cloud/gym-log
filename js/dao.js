@@ -14,7 +14,7 @@ export const EXPERIENCE = [
 /** Đạo tâm (mục tiêu): rep/nghỉ mặc định cho bài chính và bài phụ. */
 export const GOALS = [
   { id: 'strength', label: 'Luyện lực', real: 'Tăng sức mạnh', main: { reps: 5, rest: 180 }, acc: { reps: 8, rest: 120 } },
-  { id: 'muscle', label: 'Luyện thể', real: 'Tăng cơ', main: { reps: 8, rest: 120 }, acc: { reps: 12, rest: 75 } },
+  { id: 'muscle', label: 'Luyện cơ', real: 'Tăng cơ', main: { reps: 8, rest: 120 }, acc: { reps: 12, rest: 75 } },
   { id: 'lean', label: 'Luyện khí', real: 'Giảm mỡ, săn chắc', main: { reps: 10, rest: 90 }, acc: { reps: 15, rest: 60 } },
   { id: 'health', label: 'Dưỡng sinh', real: 'Khoẻ mạnh, bền bỉ', main: { reps: 10, rest: 90 }, acc: { reps: 12, rest: 60 } },
 ];
@@ -143,7 +143,7 @@ export function buildPlan({ path = {}, days = 3, goal = 'muscle', experience = '
         items.push(item(key, ids[Math.min(S.pick, ids.length - 1)]));
       }
     }
-    const t = { id: makeId(templates.length), name: `Công pháp · ${S.name}`, items };
+    const t = { id: makeId(templates.length), name: `Giáo án · ${S.name}`, items };
     templates.push(t);
     byKind[kind] = t.id;
   }

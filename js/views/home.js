@@ -14,13 +14,13 @@ import { hintLabel, termLabel } from './sections.js';
 const icon = (name) => `<svg class="dashboard-icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const scheduleLabels = { none: 'Chưa đặt lịch tập', due: 'Hôm nay có lịch tập', done: 'Đã tập hôm nay', rest: 'Hôm nay nghỉ' };
 
-function trainingCard(cur, plan, template) {
+function trainingCard(cur, plan, template, first) {
   const scheduled = plan.state === 'due' && template;
-  return `<section class="workout-hero sanctum-training" data-schedule-today data-state="${plan.state}">
+  return `<section class="workout-hero sanctum-training" data-schedule-today data-state="${plan.state}"${first ? ' data-first-run' : ''}>
     <div class="hero-content">
       <div class="training-schedule">${icon('calendar')}<span>${scheduleLabels[plan.state]}</span>
         ${plan.state === 'none' ? '<a href="#/cong-phap">Đặt lịch</a>' : ''}</div>
-      ${cur ? `<h2>${h(cur.name)}</h2>` : scheduled ? `<h2>${h(template.name)}</h2>` : ''}
+      ${cur ? `<h2>${h(cur.name)}</h2>` : scheduled ? `<h2>${h(template.name)}</h2>` : first ? '<h2>Ghi buổi tập đầu tiên</h2>' : ''}
       ${plan.state === 'due' && !cur && !template ? '<p>Tập tự do</p>' : ''}
       ${!cur && plan.state !== 'due' ? `<p class="gloss">${gloss('start')}</p>` : ''}
       <div class="row wrap training-actions">
@@ -46,7 +46,10 @@ export async function render(el) {
   const draw = (p) => {
     el.innerHTML = `<div class="dashboard">
       <header class="dashboard-heading"><h1>${hintLabel(NAV[0].label, NAV[0].hint)}</h1><p>${icon('calendar')}<span>${h(date)}</span></p></header>
-      ${trainingCard(cur, plan, template)}
+      ${trainingCard(cur, plan, template, !cur && !done.length)}
+      ${!settings.get().dao && !settings.get().daoSkip ? `<a class="card row dao-invite" href="#/nhap-mon">
+        ${icon('layers')}<span class="grow"><b>${termLabel('nhapMon')}</b><small class="muted">Tuỳ chọn · chọn bài theo mạch, tự sinh giáo án và lịch tập</small></span>${icon('chevron')}
+      </a>` : ''}
       <div class="sanctum-cultivation cultivation">
         ${tuviStrip(p)}
         ${questBoard(p.weekly, false, true)}

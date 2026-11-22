@@ -1,4 +1,4 @@
-import { seed, activeWorkout } from './db.js';
+import { seed, all, put } from './db.js';
 import * as timer from './timer.js';
 import { countUp, toast, settings, applyGloss } from './util.js';
 import { logError } from './safety.js';
@@ -60,11 +60,6 @@ async function route() {
   const [name = '', ...raw] = location.hash.replace(/^#\/?/, '').split('/');
   if (ALIASES[name]) return location.replace(ALIASES[name](raw)); // thay mục lịch sử; hashchange gọi lại route()
   const params = raw.map(decodeURIComponent);
-  // Lần đầu (chưa Nhập môn, chưa bấm "Để sau", không có buổi đang tập): vào thẳng Nhập môn.
-  if (!name) {
-    const s = settings.get();
-    if (!s.dao && !s.daoSkip && !(await activeWorkout())) return location.replace('#/nhap-mon');
-  }
   const key = ROUTES[name] ? name : '';
   const views = ROUTES[key](key === name ? params : []);
   cleanup?.();
@@ -98,8 +93,17 @@ async function route() {
   window.scrollTo(0, 0);
 }
 
+// Giáo án tự sinh cũ tên "Công pháp · …" → "Giáo án · …" (Dễ dùng C: "Công pháp" chỉ còn là mục Kế hoạch).
+async function renameDaoTemplates() {
+  const ids = settings.get().dao?.templateIds || [];
+  for (const t of await all('templates')) {
+    if (ids.includes(t.id) && t.name.startsWith('Công pháp · ')) await put('templates', { ...t, name: t.name.replace('Công pháp · ', 'Giáo án · ') });
+  }
+}
+
 applyGloss();
 await seed();
+await renameDaoTemplates();
 navigator.storage?.persist?.();
 timer.resume();
 addEventListener('hashchange', route);

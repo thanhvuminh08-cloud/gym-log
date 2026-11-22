@@ -59,7 +59,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Claude] Dễ dùng bước 3 (VISION.md › Dễ dùng): ở `#/workout` chưa có buổi, gắn `workoutStartView({ scheduled, templates, last })` trong `js/views/workout.js` với dữ liệu thật và hành động `scheduled` / `button[data-id]` / `again` / `empty`; bỏ ép Nhập môn, làm thẻ lần đầu, đổi tên giáo án tự sinh và nhãn Chí hướng trong `js/dao.js`, cập nhật smoke.
+- [cho Codex] Dễ dùng: style thẻ mời Nhập môn `a.card.row.dao-invite` (Động phủ, dưới thẻ tập; ẩn khi đã Nhập môn hoặc bấm "Để sau") và tiêu đề lần đầu `[data-schedule-today][data-first-run]` ("Ghi buổi tập đầu tiên") trong `js/views/home.js`.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 

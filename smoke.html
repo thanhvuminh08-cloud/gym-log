@@ -29,16 +29,25 @@ const check = async (i) => { $$('.set:not(.head) .check')[i].click(); await wait
 const step = async (name, fn) => { try { const r = await fn(); log(r !== false, name); } catch (e) { log(false, `${name} — ${e.message}`); } };
 
 try {
-  await step('Lần đầu mở app → Nhập môn; "Để sau" → Hôm nay, không hỏi lại', async () => {
-    const wiz = await until(() => w.location.hash === '#/nhap-mon' && $('[data-dao-step="1"]'));
-    if (!wiz) throw new Error(`không chuyển tới Nhập môn (${w.location.hash})`);
+  await step('Lần đầu mở app: ở Động phủ, thẻ "Ghi buổi tập đầu tiên" + mời Nhập môn; "Để sau" ẩn lời mời', async () => {
+    const first = await until(() => $('[data-first-run]') && $('.dao-invite[href="#/nhap-mon"]'));
+    if (!first) throw new Error(`không có thẻ lần đầu (${w.location.hash})`);
+    const stay = w.location.hash === '#/' || w.location.hash === '';
     await go('#/nhap-mon/6'); // nhảy cóc khi chưa khai thân thể → về bước 2
     const back2 = !!(await until(() => $('[data-dao-step="2"]')));
-    await go('#/nhap-mon/1'); await until(() => $('[data-dao-step="1"]'));
-    // "Để sau" chỉ có ở bước 6; giả lập bằng cờ như nút làm, rồi mở lại Hôm nay.
+    // "Để sau" chỉ có ở bước 6; giả lập bằng cờ như nút làm, rồi mở lại Động phủ.
     const s = JSON.parse(w.localStorage.getItem('gym.settings') || '{}'); w.localStorage.setItem('gym.settings', JSON.stringify({ ...s, daoSkip: Date.now() }));
-    await go('#/');
-    return back2 && w.location.hash === '#/';
+    await go('#/'); await until(() => $('[data-first-run]'));
+    return stay && back2 && w.location.hash === '#/' && !$('.dao-invite');
+  });
+  await step('Bế quan khi chưa có buổi: không bật về, chỉ hiện buổi trống, bấm thì vào buổi', async () => {
+    await go('#/workout');
+    const page = await until(() => $('.workout-start [data-act=empty]'));
+    const only = !!page && w.location.hash === '#/workout' && $$('.workout-start button').length === 1;
+    page.click();
+    const opened = !!(await until(() => $('[data-act=addEx]')));
+    $('[data-act=discard]').click(); await until(() => w.location.hash === '#/' && $('[data-schedule-today]'));
+    return only && opened;
   });
   await step('Trang Hôm nay hiện nút bắt đầu', async () => !!(await until(() => $('[data-act=empty]'))));
   await step('Bắt đầu buổi tập trống', async () => { $('[data-act=empty]').click(); return !!(await until(() => w.location.hash === '#/workout' && $('[data-act=addEx]'))); });
@@ -93,6 +102,18 @@ try {
   await step('Toast cổ vũ khi vượt', () => $$('.toast').some((t) => t.textContent.includes('PR mới')));
   await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/ky/'))); });
   await step('Tổng kết: huy chương vàng + 1/1 bài vượt', async () => !!(await until(() => $('.tier[data-tier=gold]'))) && $('.overload')?.textContent.includes('1/1'));
+  await step('Bế quan chưa có buổi: giáo án thật + lặp lại buổi gần nhất; Động phủ hết thẻ lần đầu', async () => {
+    await go('#/'); await until(() => $('[data-schedule-today]'));
+    const noFirst = !$('[data-first-run]');
+    await go('#/workout');
+    const tpl = await until(() => $$('.workout-start .start-templates button[data-id]').find((b) => b.getAttribute('aria-label').includes('Smoke A')));
+    const again = $('.workout-start [data-act=again]');
+    if (!tpl || !again) throw new Error(`thiếu giáo án ${!!tpl} / lặp lại ${!!again}`);
+    again.click();
+    const ok = await until(() => $$('section.entry').length === 1 && $$('.set:not(.head)').length >= 1);
+    $('[data-act=discard]').click(); await until(() => w.location.hash !== '#/workout' || $('.workout-start'));
+    return noFirst && !!ok;
+  });
   await step('Luật so sánh quá tải', async () => {
     const { compare } = await import('./js/overload.js');
     const S = (...a) => a.map(([w, r]) => ({ w, r, done: true }));
@@ -351,7 +372,7 @@ try {
       Object.entries(plan.schedule).map(([d, t]) => `${d}=${plan.templates.findIndex((x) => x.id === t)}`).join(' '),
       plan.templates[0].items[0].reps + '×' + plan.templates[0].items[0].sets, tl.length, tl.find((t) => t.name === 'Dips').bodyweight].join(',');
     const want = [true, 'back:1', true, 'Kết Đan · Trung kỳ', 'Ngực', 'Luyện Cân · Đại thành', 'Luyện Cân · Đại thành', true, // Vai khai tới Nguyên Anh → hư cảnh, giới hạn Kết Đan
-      'Công pháp · Thượng thân A:5/Công pháp · Hạ thân A:3/Công pháp · Thượng thân B:5/Công pháp · Hạ thân B:3', '1=0 2=1 4=2 5=3', '5×4', 14, true].join(','); // 14 = 12 bài tạ + Plank, Hanging Leg Raise
+      'Giáo án · Thượng thân A:5/Giáo án · Hạ thân A:3/Giáo án · Thượng thân B:5/Giáo án · Hạ thân B:3', '1=0 2=1 4=2 5=3', '5×4', 14, true].join(','); // 14 = 12 bài tạ + Plank, Hanging Leg Raise
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
     return got === want;
   });
@@ -492,14 +513,14 @@ try {
     const ceremonyShown = !!$('dialog.breakthrough-modal[open]');
     if (done) done.click();
     await until(() => $('.cultivation-meridian'));
-    const s = S(), tpl = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp'));
+    const s = S(), tpl = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Giáo án'));
     const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
     const got = [!!done, !!rank, days, s.dao.name, s.dao.path.back.join('+'), s.dao.tested.length, tpl.length, Object.keys(s.schedule).join(''), s.weekGoal,
       s.dao.templateIds.length, !!seen, ceremonyShown, $('.cultivation-navigation')?.textContent.includes('Sửa bài theo mạch'),
       !!$('.cultivation-meridian[data-muscle=legs] .cultivation-tested')].join(',');
     // Làm lại Nhập môn: ghi đè giáo án cũ, không nhân đôi.
     await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/' && $('.tuvi-strip'), 5000);
-    const tpl2 = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp')).length;
+    const tpl2 = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Giáo án')).length;
     const want = ['true', 'true', 4, 'Thanh Vân', 'x-barbell-row+x-pull-up', 4, 4, '1245', 4, 4, 'true', 'false', 'true', 'true'].join(',');
     if (got !== want || tpl2 !== 4) lines.push(`  ${got} | lại ${tpl2}\n  ≠ ${want}`);
     return got === want && tpl2 === 4;

@@ -8,6 +8,7 @@ import * as timer from '../timer.js';
 import { compare, target, TIERS, RPE } from '../overload.js';
 import { muscleKey } from '../insights.js';
 import { lockedPath, filterByPath } from '../dao.js';
+import { weekPlan } from '../schedule.js';
 
 async function newEntry(exerciseId, nSets, reps, rest) {
   const prev = await lastSets(exerciseId);
@@ -33,7 +34,9 @@ export async function startWorkout({ template, from } = {}) {
   if (dropped) toast(`Bỏ ${dropped} bài ngoài danh sách bài theo mạch`);
   const name = template?.name || from?.name || 'Buổi tập ' + new Date().toLocaleDateString('vi-VN');
   await put('workouts', { id: uid(), name, start: Date.now(), end: null, templateId: template?.id || null, note: '', entries });
-  location.hash = '#/workout';
+  // Bắt đầu từ trang chọn ở #/workout: hash không đổi → tự phát hashchange để vẽ lại.
+  if (location.hash === '#/workout') dispatchEvent(new HashChangeEvent('hashchange'));
+  else location.hash = '#/workout';
 }
 
 export function workoutStartView({ scheduled = null, templates = [], last = null } = {}) {
@@ -64,9 +67,27 @@ export function workoutStartView({ scheduled = null, templates = [], last = null
   </section>`;
 }
 
+/** Chưa có buổi: trang chọn cách bắt đầu — theo lịch hôm nay · từ giáo án · lặp lại buổi gần nhất · buổi trống. */
+async function renderStart(el) {
+  const [templates, workouts] = await Promise.all([all('templates'), all('workouts')]);
+  const done = workouts.filter((x) => x.end).sort((a, b) => b.start - a.start);
+  const plan = weekPlan(settings.get().schedule, done);
+  const scheduled = plan.state === 'due' ? (templates.find((t) => t.id === plan.templateId) || { name: 'Tập tự do' }) : null;
+  const last = done.find((x) => x.entries?.length) || null;
+  el.innerHTML = workoutStartView({ scheduled, templates, last });
+  el.onclick = (ev) => {
+    const b = ev.target.closest('button');
+    if (!b) return;
+    const act = b.dataset.act;
+    if (act === 'again') startWorkout({ from: last });
+    else if (b.dataset.id) startWorkout({ template: templates.find((t) => t.id === b.dataset.id) });
+    else if (act === 'empty' || act === 'scheduled') startWorkout(); // lịch hôm nay không gắn giáo án = tập tự do
+  };
+}
+
 export async function render(el) {
   const w = await activeWorkout();
-  if (!w) { location.hash = '#/'; return; }
+  if (!w) return renderStart(el);
   const ex = exMap(await all('exercises'));
   const prev = {}, recs = {};
   const loadMeta = async (id) => {

@@ -110,5 +110,6 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 **Thứ tự:**
 1. ✅ **Claude** — `lore.js`: `NAV[].hint`, từ điển 35 khoá (`term/hint/gloss/GLOSSARY`), smoke.
 2. **Codex** — A (nav 2 dòng, hint ở nút/tiêu đề, trang Từ điển), B (gom/ẩn theo danh sách trên), C (đổi nhãn trong markup), D (giao diện trang chọn cách bắt đầu với số giả; giữ `[data-act=empty]` cho buổi trống, `button[data-id]` cho giáo án).
-3. **Claude** — D: dữ liệu thật + `#/workout` không bật về; E: bỏ chuyển thẳng Nhập môn lần đầu (sửa smoke bước 1); C: tên giáo án tự sinh, nhãn Chí hướng trong `js/dao.js`; smoke đủ luồng.
+3. ✅ **Claude** — D: dữ liệu thật + `#/workout` không bật về; E: bỏ chuyển thẳng Nhập môn lần đầu (sửa smoke bước 1); C: tên giáo án tự sinh, nhãn Chí hướng trong `js/dao.js`; smoke đủ luồng.
+   - Làm rồi (22/11): `#/workout` chưa có buổi → trang chọn (lịch hôm nay · giáo án · lặp lại buổi gần nhất có bài · buổi trống); lần đầu ở Động phủ, không ép Nhập môn; giáo án tự sinh "Giáo án · …" (đổi tên bộ cũ khi mở app); Chí hướng tăng cơ = "Luyện cơ".
 4. **Người dùng** — đưa bạn thử 3 việc không hướng dẫn: ghi một buổi tập · xem lại buổi hôm trước · tìm xem mình có tiến bộ không. Ghi chỗ bị kẹt vào NOTES "Ý tưởng sau khi dùng thực tế".
