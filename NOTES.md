@@ -37,14 +37,14 @@
 - Hôm nay và Tiến độ có khung chờ khi tải; nội dung khi đổi trang xuất hiện nhẹ nếu cho phép chuyển động.
 - Lịch sử, Giáo án, Tiến độ và Huy chương có minh hoạ và hướng dẫn khi chưa có dữ liệu.
 - Nút và liên kết dùng vùng chạm tối thiểu 44 px và có phản hồi khi nhấn.
+- Động phủ và thẻ Tu luyện ở Hôm nay hiển thị bản xem trước có nhãn Số liệu mẫu.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
-- [cho Codex] Con Đường Tu Luyện bước 2: trang Động phủ `#/hero` + thẻ trên Hôm nay, số liệu giả theo "Hợp đồng dữ liệu" cuối `RPG.md` (giữ `data-muscle` = key mạch). Làm sau đợt UX.
 - [cho Claude] Thêm phản hồi rung nhẹ khi đánh dấu xong set (js/views/workout.js), theo cài đặt rung và tránh rung hai lần khi có huy chương.
-- [cho Claude] Con Đường Tu Luyện bước 3 (sau khi Codex xong bước 2): nối `hero()` vào Động phủ, hỏi cân nặng/giới tính (`settings.sex`), smoke luồng.
+- [cho Claude] Con Đường Tu Luyện bước 3: truyền dữ liệu thật từ `hero()` vào `heroView(profile)` và `heroCard(profile.tuvi, false)`, nối form `[data-hero-profile]` lưu cân nặng/giới tính (`settings.sex`), rồi thêm smoke cho luồng.
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)

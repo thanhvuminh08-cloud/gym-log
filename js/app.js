@@ -20,6 +20,7 @@ const ROUTES = {
   progress: () => import('./views/progress.js'),
   settings: () => import('./views/settings.js'),
   report: () => import('./views/report.js'),
+  hero: () => import('./views/hero.js'),
 };
 
 const main = document.getElementById('main');

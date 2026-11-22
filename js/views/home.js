@@ -6,6 +6,7 @@ import { weekPlan } from '../schedule.js';
 import { topLifts, muscleKey, readiness, sessionCounts } from '../insights.js';
 import { sparkline, lineChart } from '../chart.js';
 import { lastBackup, backupDue } from '../safety.js';
+import { heroCard } from './hero.js';
 
 const icon = (name) => `<svg class="dashboard-icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
@@ -96,6 +97,7 @@ export async function render(el) {
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
+    ${heroCard()}
     ${plan.state === 'none' ? `<section class="card schedule-reminder" data-schedule-today data-state="none">
       <div class="row schedule-heading">
         <span class="tile-icon">${icon('calendar')}</span>

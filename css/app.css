@@ -481,9 +481,75 @@ button.chip { min-height: 44px; }
 
 .toast { position: fixed; top: calc(var(--header-height) + 8px); inset-inline: 12px; width: fit-content; max-width: min(32rem, calc(100% - 24px)); margin-inline: auto; background: #24303a; border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; z-index: 50; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
 
+/* Động phủ */
+.cultivation, .cultivation-link {
+  --jade: #97d9b3; --gold: #ead29b; --ink-line: #365451;
+  --mountains: linear-gradient(90deg, #0a181e 0%, rgb(10 24 30 / .76) 47%, transparent 100%), url("../assets/cultivation-mountains.svg");
+}
+a.card.cultivation-link {
+  display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 11px;
+  border-color: var(--ink-line); background: var(--mountains) center 58% / cover #12282e;
+}
+.cultivation-link-copy { display: grid; gap: 2px; }
+.cultivation-link strong { font: 700 1.18rem/1.2 Georgia, "Times New Roman", serif; color: var(--gold); }
+.cultivation-link small { color: var(--text); }
+.cultivation-link > svg { color: var(--jade); }
+.cultivation-back { display: inline-flex; align-items: center; min-width: 44px; min-height: 44px; color: var(--jade); }
+.cultivation h1, .cultivation h2, .cultivation h3 { font-family: Georgia, "Times New Roman", serif; }
+.cultivation h2 { color: var(--gold); }
+.cultivation-cover {
+  position: relative; isolation: isolate; overflow: hidden; display: grid; align-content: space-between; gap: 28px;
+  min-height: 216px; padding: clamp(16px, 5vw, 30px);
+  background: var(--mountains) center / cover #12282e; border: 1px solid var(--ink-line); border-radius: var(--r);
+}
+.cultivation-cover-heading, .cultivation-section-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 6px 12px; }
+.cultivation-cover h1 { margin: 0; font-size: clamp(2.15rem, 8vw, 3.45rem); line-height: 1.05; color: var(--gold); }
+.cultivation-sample { padding: 3px 8px; border: 1px solid var(--ink-line); border-radius: 999px; font-size: .75rem; color: var(--gold); background: #0b1a20; }
+.cultivation-rank { display: flex; align-items: center; gap: 14px; }
+.cultivation-rank h2 { margin: 0 0 2px; font-size: 1rem; }
+.cultivation-rank strong { display: block; font-size: clamp(1.05rem, 4vw, 1.35rem); }
+.cultivation-seal {
+  display: grid; place-items: center; width: 60px; aspect-ratio: 1; flex: none; padding: 5px;
+  border: 1px solid #f5b59b; border-radius: 9px; box-shadow: inset 0 0 0 3px #77352c, inset 0 0 0 4px #e69c83;
+  background: #8c4135; color: #ffe3d6; text-align: center; font: 700 1rem/1.05 Georgia, "Times New Roman", serif;
+}
+.cultivation-link .cultivation-seal { width: 48px; font-size: .82rem; }
+.cultivation-condition { margin: 4px 0 0; color: var(--jade); font-size: .85rem; }
+.cultivation-condition.is-shaky { color: var(--gold); }
+.cultivation-panel, .cultivation-meridian { background: linear-gradient(135deg, #162c31, #101b23 75%); border-color: var(--ink-line); }
+.cultivation-panel { margin: 12px 0 20px; padding: clamp(14px, 4vw, 20px); }
+.cultivation-panel :is(h2, p), .cultivation-section-heading h2 { margin: 0; }
+.cultivation-panel .cultivation-section-heading > span { color: var(--jade); }
+.cultivation-panel progress { margin: 12px 0 6px; }
+.cultivation-meter { display: block; width: 100%; height: 7px; appearance: none; border: 0; border-radius: 999px; overflow: hidden; background: #0a151b; accent-color: var(--jade); }
+.cultivation-meter::-webkit-progress-bar { background: #0a151b; }
+.cultivation-meter::-webkit-progress-value { background: var(--jade); border-radius: 999px; }
+.cultivation-meter::-moz-progress-bar { background: var(--jade); border-radius: 999px; }
+.cultivation-radar { display: block; width: min(100%, 380px); height: auto; margin: 0 auto; }
+.radar-grid { fill: none; stroke: #42605f; stroke-width: 1; }
+.radar-grid polygon:last-of-type { stroke: #6c928a; }
+.radar-value { fill: rgb(151 217 179 / .22); stroke: var(--jade); stroke-width: 1.5; }
+.cultivation-radar circle { fill: var(--muscle); stroke: #0e2027; stroke-width: 1.5; }
+.cultivation-radar text { fill: var(--text); font: 600 13px system-ui, sans-serif; }
+.cultivation-meridians { display: grid; gap: 10px; margin: 10px 0 0; padding: 0; list-style: none; }
+.cultivation-meridian { min-width: 0; margin: 0; padding: 13px; overflow-wrap: anywhere; }
+.cultivation-meridian-head, .cultivation-target-label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 3px 10px; }
+.cultivation-meridian-head h3 { margin: 0; color: var(--muscle); }
+.cultivation-meridian-head strong { color: var(--gold); font-size: .875rem; }
+.cultivation-lift { margin: 4px 0 0; color: var(--muted); font-size: .85rem; }
+.cultivation-target { display: grid; gap: 5px; margin-top: 12px; font-size: .8rem; }
+.cultivation-target-label b { color: var(--jade); }
+.cultivation-profile { display: grid; gap: 8px; }
+.cultivation-profile label { display: grid; gap: 3px; }
+.cultivation-note { margin: 12px 0 0; }
+@media (min-width: 600px) {
+  .cultivation-meridians { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 /* Phản hồi khi tập và chuyển màn hình */
 @media (prefers-reduced-motion: no-preference) {
   main > :nth-child(-n+8):not(.loading-view, :has(.resume-workout)) { animation: screen-in .22s ease-out; }
+  .dashboard:has(.resume-workout) > :is(.dashboard-heading, .cultivation-link) { animation: screen-in .22s ease-out; }
   .loading-view { animation: loading-in .14s .12s ease-out backwards; }
   .year-grid rect[data-muscle] { animation: chart-in .26s ease-out backwards; animation-delay: calc(var(--i) * .55ms); }
   .chart.bars .bar { animation: chart-in .3s ease-out backwards; animation-delay: calc(var(--i) * 24ms); }
@@ -492,6 +558,14 @@ button.chip { min-height: 44px; }
   .rest-bar.show { animation: rest-in .2s ease-out both; }
   .rest-ring-progress { transition: stroke-dasharray .2s linear; }
   .summary-medal { animation: medal-reveal .45s .22s ease-out backwards; }
+  .cultivation-cover::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background: radial-gradient(circle at 61% 75%, var(--jade) 0 1px, transparent 3px),
+      radial-gradient(circle at 73% 59%, var(--gold) 0 1px, transparent 3px),
+      radial-gradient(circle at 87% 67%, var(--jade) 0 1px, transparent 3px),
+      radial-gradient(circle at 91% 40%, var(--gold) 0 1px, transparent 3px);
+    animation: cultivation-particles .75s ease-out both;
+  }
   .set .check { transition: background-color .15s ease-out, filter .15s ease-out; }
   .set.celebrate[data-celebrate] { animation: set-celebration .85s ease-out both; }
   .set.celebrate[data-celebrate]::after {
@@ -514,6 +588,7 @@ button.chip { min-height: 44px; }
 @keyframes sheet-in { from { translate: 0 24px; opacity: .8; } }
 @keyframes rest-in { from { translate: 0 8px; opacity: .65; } }
 @keyframes medal-reveal { from { opacity: 0; translate: 0 6px; } }
+@keyframes cultivation-particles { from { opacity: 0; translate: 0 14px; } to { opacity: .65; } }
 @keyframes set-celebration {
   35% { scale: var(--burst-scale); }
   to { box-shadow: 0 0 0 1px var(--burst); }
