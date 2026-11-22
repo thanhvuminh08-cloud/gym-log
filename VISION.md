@@ -180,3 +180,4 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 **Thứ tự đề xuất:** O5 + bỏ gọn ở O4 (nhanh) → O1 → O2 → O3.
 - ✅ 23/11 người dùng chốt: Tu vi = trung bình trọng số các mạch đã khai (p > 0), `tuvi.opened/of`; Thất mạch ghi "Theo x/7 mạch đã khai". Mạch vẫn cần đủ 2 bài (giữ). Còn lại của O1: hỏi cân nặng một lần (thiếu cân nặng thì mạch tạ chưa tính được) — gộp với O2/O3.
 - ✅ 23/11 O5 + phần bỏ gọn của O4 xong (Claude). Còn: gộp Khí huyết + Căn cơ (Codex, Việc chờ); O1 phần hỏi cân nặng → O2 → O3.
+- ✅ 23/11 O1 (hỏi cân nặng/giới tính một lần ngay ở tổng kết) + O2 phần dữ liệu xong (Claude, `js/recap.js`). Còn: giao diện thẻ Thu hoạch (Codex, Việc chờ) → O3 (bỏ form Động phủ/Thất mạch, giới tính về Cài đặt).

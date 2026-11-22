@@ -1,5 +1,5 @@
 import { all, get, put, del } from '../db.js';
-import { h, uid, fmtDate, fmtTime, fmtDur, fmtNum, e1rm, exMap, toast } from '../util.js';
+import { h, uid, fmtDate, fmtTime, fmtDur, fmtNum, e1rm, exMap, toast, settings } from '../util.js';
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
 import { analyzeWorkout } from '../overload.js';
@@ -7,6 +7,8 @@ import { muscleKey } from '../insights.js';
 import { medals } from '../medals.js';
 import { gloss, hint, term } from '../lore.js';
 import { hintLabel, journalHeader, phamSeal, termLabel } from './sections.js';
+import { recap } from '../recap.js';
+import { profileForm, bindProfileForm } from './hero.js';
 
 export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
@@ -39,6 +41,8 @@ async function detail(el, id, ex) {
   const tierRow = (o) => o.res ? `<div class="tier small summary-medal" data-tier="${o.res.tier}">${phamSeal()}<strong>${termLabel(o.res.tier)}</strong><span>${h(o.res.msg)}</span></div>`
     : `<div class="tier small muted" data-tier="${o.first ? 'first' : 'none'}">${o.first ? 'Lần đầu tập bài này' : 'Chưa vượt lần trước'}</div>`;
   const sets = setCount(w), kg = volume(w);
+  const [allW, body, templates] = await Promise.all([all('workouts'), all('body'), all('templates')]);
+  const rc = recap(w, { workouts: allW, exercises: Object.values(ex), body, templates, settings: settings.get() });
   el.innerHTML = `
   ${journalHeader('journal')}
   <a href="#/ky" class="small">← Nhật ký</a>
@@ -55,6 +59,7 @@ async function detail(el, id, ex) {
       <small>${nCmp ? 'Bài vượt lần trước' : 'Chưa có lần trước'}</small>
     </div>
   </div>
+  ${recapView(rc)}
   ${ledger.streak.cur || stones.length ? `<section class="card ledger-summary">
     ${ledger.streak.cur ? `<b>${hintLabel(term('streak', ledger.streak.cur), hint('streak'))}</b><small class="gloss">${gloss('streak')}</small>` : ''}
     ${stones.length ? `<h3>${hintLabel(`${term('milestone')} mới`, hint('milestone'))}</h3><ul>${stones.map((item) => `<li>${h(ex[item.exerciseId]?.name || 'Bài đã xoá')} · ${fmtNum(item.reached.kg)} kg</li>`).join('')}</ul>` : ''}
@@ -73,8 +78,11 @@ async function detail(el, id, ex) {
     <button class="ghost danger" data-act="del">Xoá</button>
   </div>`;
 
+  // O1: hỏi cân nặng/giới tính một lần ngay tại tổng kết; lưu xong vẽ lại trang.
+  bindProfileForm(el, () => detail(el, id, ex));
   el.onclick = async (ev) => {
-    const act = ev.target.closest('button[data-act]')?.dataset.act;
+    const btn = ev.target.closest('button[data-act]'), act = btn?.dataset.act;
+    if (act === 'next') { const t = templates.find((x) => x.id === btn.dataset.id); if (t) startWorkout({ template: t }); return; }
     if (act === 'again') startWorkout({ from: w });
     if (act === 'tpl') {
       const name = prompt('Tên giáo án:', w.name);
@@ -84,4 +92,25 @@ async function detail(el, id, ex) {
     }
     if (act === 'del' && confirm('Xoá vĩnh viễn buổi tập này?')) { await del('workouts', w.id); location.hash = '#/ky'; }
   };
+}
+
+/** Thu hoạch của buổi (O2): Phẩm, Linh khí/Công lực, Tu vi, mạch, Đột phá, nhiệm vụ, Buổi sau. Markup tạm — giao diện: Codex. */
+function recapView(rc) {
+  const L = rc.linhKhi, n = rc.next;
+  const mer = rc.meridians.map((m) => `<li data-recap-meridian="${h(m.key)}"${m.up || m.opened ? ' class="is-up"' : ''}><b>${h(m.name)}</b> +${fmtNum(m.xp)} ${term('linhKhi')}${
+    m.opened ? ` · Khai mạch · ${h(m.to)}` : m.up ? ` · ${h(m.from)} → ${h(m.to)}` : ''}</li>`).join('');
+  return `<section class="card recap" data-recap>
+    <h2>Thu hoạch</h2>
+    ${rc.pham ? `<div class="tier small recap-pham" data-tier="${rc.pham}">${phamSeal()}<strong>${termLabel(rc.pham)}</strong></div>` : ''}
+    <div class="recap-linhkhi" data-recap-linhkhi><b>+${fmtNum(L.gain)}</b> ${term('linhKhi')} · ${term('congLuc')} cấp ${L.level}${L.levelUp ? ' · <b class="recap-up">Lên cấp!</b>' : ''}
+      <progress value="${L.pct}" max="100" aria-label="Tới cấp ${L.level + 1}"></progress></div>
+    ${rc.needsWeight || rc.needsSex ? profileForm(rc)
+      : `<div class="recap-tuvi" data-recap-tuvi>${term('tuvi')}: ${rc.tuvi.up ? `${h(rc.tuvi.from)} → ` : ''}<b>${h(rc.tuvi.to)}</b> <small class="muted">${rc.tuvi.opened}/${rc.tuvi.of} mạch</small></div>`}
+    ${mer ? `<ul class="recap-meridians">${mer}</ul>` : ''}
+    ${rc.breakthroughs.length ? `<ul class="recap-breaks" data-recap-breaks>${rc.breakthroughs.map((b) => `<li><b>${h(b.name)}</b>: ${h(b.from)} → ${h(b.to)}</li>`).join('')}</ul>` : ''}
+    ${rc.quests.length ? `<ul class="recap-quests" data-recap-quests>${rc.quests.map((q) => `<li>✓ ${h(q.title)}</li>`).join('')}</ul>` : ''}
+    ${n ? `<div class="recap-next" data-recap-next="${n.kind}"><small class="muted">Buổi sau${n.when ? ` · ${h(n.when)}` : ''}</small>
+      <b>${h(n.title)}</b>${n.detail ? ` <small class="muted">${h(n.detail)}</small>` : ''}
+      ${n.templateId ? `<button class="ghost" data-act="next" data-id="${h(n.templateId)}">Bắt đầu</button>` : ''}</div>` : ''}
+  </section>`;
 }
