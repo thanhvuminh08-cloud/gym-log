@@ -152,6 +152,16 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .empty-state .btn, .empty-state button { margin-top: 6px; }
 .card .row.small:has(input.tiny) { flex-wrap: wrap; }
 
+.loading-view { display: grid; gap: 12px; }
+.loading-label { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.loading-line, .loading-block { background: var(--card); border: 1px solid var(--line); }
+.loading-line { width: min(148px, 50%); height: 28px; border-radius: 8px; margin-block: 3px 7px; }
+.loading-block { min-height: 90px; border-radius: var(--r); }
+.loading-hero { min-height: 174px; }
+.loading-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.loading-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.loading-tabs .loading-block { min-height: 44px; border-radius: 10px; }
+
 /* Hôm nay */
 .dashboard-heading h1 { margin-bottom: 7px; }
 .dashboard-heading p { display: flex; align-items: center; gap: 8px; color: var(--muted); margin: 0 0 18px; }
@@ -467,7 +477,8 @@ nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
 
 /* Phản hồi khi tập và chuyển màn hình */
 @media (prefers-reduced-motion: no-preference) {
-  main > h1, .dashboard-heading, .workout-hero:not(:has(.resume-workout)) { animation: screen-in .24s ease-out both; }
+  main > :nth-child(-n+8):not(.loading-view, :has(.resume-workout)) { animation: screen-in .22s ease-out; }
+  .loading-view { animation: loading-in .14s .12s ease-out backwards; }
   .year-grid rect[data-muscle] { animation: chart-in .26s ease-out backwards; animation-delay: calc(var(--i) * .55ms); }
   .chart.bars .bar { animation: chart-in .3s ease-out backwards; animation-delay: calc(var(--i) * 24ms); }
   .modal { animation: shade-in .18s ease-out both; }
@@ -492,6 +503,7 @@ nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
 @keyframes screen-in {
   from { opacity: .65; translate: 0 5px; }
 }
+@keyframes loading-in { from { opacity: 0; } }
 @keyframes shade-in { from { background-color: transparent; } }
 @keyframes sheet-in { from { translate: 0 24px; opacity: .8; } }
 @keyframes rest-in { from { translate: 0 8px; opacity: .65; } }

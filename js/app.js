@@ -38,6 +38,8 @@ async function route() {
     else a.removeAttribute('aria-current');
   });
   try {
+    const loading = document.getElementById(`loading-${name || 'home'}`);
+    if (loading) main.replaceChildren(loading.content.cloneNode(true));
     cleanup = await (await load()).render(main, params.map(decodeURIComponent));
     countUp(main);
   } catch (e) {
