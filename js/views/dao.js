@@ -118,7 +118,8 @@ function stepContent({ step, dao, sex, weight, known, groups, validation, tests,
       return `<label class="dao-field">Đạo hiệu <small>Tuỳ chọn</small><input name="name" value="${h(dao.name ?? '')}" placeholder="Ví dụ: Thanh Vân"></label>`;
     case 2:
       return `<div class="dao-fields">
-        ${known ? `<p class="dao-field muted small" data-dao-known>${sex === 'f' ? 'Nữ' : 'Nam'} · ${h(weight)} kg <small>— đổi ở Cài đặt / ${termLabel('thanTrong')}</small>
+        ${known ? `<p class="dao-field" data-dao-known><b>${sex === 'f' ? 'Nữ' : 'Nam'} · ${h(weight)} kg</b>
+          <small>Đã lưu · đổi trong Cài đặt hoặc ${termLabel('thanTrong')}</small>
           <input type="hidden" name="sex" value="${h(sex)}"><input type="hidden" name="weight" value="${h(weight)}"></p>` : `
         <label class="dao-field">Giới tính<select name="sex" required>
           <option value="">Chọn giới tính</option><option value="m"${sex === 'm' ? ' selected' : ''}>Nam</option><option value="f"${sex === 'f' ? ' selected' : ''}>Nữ</option>

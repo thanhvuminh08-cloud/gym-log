@@ -125,6 +125,42 @@ label.row { padding: 6px 0; }
 .workout-summary small { margin-top: 5px; }
 .summary-compared { color: var(--muted); font-size: .68em; }
 .summary-medal.tier { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 10px; }
+.recap {
+  --jade: #b5e7c1; --ink-line: #486055;
+  display: grid; gap: 12px; padding: clamp(12px, 4vw, 20px); border-color: #806947;
+  background: linear-gradient(142deg, #2b382b, #152725 42%, #111e25);
+  overflow-wrap: anywhere;
+}
+.recap-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; }
+.recap-header h2 { margin: 0; color: #f7dca6; font: 700 clamp(1.5rem, 5.7vw, 2rem)/1.15 var(--cultivation-serif); }
+.recap .recap-pham { display: flex; align-items: center; gap: 6px; margin: 0; border: 1px solid var(--tier-line); border-radius: 9px; }
+.recap-pham .pham-seal { font-size: 1.25rem; }
+.recap-linhkhi, .recap-tuvi, .recap-next {
+  padding: 10px 12px; border: 1px solid var(--ink-line); border-radius: 12px; background: #0c191d8f;
+}
+.recap-gain { color: var(--jade); line-height: 1.15; }
+.recap-gain > strong { font: 700 2rem/1.1 var(--cultivation-serif); font-variant-numeric: tabular-nums; }
+.recap-level { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; margin-block: 6px; }
+.recap-level .recap-up { padding: 1px 7px; border-radius: 6px; color: #f6ddaa; background: #3c3224; font-size: .75rem; }
+.recap-linhkhi .cultivation-meter { margin-block: 8px 4px; }
+.recap h3 { margin: 0 0 4px; color: #ebd9b5; font-size: .95rem; }
+.recap-tuvi { display: grid; gap: 2px; }
+.recap .cultivation-profile { margin: 0; }
+.recap [data-hero-profile] button { justify-self: start; }
+.recap :is(.recap-meridians, .recap-breaks, .recap-quests) { display: grid; gap: 5px; list-style: none; margin: 0; padding: 0; }
+.recap-meridians li, .recap-breaks li, .recap-quests li { min-width: 0; padding: 6px 9px; border-radius: 8px; background: #0d1c21; }
+.recap-meridians li { border-inline-start: 2px solid var(--muscle, var(--ink-line)); }
+.recap-meridians li.is-up { background: #22342b; }
+.recap-meridian-head { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: 0 8px; }
+.recap-meridian-head small, .recap-up { color: var(--jade); }
+.recap-breaks li { display: grid; border-inline-start: 2px solid #d5ad71; }
+.recap-breaks small { color: #e7c895; }
+.recap-quests li { display: flex; align-items: baseline; gap: 7px; }
+.recap-quests li > span { color: var(--jade); }
+.recap-next { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 7px 12px; background: #23382e; }
+.recap-next > div { flex: 1 1 145px; min-width: 0; }
+.recap-next h3 small { font-weight: 500; }
+.recap-next > div > small { display: block; }
 @media (min-width: 600px) {
   .stats.workout-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
@@ -267,8 +303,8 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
   font: 700 clamp(1.5rem, 6.4vw, 2.25rem)/1.14 var(--cultivation-serif);
   text-wrap: balance; text-shadow: 0 2px 10px #08121c;
 }
-.sanctum-training[data-first-run] .training-actions { margin-top: 12px; }
-.sanctum-training[data-first-run] { border-color: #637655; }
+.sanctum-training[data-first-run] .training-actions { margin-top: 10px; }
+.sanctum-training[data-first-run] { border-color: #637655; padding-block: 14px; }
 a.card.dao-invite {
   gap: 10px; padding: 10px 12px; margin: 10px 0 0;
   border-color: #3e574f; background: linear-gradient(108deg, #1c302d, #141f25 82%);
@@ -626,8 +662,6 @@ button.chip { min-height: 44px; }
 .cultivation-seal[data-realm="3"] { --seal: #a03e27; --seal-edge: #ffd692; --seal-mark: repeating-radial-gradient(circle, transparent 0 8px, #ffe59b44 9px 10px); }
 .cultivation-seal[data-realm="4"] { --seal: #84244a; --seal-edge: #ffbeaf; --seal-mark: repeating-linear-gradient(-38deg, transparent 0 6px, #fff2 7px 8px); font-size: calc(var(--seal-font) * .76); }
 .cultivation-seal[data-realm="5"] { --seal: #9c262f; --seal-edge: #ffde9b; --seal-mark: repeating-conic-gradient(#ffe7ac44 0 10deg, transparent 10deg 25deg); }
-.cultivation-condition { margin: 4px 0 0; color: var(--jade); font-size: .85rem; }
-.cultivation-condition.is-shaky { color: var(--gold); }
 .cultivation-panel, .cultivation-meridian { background: linear-gradient(135deg, #162c31, #101b23 75%); border-color: var(--ink-line); }
 .cultivation-panel { position: relative; margin: 12px 0 20px; padding: clamp(14px, 4vw, 20px); }
 :is(.cultivation-cover, .cultivation-panel, .cultivation-challenge)::before {
@@ -681,6 +715,14 @@ button.chip { min-height: 44px; }
 .cultivation-target-label b { color: var(--jade); }
 .cultivation-profile { display: grid; gap: 8px; }
 .cultivation-profile label { display: grid; gap: 3px; }
+a.card[data-profile-hint] {
+  display: flex; gap: 10px; padding: 9px 12px; border-color: #49665d;
+  background: #142a29; overflow-wrap: anywhere;
+}
+a.card[data-profile-hint]:is(:hover, :active) { background: #213b34; border-color: #75a28d; }
+[data-profile-hint] .tile-icon { background: #284739; color: #c1eccd; }
+[data-profile-hint] .grow > small { display: block; font-size: .8rem; }
+[data-profile-hint] > svg { width: 16px; height: 16px; color: #a7d3b5; }
 .cultivation-note { margin: 12px 0 0; }
 .cultivation-settings select { width: auto; max-width: 56%; }
 .cultivation-settings p { margin: 6px 0 0; }
@@ -752,9 +794,21 @@ button.chip { min-height: 44px; }
 .sanctum-stats b { font-size: 1.2rem; line-height: 1.2; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .sanctum-stats [data-done] b, .sanctum-stats a:hover b { color: var(--accent); }
 .sanctum-cultivation .cultivation-profile { margin: 0; }
-.readiness-detail summary { min-height: 44px; padding-block: 10px; color: var(--gold); cursor: pointer; }
-.readiness-detail summary > b { float: inline-end; }
-.readiness-detail .spark { margin-top: 8px; }
+.readiness-detail summary { display: grid; gap: 8px; min-height: 44px; cursor: pointer; }
+.readiness-detail summary::-webkit-details-marker { display: none; }
+.status-title { display: flex; align-items: center; justify-content: space-between; color: var(--gold); font: 700 1.12rem var(--cultivation-serif); }
+.status-title::after { content: ''; width: 8px; height: 8px; margin-inline-end: 3px; border: solid currentColor; border-width: 0 2px 2px 0; rotate: 45deg; }
+.readiness-detail[open] .status-title::after { rotate: 225deg; }
+.status-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+.status-metrics > span { display: grid; align-content: start; gap: 2px; padding: 7px 9px; border: 1px solid var(--ink-line); border-radius: 9px; background: #0c1d21; overflow-wrap: anywhere; }
+.status-metrics .term-hint { display: block; color: var(--muted); }
+.status-metrics .term-hint::before { content: none; }
+.status-metrics strong { color: var(--jade); font-size: 1.25rem; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.status-metrics strong small { color: var(--muted); font-size: .7em; }
+.status-metrics .status-warn { color: var(--gold); }
+.status-detail { display: grid; gap: 7px; margin-top: 10px; }
+.status-meridians { display: grid; gap: 4px; margin: 0; padding: 0; list-style: none; }
+.status-meridians li { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 8px; padding: 3px 8px; border-inline-start: 2px solid var(--muscle); font-size: .85rem; }
 .cultivation-demo { display: none; margin: 12px 0 18px; }
 .cultivation-demo h2 { margin: 0 0 7px; }
 @supports selector(:popover-open) {
@@ -788,6 +842,7 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
 .dao-step { overflow-wrap: anywhere; }
 .dao-fields, .dao-tests { display: grid; gap: 12px; }
 .dao-field { display: grid; gap: 4px; min-width: 0; color: var(--jade); }
+.dao-field[data-dao-known] { margin: 0; padding: 9px 12px; border: 1px solid var(--ink-line); border-inline-start: 3px solid var(--jade); border-radius: 9px; background: #19302d; }
 .dao-choice-group { min-width: 0; margin: 0; padding: 0; border: 0; }
 .dao-choice-group legend { margin: 0 0 6px; padding: 0; color: var(--gold); font-weight: 700; }
 .dao-choices { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }

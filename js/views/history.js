@@ -50,6 +50,7 @@ async function detail(el, id, ex) {
     <span class="workout-record-seal" aria-hidden="true"><svg class="dashboard-icon"><use href="#i-dumbbell"/></svg></span>
     <div><h2>${h(w.name)}</h2><p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p></div>
   </header>
+  ${recapView(rc)}
   <div class="stats workout-summary">
     <div><b data-count="${sets}">${sets}</b><small>Set hoàn thành</small></div>
     <div><b data-count="${kg}">${fmtNum(kg)}</b><small>Khối lượng (kg)</small></div>
@@ -59,7 +60,6 @@ async function detail(el, id, ex) {
       <small>${nCmp ? 'Bài vượt lần trước' : 'Chưa có lần trước'}</small>
     </div>
   </div>
-  ${recapView(rc)}
   ${ledger.streak.cur || stones.length ? `<section class="card ledger-summary">
     ${ledger.streak.cur ? `<b>${hintLabel(term('streak', ledger.streak.cur), hint('streak'))}</b><small class="gloss">${gloss('streak')}</small>` : ''}
     ${stones.length ? `<h3>${hintLabel(`${term('milestone')} mới`, hint('milestone'))}</h3><ul>${stones.map((item) => `<li>${h(ex[item.exerciseId]?.name || 'Bài đã xoá')} · ${fmtNum(item.reached.kg)} kg</li>`).join('')}</ul>` : ''}
@@ -94,23 +94,38 @@ async function detail(el, id, ex) {
   };
 }
 
-/** Thu hoạch của buổi (O2): Phẩm, Linh khí/Công lực, Tu vi, mạch, Đột phá, nhiệm vụ, Buổi sau. Markup tạm — giao diện: Codex. */
 function recapView(rc) {
-  const L = rc.linhKhi, n = rc.next;
-  const mer = rc.meridians.map((m) => `<li data-recap-meridian="${h(m.key)}"${m.up || m.opened ? ' class="is-up"' : ''}><b>${h(m.name)}</b> +${fmtNum(m.xp)} ${term('linhKhi')}${
-    m.opened ? ` · Khai mạch · ${h(m.to)}` : m.up ? ` · ${h(m.from)} → ${h(m.to)}` : ''}</li>`).join('');
-  return `<section class="card recap" data-recap>
-    <h2>Thu hoạch</h2>
-    ${rc.pham ? `<div class="tier small recap-pham" data-tier="${rc.pham}">${phamSeal()}<strong>${termLabel(rc.pham)}</strong></div>` : ''}
-    <div class="recap-linhkhi" data-recap-linhkhi><b>+${fmtNum(L.gain)}</b> ${term('linhKhi')} · ${term('congLuc')} cấp ${L.level}${L.levelUp ? ' · <b class="recap-up">Lên cấp!</b>' : ''}
-      <progress value="${L.pct}" max="100" aria-label="Tới cấp ${L.level + 1}"></progress></div>
+  const { linhKhi, tuvi, next, pham, breakthroughs, quests, meridians } = rc;
+  return `<section class="card recap" data-recap aria-labelledby="recap-title">
+    <header class="recap-header">
+      <h2 id="recap-title">Thu hoạch</h2>
+      ${pham ? `<div class="tier small recap-pham" data-tier="${h(pham)}">${phamSeal()}<strong>${termLabel(pham)}</strong></div>` : ''}
+    </header>
+    <div class="recap-linhkhi" data-recap-linhkhi>
+      <div class="recap-gain"><strong>+${fmtNum(linhKhi.gain)}</strong> ${termLabel('linhKhi')}</div>
+      <div class="recap-level"><b>${term('congLuc')} cấp ${linhKhi.level}</b>${linhKhi.levelUp ? '<span class="recap-up">Lên cấp</span>' : ''}</div>
+      <progress class="cultivation-meter" value="${linhKhi.pct}" max="100" aria-label="Tới cấp ${linhKhi.level + 1}"></progress>
+      <small class="muted">${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} tới cấp ${linhKhi.level + 1}</small>
+    </div>
     ${rc.needsWeight || rc.needsSex ? profileForm(rc)
-      : `<div class="recap-tuvi" data-recap-tuvi>${term('tuvi')}: ${rc.tuvi.up ? `${h(rc.tuvi.from)} → ` : ''}<b>${h(rc.tuvi.to)}</b> <small class="muted">${rc.tuvi.opened}/${rc.tuvi.of} mạch</small></div>`}
-    ${mer ? `<ul class="recap-meridians">${mer}</ul>` : ''}
-    ${rc.breakthroughs.length ? `<ul class="recap-breaks" data-recap-breaks>${rc.breakthroughs.map((b) => `<li><b>${h(b.name)}</b>: ${h(b.from)} → ${h(b.to)}</li>`).join('')}</ul>` : ''}
-    ${rc.quests.length ? `<ul class="recap-quests" data-recap-quests>${rc.quests.map((q) => `<li>✓ ${h(q.title)}</li>`).join('')}</ul>` : ''}
-    ${n ? `<div class="recap-next" data-recap-next="${n.kind}"><small class="muted">Buổi sau${n.when ? ` · ${h(n.when)}` : ''}</small>
-      <b>${h(n.title)}</b>${n.detail ? ` <small class="muted">${h(n.detail)}</small>` : ''}
-      ${n.templateId ? `<button class="ghost" data-act="next" data-id="${h(n.templateId)}">Bắt đầu</button>` : ''}</div>` : ''}
+      : `<div class="recap-tuvi" data-recap-tuvi><h3>${termLabel('tuvi')}</h3>
+        <span>${tuvi.up ? `<span class="muted">${h(tuvi.from)} → </span>` : ''}<b>${h(tuvi.to)}</b></span>
+        <small class="muted">${tuvi.opened}/${tuvi.of} mạch đã khai</small></div>`}
+    ${meridians.length ? `<section class="recap-group"><h3>Mạch đã tập</h3><ul class="recap-meridians">
+      ${meridians.map((m) => `<li data-recap-meridian="${h(m.key)}" data-muscle="${h(m.key)}"${m.up || m.opened ? ' class="is-up"' : ''}>
+        <div class="recap-meridian-head"><b>${h(m.name)}</b><small>+${fmtNum(m.xp)} ${term('linhKhi')}</small></div>
+        ${m.opened ? `<small class="recap-up">${term('khaiMach')} · ${h(m.to)}</small>` : m.up ? `<small class="recap-up">${h(m.from)} → ${h(m.to)}</small>` : ''}
+      </li>`).join('')}
+    </ul></section>` : ''}
+    ${breakthroughs.length ? `<section class="recap-group"><h3>Mốc đạt được</h3><ul class="recap-breaks" data-recap-breaks>
+      ${breakthroughs.map((b) => `<li><b>${h(b.name)}</b><small>${h(b.from)} → ${h(b.to)}</small></li>`).join('')}
+    </ul></section>` : ''}
+    ${quests.length ? `<section class="recap-group"><h3>Nhiệm vụ hoàn thành</h3><ul class="recap-quests" data-recap-quests>
+      ${quests.map((q) => `<li><span aria-hidden="true">✓</span><b>${h(q.title)}</b></li>`).join('')}
+    </ul></section>` : ''}
+    ${next ? `<div class="recap-next" data-recap-next="${h(next.kind)}">
+      <div><h3>Buổi sau${next.when ? ` <small>· ${h(next.when)}</small>` : ''}</h3>
+        <b>${h(next.title)}</b>${next.detail ? `<small class="muted">${h(next.detail)}</small>` : ''}</div>
+      ${next.templateId ? `<button type="button" class="primary" data-act="next" data-id="${h(next.templateId)}">Bắt đầu</button>` : ''}</div>` : ''}
   </section>`;
 }

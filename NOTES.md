@@ -62,14 +62,12 @@
 - Công pháp gộp lịch thành một dòng mỗi ngày và đặt hai ô mục tiêu cạnh nhau. Động phủ giữ tên buổi dở khi tắt Chú giải. Công đức bạ dùng ba dáng ấn và bia khắc kg, ngày trên nền tranh núi có sẵn.
 - Khi mở Động phủ lần đầu, tiêu đề “Ghi buổi tập đầu tiên” dẫn mắt tới nút Bế quan. Thẻ Nhập môn tuỳ chọn nằm ngay dưới, với biểu tượng và viền xanh ngọc.
 - Hồn tu tiên: hiên luyện công do ImageGen tạo (tranh mực, sương núi, đèn đồng), nén WebP bằng FFmpeg. Vòng ấn vẽ bằng SVG. Nhạc và âm gốc tổng hợp bằng Node.js, mã hoá bằng FFmpeg, không dùng bản thu bên ngoài.
+- O2–O4: Thu hoạch nằm ngay dưới tên buổi tập, nổi bật Linh khí/Phẩm và gợi ý Buổi sau; dòng hồ sơ và số đo đã lưu có kiểu riêng; Trạng thái trong Thất mạch gom Khí huyết và Căn cơ (kể cả phong độ từng mạch).
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
-- [cho Codex] O4: gộp Khí huyết + Căn cơ thành một ô "Trạng thái" chỉ ở Thất mạch (js/views/hero.js); thẻ lần đầu ở Động phủ đã bỏ dòng chú `start` — xem lại bố cục.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Codex] O3: style dòng `a.card.row.cultivation-profile[data-profile-hint]` (Động phủ/Thất mạch, js/views/hero.js `profileHint`) và `p[data-dao-known]` (Nhập môn bước 2).
-- [cho Codex] O2: làm giao diện thẻ "Thu hoạch" `[data-recap]` ở trang tổng kết (js/views/history.js `recapView`): giữ data-recap-*, data-act=next, form data-hero-profile; class recap-pham/-linhkhi/-tuvi/-meridians/-breaks/-quests/-next, li.is-up.
 
 
 ## Ý tưởng sau khi dùng thực tế

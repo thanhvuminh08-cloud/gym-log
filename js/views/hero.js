@@ -155,7 +155,6 @@ function meridianCard(m, claims) {
     </li>`).join('')}</ul>` : `<p class="cultivation-lift">${m.key === 'core' ? `${fmtNum(m.xp)} Linh khí` : 'Chưa có kỷ lục'}</p>`}
     ${m.need > 0 ? `<p class="cultivation-path-warning">Còn thiếu ${m.need} bài để khai mạch.</p>` : ''}
     ${m.unverified ? claimRows(claims, m.key) : ''}
-    ${m.canCo != null ? `<p class="cultivation-condition${m.shaky ? ' is-shaky' : ''}">Căn cơ <b>${m.canCo}%</b>${m.shaky ? ' · Lung lay' : ''}</p>` : ''}
     ${next ? `<div class="cultivation-target">
       <div class="cultivation-target-label"><span>${target}</span><b>${h(next.realm)}</b></div>
       <progress class="cultivation-meter" value="${progress}" max="100" aria-label="Tiến độ đến ${h(next.realm)}"></progress>
@@ -170,14 +169,16 @@ export function profileHint({ needsWeight, needsSex }) {
     ? ['#/tang-thu/body', `Ghi ${term('thanTrong')}`, 'Cần cân nặng để tính cảnh giới các mạch']
     : ['#/tang-thu/cai-dat', 'Chọn giới tính ở Cài đặt', 'Cần để so chuẩn cảnh giới'];
   return `<a class="card row cultivation-profile" href="${href}" data-profile-hint="${needsWeight ? 'weight' : 'sex'}">
-    <span class="grow"><b>${h(title)}</b> <small class="muted">${sub}</small></span><span aria-hidden="true">›</span></a>`;
+    <span class="tile-icon"><svg aria-hidden="true"><use href="#${needsWeight ? 'i-trend' : 'i-layers'}"/></svg></span>
+    <span class="grow"><b>${h(title)}</b><small class="muted">${h(sub)}</small></span>
+    <svg class="dashboard-icon" aria-hidden="true"><use href="#i-chevron"/></svg></a>`;
 }
 
 /** Hỏi một lần ở trang tổng kết (O1) — nơi duy nhất còn form. */
 export function profileForm({ needsWeight, needsSex }) {
   if (!needsWeight && !needsSex) return '';
   return `<form class="card cultivation-panel cultivation-profile" data-hero-profile>
-    <h2>Thông tin tu luyện</h2>
+    <h3>Thông tin tu luyện</h3>
     <p class="muted small">Dùng cân nặng và giới tính để ước lượng cảnh giới.</p>
     ${needsWeight ? '<label>Cân nặng (kg)<input name="weight" type="number" inputmode="decimal" min="1" step="0.1" required></label>' : ''}
     ${needsSex ? '<label>Giới tính<select name="sex" required><option value="">Chọn giới tính</option><option value="m">Nam</option><option value="f">Nữ</option></select></label>' : ''}
@@ -261,8 +262,28 @@ function challengeCard(challenge, sample) {
   </section>`;
 }
 
+function statusCard({ readiness: ready, canCo, shaky, meridians }) {
+  const tracked = meridians.filter((m) => m.canCo != null);
+  return `<details class="card cultivation-panel readiness-detail" data-readiness>
+    <summary><span class="status-title">Trạng thái</span>
+      <span class="status-metrics">
+        <span>${termLabel('khiHuyet')}<strong><span data-readiness-score>${ready?.score ?? '–'}</span>${ready?.score != null ? '<small> /100</small>' : ''}</strong></span>
+        <span>${termLabel('canCo')}<strong>${canCo != null ? `${canCo}%` : '–'}</strong>${shaky ? '<small class="status-warn">Lung lay</small>' : ''}</span>
+      </span>
+    </summary>
+    <div class="status-detail">
+      ${ready?.score == null ? '<p class="muted small">Hoàn thành buổi tập đầu tiên để có điểm Khí huyết.</p>' : `
+        <p class="gloss">${gloss('khiHuyet')}</p>
+        ${ready.delta ? `<p class="muted small">${ready.delta > 0 ? '+' : '−'}${Math.abs(ready.delta)} điểm so với hôm qua</p>` : ''}
+        <div data-readiness-chart aria-label="Khí huyết 7 ngày qua">${sparkline(ready.days, 260, 44)}</div>`}
+      <p class="gloss">${gloss('canCo')}</p>
+      ${tracked.length ? `<ul class="status-meridians" aria-label="Phong độ theo mạch">${tracked.map((m) => `<li data-muscle="${h(m.key)}"><b>${h(m.name)}</b> <span>${m.canCo}%${m.shaky ? ' · Lung lay' : ''}</span></li>`).join('')}</ul>` : ''}
+    </div>
+  </details>`;
+}
+
 export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, challenge = SAMPLE_CHALLENGE, demo = true } = {}) {
-  const { tuvi, canCo, shaky, linhKhi, meridians, bw, readiness: ready } = profile;
+  const { tuvi, linhKhi, meridians, bw } = profile;
   return `<article class="cultivation">
     <div class="cultivation-navigation">
       <a class="cultivation-back small" href="#/nhap-mon${settings.get().dao ? '/4' : ''}">${settings.get().dao ? 'Sửa bài theo mạch' : termLabel('nhapMon')} →</a>
@@ -279,7 +300,6 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
           <h2>${termLabel('tuvi')}</h2>
           <strong>${h(tuvi.label)}</strong>
           <small class="muted" data-opened="${tuvi.opened}">Theo ${tuvi.opened}/${tuvi.of} mạch đã khai</small>
-          ${canCo != null ? `<p class="cultivation-condition${shaky ? ' is-shaky' : ''}">${termLabel('canCo')} <b>${canCo}%</b>${shaky ? ' · Lung lay' : ''}</p>` : ''}
         </div>
       </div>
     </header>
@@ -293,13 +313,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
       <p class="muted small">${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} Linh khí tới cấp ${linhKhi.level + 1}</p>
       ${linhKhi.parts?.dao > 0 ? `<p class="cultivation-prior-qi"><b>${fmtNum(linhKhi.parts.dao)} Linh khí</b> · Tu vi tích luỹ trước khi nhập môn</p>` : ''}
     </section>
-    ${ready ? `<details class="card cultivation-panel readiness-detail" data-readiness>
-      <summary>${termLabel('khiHuyet')} <b><span data-readiness-score>${ready.score ?? '–'}</span>${ready.score != null ? ' /100' : ''}</b></summary>
-      ${ready.score == null ? '<p class="muted small">Hoàn thành buổi tập đầu tiên để có điểm.</p>' : `
-        <p class="gloss">${gloss('khiHuyet')}</p>
-        ${ready.delta ? `<p class="muted small">${ready.delta > 0 ? '+' : '−'}${Math.abs(ready.delta)} điểm so với hôm qua</p>` : ''}
-        <div data-readiness-chart>${sparkline(ready.days, 260, 44)}</div>`}
-    </details>` : ''}
+    ${statusCard(profile)}
     ${challengeCard(challenge, challenge === SAMPLE_CHALLENGE)}
     ${questBoard(weekly, weekly === SAMPLE_QUESTS)}
     ${demo ? `<section class="cultivation-demo" aria-labelledby="cultivation-demo-title">
@@ -334,7 +348,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
       <summary>Đồ phổ cảnh giới Tu vi</summary>
       <ul>${REALMS.map((name, i) => `<li>${realmArt(i, 'cultivation-portrait')}${seal(i, name)}<b>${h(name)}</b></li>`).join('')}</ul>
     </details>
-    <p class="cultivation-note muted small">Chuẩn tham khảo, ước lượng. BW là cân nặng lúc tập. Căn cơ so phong độ 90 ngày với kỷ lục.</p>
+    <p class="cultivation-note muted small">Chuẩn tham khảo, ước lượng. BW là cân nặng lúc tập.</p>
   </article>`;
 }
 
