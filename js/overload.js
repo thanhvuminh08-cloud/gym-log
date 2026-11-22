@@ -5,6 +5,7 @@ import { e1rm, fmtNum } from './util.js';
 const done = (sets) => sets.filter((s) => s.done !== false && +s.r > 0).map((s) => ({ w: +s.w || 0, r: +s.r }));
 const STEP = 2.5;
 const E1_TOL = 0.98; // tăng tạ mà e1RM tụt ≤2% vẫn tính là vượt
+export const GOLD_PCT = 5; // vàng = ~1RM vượt kỷ lục cũ ≥ 5%
 
 export const TIERS = { gold: 3, silver: 2, bronze: 1 };
 export const TIER_LABEL = { gold: '🥇 Vàng', silver: '🥈 Bạc', bronze: '🥉 Đồng' };
@@ -31,7 +32,13 @@ export function summary(sets) {
 export function compare(curSets, prevSets, recE1 = 0) {
   const c = summary(curSets), p = summary(prevSets || []);
   if (!c || !p) return null;
-  if (recE1 > 0 && c.e1 > recE1 + 1e-9) return { tier: 'gold', kind: 'pr', msg: `🏆 PR mới! ~1RM ${fmtNum(c.e1)} kg` };
+  if (recE1 > 0 && c.e1 > recE1 + 1e-9) {
+    const pct = (c.e1 / recE1 - 1) * 100;
+    // Vàng chỉ khi phá kỷ lục đậm (≥ GOLD_PCT%); PR nhỏ là bạc để vàng giữ giá trị.
+    return pct >= GOLD_PCT - 1e-9
+      ? { tier: 'gold', kind: 'pr', msg: `🏆 PR mới! ~1RM ${fmtNum(c.e1)} kg (+${fmtNum(pct)}%)` }
+      : { tier: 'silver', kind: 'pr', msg: `🔥 PR mới! ~1RM ${fmtNum(c.e1)} kg` };
+  }
   if (c.top.w > p.top.w && c.e1 >= p.e1 * E1_TOL)
     return { tier: 'silver', kind: 'weight', msg: `🔥 +${fmtNum(c.top.w - p.top.w)} kg so với lần trước!` };
   const reps = c.repsAt(p.top.w) - p.top.r;
