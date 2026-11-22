@@ -30,13 +30,22 @@ async function detail(el, id, ex) {
   if (!w) { el.innerHTML = '<p>Không tìm thấy buổi tập.</p>'; return; }
   const ov = analyzeWorkout(w, await finished());
   const nCmp = ov.filter((o) => !o.first).length, nUp = ov.filter((o) => o.res).length;
-  const tierRow = (o) => o.res ? `<div class="tier small" data-tier="${o.res.tier}">${TIER_LABEL[o.res.tier]} · ${h(o.res.msg)}</div>`
+  const tierRow = (o) => o.res ? `<div class="tier small summary-medal" data-tier="${o.res.tier}"><strong>${TIER_LABEL[o.res.tier]}</strong><span>${h(o.res.msg)}</span></div>`
     : `<div class="tier small muted" data-tier="${o.first ? 'first' : 'none'}">${o.first ? 'Lần đầu tập bài này' : 'Chưa vượt lần trước'}</div>`;
+  const sets = setCount(w), kg = volume(w);
   el.innerHTML = `
   <a href="#/history" class="small">← Lịch sử</a>
   <h1>${h(w.name)}</h1>
   <p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p>
-  <div class="stats"><div><b data-count="${setCount(w)}">${setCount(w)}</b><small>set</small></div><div><b data-count="${volume(w)}">${fmtNum(volume(w))}</b><small>kg khối lượng</small></div><div><b data-count="${w.entries.length}">${w.entries.length}</b><small>bài</small></div>${nCmp ? `<div class="overload"><b>${nUp}/${nCmp}</b><small>bài vượt lần trước</small></div>` : ''}</div>
+  <div class="stats workout-summary">
+    <div><b data-count="${sets}">${sets}</b><small>Set hoàn thành</small></div>
+    <div><b data-count="${kg}">${fmtNum(kg)}</b><small>Khối lượng (kg)</small></div>
+    <div><b data-count="${w.entries.length}">${w.entries.length}</b><small>Bài tập</small></div>
+    <div${nCmp ? ' class="overload"' : ''}>
+      <b>${nCmp ? `${nUp}<span class="summary-compared">/${nCmp}</span>` : '—'}</b>
+      <small>${nCmp ? 'Bài vượt lần trước' : 'Chưa có lần trước'}</small>
+    </div>
+  </div>
   ${w.entries.map((e, ei) => {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));
     return `<section class="card" data-muscle="${muscleKey(ex[e.exerciseId])}"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>

@@ -98,6 +98,17 @@ label.row { padding: 6px 0; }
 :is(.tier, .report-ex)[data-tier="bronze"] { --tier-text: #ffc9a5; --tier-line: #b87956; --tier-bg: #33241f; }
 .tier[data-tier="first"] { --tier-text: #b5c9e1; --tier-line: #617c9d; --tier-bg: #1e2936; }
 
+/* Tổng kết buổi tập */
+.stats.workout-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
+.workout-summary > div { display: grid; align-content: center; min-height: 100px; padding: 12px; background: var(--surface); }
+.workout-summary b { font-size: clamp(1.55rem, 5vw, 2.2rem); line-height: 1.15; }
+.workout-summary small { margin-top: 5px; }
+.summary-compared { color: var(--muted); font-size: .68em; }
+.summary-medal.tier { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; padding: 8px 10px; }
+@media (min-width: 600px) {
+  .stats.workout-summary { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 /* Huy chương */
 .stats.medals .tier[data-tier] {
   display: grid;
@@ -463,6 +474,7 @@ nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
   .sheet { animation: sheet-in .24s ease-out both; }
   .rest-bar.show { animation: rest-in .2s ease-out both; }
   .rest-ring-progress { transition: stroke-dasharray .2s linear; }
+  .summary-medal { animation: medal-reveal .45s .22s ease-out backwards; }
   .set .check { transition: background-color .15s ease-out, filter .15s ease-out; }
   .set.celebrate[data-celebrate] { animation: set-celebration .85s ease-out both; }
   .set.celebrate[data-celebrate]::after {
@@ -483,6 +495,7 @@ nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
 @keyframes shade-in { from { background-color: transparent; } }
 @keyframes sheet-in { from { translate: 0 24px; opacity: .8; } }
 @keyframes rest-in { from { translate: 0 8px; opacity: .65; } }
+@keyframes medal-reveal { from { opacity: 0; translate: 0 6px; } }
 @keyframes set-celebration {
   35% { scale: var(--burst-scale); }
   to { box-shadow: 0 0 0 1px var(--burst); }

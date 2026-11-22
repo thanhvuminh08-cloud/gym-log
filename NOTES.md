@@ -33,13 +33,13 @@
 - Lịch tập có bảy dòng T2–CN trong Cài đặt và thẻ mời đặt lịch cùng bản xem trước ba trạng thái ở Hôm nay.
 - Màn Tập dùng nút đánh dấu 48 × 48 px, ô nhập cao 48 px và viền xanh chanh cho set chưa xong đầu tiên của mỗi bài; set đã xong mờ nhẹ.
 - Thanh nghỉ có vòng SVG cạnh số giây và kiểu cảnh báo vàng cho 10 giây cuối.
+- Tổng kết buổi có bốn thẻ số lớn và hiệu ứng xuất hiện cho huy chương, theo cài đặt giảm chuyển động.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 - [cho Codex] CSS `.schedule-preview`, `.schedule-examples` không còn dùng (đã bỏ bản xem trước ở Hôm nay); thẻ chưa đặt lịch giờ có `data-state="none"`.
 - [cho Codex] Đợt nâng cấp giao diện/UX — làm theo thứ tự, mỗi mục 1 commit `ui:`, giữ `data-*`/class logic, tôn trọng giảm chuyển động. Phần cần logic thì ghi lại "Việc chờ cho Claude":
-  3. Tổng kết buổi (js/views/history.js, trang chi tiết ngay sau khi Kết thúc): thẻ to cho set/kg/bài/bài vượt, huy chương xuất hiện có hiệu ứng, số đếm tăng (đã có `data-count`).
   4. Chuyển trang + tải: chuyển cảnh mờ/trượt nhẹ giữa các tab; khung chờ (skeleton) cho Hôm nay/Tiến độ.
   5. Trạng thái trống: minh hoạ + 1 câu hướng dẫn cho người mới ở Lịch sử, Giáo án, Tiến độ, Huy chương.
   6. Phản hồi chạm: trạng thái nhấn (`:active`) cho mọi nút/thẻ bấm được; vùng chạm ≥44px. Rung nhẹ khi xong set là logic → Claude.
