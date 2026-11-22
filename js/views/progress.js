@@ -4,7 +4,7 @@ import { finished, series, records } from '../stats.js';
 import { lineChart, stackedBars, yearGridSvg } from '../chart.js';
 import { medals } from '../medals.js';
 import { TIER_LABEL } from '../overload.js';
-import { MUSCLE, yearGrid, years, weeklyVolume, inRange } from '../insights.js';
+import { MUSCLE, yearGrid, years, weeklyVolume, inRange, liftTotal, mainLifts } from '../insights.js';
 
 const METRICS = { e1rm: '~1RM', top: 'Mức tạ cao nhất', vol: 'Khối lượng' };
 const RANGES = { 1: '1T', 3: '3T', 6: '6T', 12: '1N', 0: 'Tất cả' };
@@ -31,6 +31,7 @@ export async function render(el, [tab, exId] = []) {
       const ys = years(done), lo = Math.min(...ys), hi = Math.max(...ys);
       const g = yearGrid(done, ex, state.year);
       const wv = weeklyVolume(done, ex, 12);
+      const main = mainLifts(Object.values(ex)), sbd = liftTotal(done, main);
       const inWeeks = Object.keys(MUSCLE).filter((m) => wv.some((w) => w.byMuscle[m]));
       body = `<div class="progress-overview"><section class="card year-card">
           <div class="row year-nav"><button class="ghost icon" data-y="${state.year - 1}" ${state.year <= lo ? 'disabled' : ''} aria-label="Năm trước">‹</button>
@@ -43,17 +44,11 @@ export async function render(el, [tab, exId] = []) {
           ${yearGridSvg(g)}
         </section>
         <section class="card summary-card strength-total" data-strength-total>
-          <h2>Tổng <small class="sample-label">Dữ liệu mẫu</small></h2>
-          <div class="lift-top"><b><span data-strength-total-value>397,5</span><small> kg</small></b></div>
-          <p class="muted small">Tổng ~1RM của 3 bài chính · Squat, Bench Press, Deadlift</p>
+          <h2>Tổng</h2>
+          <div class="lift-top"><b><span data-strength-total-value data-count="${sbd.max}">${fmtNum(sbd.max)}</span><small> kg</small></b>${sbd.delta ? `<span class="trend ${sbd.delta > 0 ? 'up' : 'down'}">${sbd.delta > 0 ? '↑' : '↓'} ${fmtNum(Math.abs(sbd.delta))}</span>` : ''}</div>
+          <p class="muted small">Tổng ~1RM ${main.length ? main.map((id) => `${h(ex[id].name)} ${fmtNum(sbd.parts[id] || 0)}`).join(' · ') : 'Squat, Bench Press, Deadlift'}${sbd.delta ? ' · so với 30 ngày trước' : ''}</p>
           <div data-strength-total-chart>
-            ${lineChart([
-              { t: new Date(2026, 9, 25).getTime(), v: 365 },
-              { t: new Date(2026, 10, 1).getTime(), v: 375 },
-              { t: new Date(2026, 10, 8).getTime(), v: 372.5 },
-              { t: new Date(2026, 10, 15).getTime(), v: 390 },
-              { t: new Date(2026, 10, 22).getTime(), v: 397.5 },
-            ], { unit: ' kg', area: true, labels: true, head: false })}
+            ${sbd.series.length > 1 ? lineChart(sbd.series.slice(-40), { unit: ' kg', area: true, labels: true, head: false }) : `<p class="muted small">Tập Squat, Bench Press hoặc Deadlift để xem biểu đồ.</p>`}
           </div>
         </section>
         <section class="card volume-card">

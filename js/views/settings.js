@@ -13,6 +13,8 @@ export async function render(el) {
   el.innerHTML = `<h1>Cài đặt</h1>
   <section class="card">
     <label class="row">Thời gian nghỉ mặc định (giây)<span class="grow"></span><input class="tiny" type="number" inputmode="numeric" data-k="rest" value="${s.rest}"></label>
+    <label class="row">Mục tiêu buổi / tuần<span class="grow"></span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${s.weekGoal}"></label>
+    <label class="row">Mục tiêu buổi / tháng<span class="grow"></span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${s.monthGoal}"></label>
     <label class="row">Âm báo hết giờ nghỉ<span class="grow"></span><input type="checkbox" data-k="sound" ${s.sound ? 'checked' : ''}></label>
     <label class="row">Rung khi hết giờ nghỉ<span class="grow"></span><input type="checkbox" data-k="vibrate" ${s.vibrate ? 'checked' : ''}></label>
   </section>

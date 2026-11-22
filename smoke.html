@@ -106,10 +106,38 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
+  await step('Hôm nay: Sẵn sàng + Mục tiêu tập dùng dữ liệu thật', async () => {
+    await go('#/'); const s = await until(() => $('[data-readiness-score]'));
+    const sc = Number(s?.dataset.count), wk = $('[data-session-goal=week]');
+    return sc >= 0 && sc <= 100 && wk.querySelector('[data-session-goal-count]').textContent.startsWith('2 / ')
+      && wk.querySelectorAll('.filled').length === 2 && $('[data-session-count]').dataset.count === '2' && !$('.sample-label');
+  });
+  await step('Tổng quan: thẻ Tổng ~1RM SBD dùng dữ liệu thật', async () => {
+    await go('#/progress/overview'); const v = await until(() => $('[data-strength-total-value]'));
+    const ok = Number(v?.dataset.count) > 70 && $('[data-strength-total]').textContent.includes('Bench') && !$('.sample-label');
+    await go('#/history'); return ok;
+  });
+  await step('Luật Tổng SBD, Sẵn sàng, đếm buổi', async () => {
+    const { liftTotal, mainLifts, readinessAt, readiness, sessionCounts } = await import('./js/insights.js');
+    const D = 864e5, H = 36e5, t0 = new Date(2026, 0, 5, 18).getTime(); // thứ Hai
+    const W = (id, day, exerciseId, sets) => ({ id, start: t0 + day * D, end: t0 + day * D + H, entries: [{ exerciseId, sets }] });
+    const S = (w, r, rpe) => ({ w, r, rpe, done: true });
+    const ws = [W('1', 0, 'b', [S(60, 1)]), W('2', 2, 's', [S(100, 1)]), W('3', 40, 'b', [S(70, 1)])];
+    const lt = liftTotal(ws, ['s', 'b'], t0 + 41 * D);
+    const ml = mainLifts([{ id: 'x', name: 'Front Squat' }, { id: 'r', name: 'Romanian Deadlift' }, { id: 'd', name: 'Deadlift' }, { id: 'b', name: 'Bench Press (đòn)' }, { id: 's', name: 'Squat' }]);
+    const one = [W('a', 0, 'b', [S(100, 5, 9)])];
+    const got = [lt.max, lt.delta, lt.parts.b, lt.series.length, ml.join(''),
+      readinessAt(one, t0), readinessAt(one, t0 + 11 * H), readinessAt(one, t0 + 30 * D), readiness(one, t0 + 3 * D).days.length,
+      Object.values(sessionCounts(ws, t0 + 3 * D)).join('/'), Object.values(sessionCounts(ws, t0 + 41 * D)).join('/')].join(',');
+    const want = [170, 10, 70, 3, 'sbd', null, 45, 100, 4, '2/2', '1/1'].join(',');
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Tab Huy chương: 1 vàng, 1 lần vượt, mốc tạ 70kg', async () => {
     await go('#/progress'); $('[data-tab=medal]').click();
-    const g = await until(() => $('.medals .tier[data-tier=gold] b')?.textContent === '1' && $('.medals .tier[data-tier=gold] b'));
-    return !!g && !!(await until(() => $('.streaks .overload b')?.textContent === '1')) && !$('[data-new]') && !!$('.milestone')?.textContent.includes('70 kg')
+    // Đọc data-count (chữ số chạy bằng requestAnimationFrame, dừng ở 0 khi khung bị ẩn).
+    const g = await until(() => $('.medals .tier[data-tier=gold] b')?.dataset.count === '1');
+    return !!g && !!(await until(() => $('.streaks .overload b')?.dataset.count === '1')) && !$('[data-new]') && !!$('.milestone')?.textContent.includes('70 kg')
       && !!$('.medal-row[href^="#/history/"]');
   });
   await step('Huy chương mới (sau lần xem trước) có data-new', async () => {

@@ -93,16 +93,65 @@ export function topLifts(workouts, n = 3, now = Date.now(), days = 30) {
     const before = Math.max(0, ...s.filter((p) => p.t <= cut).map((p) => p.v));
     return { exerciseId: id, max, delta: before ? max - before : 0, spark: s.slice(-12).map((p) => p.v), series: s };
   });
-  // Tổng: sau mỗi buổi, cộng max tích luỹ của từng bài.
-  const best = {}, series = [];
-  const pts = lifts.flatMap((l) => l.series.map((p) => ({ ...p, id: l.exerciseId }))).sort((a, b) => a.t - b.t);
+  const { parts: _, ...total } = liftTotal(workouts, ids, now, days);
+  return { lifts: lifts.map(({ series: _s, ...l }) => l), total };
+}
+
+/**
+ * Tổng ~1RM của các bài `ids`: sau mỗi buổi, cộng max tích luỹ của từng bài (1 điểm/ngày).
+ * {max, delta (so với `days` ngày trước), series:[{t, v}], parts:{id: max}}.
+ */
+export function liftTotal(workouts, ids, now = Date.now(), days = 30) {
+  const best = {}, series = [], cut = now - days * D;
+  const pts = ids.flatMap((id) => e1rmSeries(workouts, id).filter((p) => p.v > 0).map((p) => ({ ...p, id }))).sort((a, b) => a.t - b.t);
   for (const p of pts) {
     best[p.id] = Math.max(best[p.id] || 0, p.v);
     const v = Object.values(best).reduce((a, b) => a + b, 0);
     if (series.length && dayKey(series.at(-1).t) === dayKey(p.t)) series.at(-1).v = v; else series.push({ t: p.t, v });
   }
-  const tot = series.at(-1)?.v || 0, totBefore = [...series].reverse().find((p) => p.t <= cut)?.v || 0;
-  return { lifts: lifts.map(({ series: _, ...l }) => l), total: { max: tot, delta: totBefore ? tot - totBefore : 0, series } };
+  const max = series.at(-1)?.v || 0, before = [...series].reverse().find((p) => p.t <= cut)?.v || 0;
+  return { max, delta: before ? max - before : 0, series, parts: best };
+}
+
+/** Squat, Bench Press, Deadlift trong thư viện (theo tên), thứ tự S-B-D, bỏ bài không có: [id…]. */
+const MAIN_LIFTS = [/^squat\b/i, /^bench press\b/i, /^deadlift\b/i];
+export const mainLifts = (exList) => MAIN_LIFTS.map((re) => exList.find((e) => re.test(e.name.trim()))?.id).filter(Boolean);
+
+/**
+ * Điểm sẵn sàng 0–100 tại thời điểm `t` (ước lượng từ dữ liệu tập, không có giấc ngủ):
+ * 100 − nghỉ chưa đủ (<24h: 20, <48h: 8) − tải tăng đột ngột (khối lượng 7 ngày / TB tuần của 28 ngày: >1,5: 25, >1,3: 12)
+ * − buổi gần nhất nặng, trong 72h (RPE TB ≥9,5: 15, ≥8,5: 10, ≥7,5: 5). null nếu chưa có buổi nào trước `t`.
+ */
+export function readinessAt(workouts, t) {
+  const ws = ended(workouts).filter((w) => w.end <= t);
+  if (!ws.length) return null;
+  const last = ws.reduce((a, w) => (w.end > a.end ? w : a));
+  const hrs = (t - last.end) / 36e5;
+  let score = 100 - (hrs < 24 ? 20 : hrs < 48 ? 8 : 0);
+  const vol = (from) => ws.filter((w) => w.start > from).reduce((a, w) => a + w.entries.reduce((b, e) => b + doneSets(e).reduce((c, s) => c + s.w * s.r, 0), 0), 0);
+  const chronic = vol(t - 28 * D) / 4, ratio = chronic ? vol(t - 7 * D) / chronic : 0;
+  score -= ratio > 1.5 ? 25 : ratio > 1.3 ? 12 : 0;
+  const rpes = hrs < 72 ? last.entries.flatMap(doneSets).map((s) => +s.rpe).filter((v) => v > 0) : [];
+  const rpe = rpes.length ? rpes.reduce((a, b) => a + b, 0) / rpes.length : 0;
+  score -= rpe >= 9.5 ? 15 : rpe >= 8.5 ? 10 : rpe >= 7.5 ? 5 : 0;
+  return Math.max(0, Math.min(100, Math.round(score)));
+}
+
+/** Sẵn sàng 7 ngày (cuối mỗi ngày, hôm nay = lúc này): {score|null, delta (so với hôm qua), days:[v…] cũ → mới, bỏ ngày chưa có dữ liệu}. */
+export function readiness(workouts, now = Date.now()) {
+  const end = new Date(now); end.setHours(23, 59, 59, 999);
+  const vals = Array.from({ length: 7 }, (_, i) => readinessAt(workouts, i === 6 ? now : end.getTime() - (6 - i) * D));
+  const score = vals[6], prev = vals[5];
+  return { score, delta: score != null && prev != null ? score - prev : 0, days: vals.filter((v) => v != null) };
+}
+
+/** Số buổi đã xong trong tuần này (từ thứ Hai) và tháng này: {week, month}. */
+export function sessionCounts(workouts, now = Date.now()) {
+  const d = new Date(now); d.setHours(0, 0, 0, 0);
+  const month = new Date(d.getFullYear(), d.getMonth(), 1).getTime();
+  d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+  const ws = ended(workouts).filter((w) => w.start <= now);
+  return { week: ws.filter((w) => w.start >= d.getTime()).length, month: ws.filter((w) => w.start >= month).length };
 }
 
 /** Khối lượng (kg×rep) mỗi tuần theo nhóm cơ, `weeks` tuần gần nhất, cũ → mới: [{t (thứ Hai), byMuscle:{muscle: kg}, total}]. */

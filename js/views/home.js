@@ -1,8 +1,8 @@
 import { all, activeWorkout } from '../db.js';
-import { h, fmtDate, fmtDur, fmtNum, exMap } from '../util.js';
+import { h, fmtDate, fmtDur, fmtNum, exMap, settings } from '../util.js';
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
-import { topLifts, muscleKey } from '../insights.js';
+import { topLifts, muscleKey, readiness, sessionCounts } from '../insights.js';
 import { sparkline, lineChart } from '../chart.js';
 import { lastBackup, backupDue } from '../safety.js';
 
@@ -26,9 +26,20 @@ function strength({ lifts, total }, ex) {
     </section>`;
 }
 
+/** 1 dòng mục tiêu: số buổi / mục tiêu + chấm (vượt mục tiêu thì thêm chấm). */
+function goal(key, label, n, target) {
+  target = Math.max(1, Math.round(target) || 1);
+  const dots = Math.min(31, Math.max(n, target));
+  return `<div class="session-goal" data-session-goal="${key}"${n >= target ? ' data-done' : ''}>
+          <div class="row"><span class="grow">${label}</span><b data-session-goal-count>${n} / ${target} buổi</b></div>
+          <div class="goal-dots" data-session-goal-dots aria-hidden="true">${Array.from({ length: dots }, (_, i) => `<i${i < n ? ' class="filled"' : ''}></i>`).join('')}</div>
+        </div>`;
+}
+
 export async function render(el) {
   const [cur, templates, done, exList] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises')]);
   const ex = exMap(exList), top = topLifts(done);
+  const ready = readiness(done), sess = sessionCounts(done), goals = settings.get();
   const last = lastBackup(), remind = backupDue(last, done);
   const weekAgo = Date.now() - 7 * 864e5;
   const week = done.filter((w) => w.start > weekAgo);
@@ -66,32 +77,20 @@ export async function render(el) {
     ${top.lifts.length ? strength(top, ex) : ''}
     <div class="dashboard-summaries">
       <section class="card summary-card" data-readiness>
-        <h2>Sẵn sàng <small class="sample-label">Dữ liệu mẫu</small></h2>
-        <div class="lift-top"><b><span data-readiness-score>82</span><small> /100</small></b>
-          <span class="trend up" data-readiness-delta>↑ 6 điểm</span></div>
-        <p class="muted small">So với lần trước</p>
+        <h2>Sẵn sàng</h2>
+        <div class="lift-top"><b><span data-readiness-score${ready.score != null ? ` data-count="${ready.score}"` : ''}>${ready.score ?? '–'}</span><small> /100</small></b>
+          ${ready.delta ? `<span class="trend ${ready.delta > 0 ? 'up' : 'down'}" data-readiness-delta>${ready.delta > 0 ? '↑' : '↓'} ${Math.abs(ready.delta)} điểm</span>` : ''}</div>
+        <p class="muted small">${ready.score == null ? 'Hoàn thành buổi tập đầu tiên để có điểm' : 'So với hôm qua · theo thời gian nghỉ, tải 7 ngày và RPE'}</p>
         <div class="readiness-chart" data-readiness-chart>
-          ${sparkline([69, 73, 71, 78, 74, 76, 82], 260, 44)}
+          ${sparkline(ready.days, 260, 44)}
         </div>
         <small class="muted">7 ngày gần nhất</small>
       </section>
       <section class="card summary-card" data-session-goals>
-        <h2>Mục tiêu tập <small class="sample-label">Dữ liệu mẫu</small></h2>
-        <div class="lift-top"><b><span data-session-count>8</span><small> buổi đã tập</small></b></div>
-        <div class="session-goal" data-session-goal="week">
-          <div class="row"><span class="grow">Tuần này</span><b data-session-goal-count>3 / 4 buổi</b></div>
-          <div class="goal-dots" data-session-goal-dots aria-hidden="true">
-            <i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i>
-          </div>
-        </div>
-        <div class="session-goal" data-session-goal="month">
-          <div class="row"><span class="grow">Tháng này</span><b data-session-goal-count>8 / 12 buổi</b></div>
-          <div class="goal-dots" data-session-goal-dots aria-hidden="true">
-            <i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i>
-            <i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i>
-            <i></i><i></i><i></i><i></i>
-          </div>
-        </div>
+        <h2>Mục tiêu tập</h2>
+        <div class="lift-top"><b><span data-session-count data-count="${sess.month}">${sess.month}</span><small> buổi tháng này</small></b></div>
+        ${goal('week', 'Tuần này', sess.week, goals.weekGoal)}
+        ${goal('month', 'Tháng này', sess.month, goals.monthGoal)}
       </section>
     </div>
     <div class="dashboard-lists">
