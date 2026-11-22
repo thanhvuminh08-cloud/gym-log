@@ -95,3 +95,20 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 5. Form cân nặng/giới tính (`[data-hero-profile]`) chỉ hiện khi thiếu (như hiện nay).
 - **Chuyển đi:** Thất mạch đồ, bảng Luyện thể, Thử thách Bình cảnh → tab **Thất mạch** `#/tang-thu/that-mach` (Claude đã gắn: view `hero` đầy đủ; `#/hero` cũ chuyển tới đây). Bỏ khỏi Động phủ: Giáo án (có ở Công pháp), Tập gần đây (Tu luyện ký), Sức mạnh (Tàng thư › Tổng quan), 7 ngày qua/Mục tiêu (gộp vào hàng số).
 - **Hợp đồng:** Động phủ vẫn phải gọi `ceremony(profile)` (export từ `js/views/hero.js`) để nghi lễ Đột phá bật khi mở `#/` — smoke "Động phủ đợt 2" kiểm ở `#/`. Có thể tách phần nhỏ trong hero.js thành hàm export (vd. `tuviStrip`, `questBoard`) để home.js dùng; trang Thất mạch thêm `archiveHeader('that-mach')`. Smoke cần `.lift-card` ở `#/` → đổi bước "Hôm nay: thẻ Sức mạnh" sang `#/tang-thu/overview` khi bỏ thẻ (Codex sửa smoke cùng commit, hoặc ghi Việc chờ cho Claude).
+
+## Dễ dùng (22/11, từ phản hồi: ghép lại thì rối, bạn của người dùng không biết dùng)
+**Chẩn đoán:** (1) ~35 thuật ngữ tu tiên phải học, kể cả trên nút/điều hướng; (2) một từ nhiều nghĩa — "Bế quan" (mục, nút, lịch, mục tiêu), "Công pháp" (mục, bộ bài Nhập môn, tên giáo án tự sinh), "Luyện thể" (thang cấp nhóm cơ *và* Chí hướng "tăng cơ"); (3) ~12 hệ tiến độ song song rải ở 3 nơi; (4) luồng chính gãy: mục Bế quan khi chưa có buổi lặng lẽ bật về Động phủ, lần đầu bị ép qua 6 bước Nhập môn trước khi được tập.
+
+**Quyết định (người dùng chọn):** *giữ tên tu tiên, thêm chú* — mỗi tên tu tiên đi kèm chữ thường. Nguồn chữ: `js/lore.js` (`hint(k)` chữ ngắn, `gloss(k)` câu giải nghĩa, `GLOSSARY` toàn bộ, `NAV[i].hint`).
+
+- **A. Chú:** thanh điều hướng hiện `label` + `hint` nhỏ bên dưới (luôn hiện, không theo công tắc Chú giải). Nút hành động chính kèm hint ("Bế quan · Bắt đầu tập"). Tiêu đề mục/tab kèm hint. Công tắc Chú giải chỉ ẩn/hiện câu `gloss` dài. Thêm trang **Từ điển** (Tàng thư › Thư viện hoặc cuối Cài đặt) liệt kê `GLOSSARY`.
+- **B. Bốn hệ tiến độ hiện ra ngoài:** Tu vi (gồm Công lực/Linh khí trên cùng một dải), Thất mạch (cấp nhóm cơ), Phẩm (mỗi buổi), Nhiệm vụ tuần. Khí huyết, Căn cơ, Bình cảnh, Hư cảnh/Xác chứng chỉ ở trang Thất mạch. Liên kích là chuỗi duy nhất ở Động phủ; Đạo tâm chỉ trong Công đức bạ.
+- **C. Một việc một tên:** "Bế quan" = chỉ hành động bắt đầu tập (lịch → "Lịch tập", mục tiêu → "Mục tiêu tuần" trong Công pháp). "Công pháp" = cả mục Kế hoạch; bộ bài chọn ở Nhập môn gọi là "Bài theo mạch"; giáo án tự sinh đặt tên "Giáo án · …". Chí hướng "Luyện thể" (tăng cơ) đổi nhãn khác (vd. "Luyện cơ") để "Luyện thể" chỉ còn là thang cấp nhóm cơ.
+- **D. Mục Bế quan khi chưa có buổi:** không bật về; hiện trang chọn cách bắt đầu — theo lịch hôm nay (nếu có) · từ giáo án · lặp lại buổi gần nhất · buổi trống.
+- **E. Lần đầu mở app:** không ép Nhập môn. Vào Động phủ với thẻ "Ghi buổi tập đầu tiên" (nút Bế quan) + thẻ mời Nhập môn (tuỳ chọn, có hint "Thiết lập"). Nhập môn vẫn mở được từ Công pháp.
+
+**Thứ tự:**
+1. ✅ **Claude** — `lore.js`: `NAV[].hint`, từ điển 35 khoá (`term/hint/gloss/GLOSSARY`), smoke.
+2. **Codex** — A (nav 2 dòng, hint ở nút/tiêu đề, trang Từ điển), B (gom/ẩn theo danh sách trên), C (đổi nhãn trong markup), D (giao diện trang chọn cách bắt đầu với số giả; giữ `[data-act=empty]` cho buổi trống, `button[data-id]` cho giáo án).
+3. **Claude** — D: dữ liệu thật + `#/workout` không bật về; E: bỏ chuyển thẳng Nhập môn lần đầu (sửa smoke bước 1); C: tên giáo án tự sinh, nhãn Chí hướng trong `js/dao.js`; smoke đủ luồng.
+4. **Người dùng** — đưa bạn thử 3 việc không hướng dẫn: ghi một buổi tập · xem lại buổi hôm trước · tìm xem mình có tiến bộ không. Ghi chỗ bị kẹt vào NOTES "Ý tưởng sau khi dùng thực tế".

@@ -26,6 +26,7 @@
 - Luyện Thể Ký bước 1 (Claude, 22/11): `js/lore.js` (NAV/PHAM/term/gloss), `TIER_LABEL = PHAM`, router `ROUTES` 5 mục + `ALIASES` route cũ (`location.replace`); `#/` tạm xếp chồng home + hero. Hợp đồng chi tiết cuối VISION.md.
 - Luyện Thể Ký bước 3 (Claude, 22/11): lịch bế quan + mục tiêu buổi chuyển từ Cài đặt sang Công pháp (`[data-schedule]`, `[data-goals]`); "Chú giải" `settings.gloss` (mặc định bật, thay `lore`) → `<html data-no-gloss>` ẩn `.gloss`; chữ chia sẻ Tuần ký dùng tên phẩm; bỏ `LORE/term` cũ trong js/hero.js (dùng lore.js); Bế quan: đánh dấu set xong → ô trống của set kế tự điền kg × rep.
 - Động phủ gọn (22/11): thẻ lịch kiêm nút Bế quan/Tiếp tục, dải Tu vi, ba nhiệm vụ tuần và một hàng số. Thất mạch/Luyện thể/Bình cảnh ở Tàng thư › Thất mạch, Sức mạnh ở Tàng thư › Tổng quan. Nút Tiếp tục nằm trong thẻ đầu trang.
+- Dễ dùng (22/11): người dùng chọn "giữ tu tiên, thêm chú" — tên tu tiên luôn kèm chữ thường (`hint`), gom 12 hệ tiến độ còn 4, một việc một tên, mục Bế quan có trang bắt đầu, không ép Nhập môn. Kế hoạch: VISION.md › Dễ dùng.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -57,6 +58,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
+- [cho Codex] Dễ dùng bước 2 (VISION.md › Dễ dùng, mục A–D): nav 2 dòng label + `hint` từ `NAV`, hint ở nút/tiêu đề, trang Từ điển từ `GLOSSARY`, gom tiến độ còn 4 hệ, đổi nhãn theo C, giao diện trang chọn cách bắt đầu ở `#/workout` (số giả).
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 

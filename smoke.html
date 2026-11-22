@@ -126,11 +126,12 @@ try {
     if (bad.length) lines.push('  ' + bad.join(' '));
     return !bad.length;
   });
-  await step('lore.js: 5 mục NAV, phẩm thay huy chương, term/gloss', async () => {
+  await step('lore.js: 5 mục NAV, phẩm thay huy chương, term/hint/gloss, từ điển đủ chú', async () => {
     const L = await import('./js/lore.js'), { TIER_LABEL } = await import('./js/overload.js');
     const got = [L.NAV.map((n) => n.route).join(' '), TIER_LABEL.gold, TIER_LABEL.bronze, L.term('streak', 4), L.term('weeks', 6), L.term('rest'),
-      L.term('ledger'), !!L.gloss('milestone'), L.gloss('x')].join(',');
-    const want = ['#/ #/workout #/cong-phap #/ky #/tang-thu', 'Thượng phẩm', 'Hạ phẩm', 'Liên kích ×4', 'Đạo tâm 6 tuần', 'Điều tức', 'Công đức bạ', true, ''].join(',');
+      L.term('ledger'), !!L.gloss('milestone'), L.gloss('x'), L.NAV.map((n) => n.hint).join('/'), L.hint('start'), L.hint('x'),
+      L.GLOSSARY.length >= 30 && L.GLOSSARY.every((g) => g.term && g.hint && g.gloss), new Set(L.GLOSSARY.map((g) => g.term)).size === L.GLOSSARY.length].join(',');
+    const want = ['#/ #/workout #/cong-phap #/ky #/tang-thu', 'Thượng phẩm', 'Hạ phẩm', 'Liên kích ×4', 'Đạo tâm 6 tuần', 'Điều tức', 'Công đức bạ', true, '', 'Hôm nay/Tập/Kế hoạch/Nhật ký/Tiến độ', 'Bắt đầu tập', '', true, true].join(',');
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
