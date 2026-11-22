@@ -387,7 +387,7 @@ try {
     input($('[name=name]'), 'Thanh Vân'); if (!(await next(2))) throw new Error('bước 2');
     $('[name=sex]').value = 'm'; input($('[name=weight]'), '80'); input($('[name=height]'), '174');
     if (!(await next(3))) throw new Error('bước 3');
-    $('[name=experience]').value = 'mid'; $('[name=goal]').value = 'strength'; $('[name=days]').value = '4';
+    $('[name=experience][value=mid]').click(); $('[name=goal][value=strength]').click(); $('[name=days][value="4"]').click();
     if (!(await next(4))) throw new Error('bước 4');
     const box = (id) => $(`input[data-path=back][value="${id}"]`);
     box('x-deadlift').click(); // bỏ Deadlift → Lưng thiếu 1 bài → không đi tiếp được

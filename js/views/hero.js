@@ -133,7 +133,18 @@ function loadText(next, kg) {
   return `${fmtNum(kg)} kg${next.added ? ' đeo thêm' : next.perHand ? ' mỗi tay' : ''}`;
 }
 
-function meridianCard(m) {
+export function claimRows(claims = [], meridian) {
+  const pending = claims.filter((claim) => claim.meridian === meridian && !claim.verified && claim.target);
+  if (!pending.length) return '';
+  return `<div class="cultivation-claims"><b>Mốc xác chứng</b><ul>${pending.map(({ name, target }) => {
+    const goal = target.reps != null ? `${fmtNum(target.reps)} ${h(target.unit)}`
+      : target.alt ? `${loadText(target, target.alt.kg)} × ${target.alt.r} hoặc ${loadText(target, target.kg)} × 1`
+      : `${loadText(target, target.kg)} × 1`;
+    return `<li>${h(name)} · ${goal}</li>`;
+  }).join('')}</ul></div>`;
+}
+
+function meridianCard(m, claims) {
   const { next, lifts } = m;
   const progress = Math.round((m.p - m.realm.i) * 100);
   const target = next && ('kg' in next
@@ -143,11 +154,13 @@ function meridianCard(m) {
     <div class="cultivation-meridian-head">
       <h3>${h(m.name)}</h3><strong>${h(m.label)}</strong>
     </div>
+    ${m.unverified ? '<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>' : ''}
     ${lifts?.length ? `<ul class="cultivation-lifts">${lifts.map((lift) => `<li class="cultivation-lift">
       <span><b>${h(lift.name)}</b>${lift.unverified ? ' <small class="cultivation-tested" data-unverified>hư cảnh</small>' : lift.tested ? ' <small class="cultivation-tested">tự khai</small>' : ''}</span>
       <span>${lift.unit ? `${fmtNum(lift.reps)} ${h(lift.unit)}` : `${lift.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(lift.kg)} kg`}</span>
     </li>`).join('')}</ul>` : `<p class="cultivation-lift">${m.key === 'core' ? `${fmtNum(m.xp)} Linh khí` : 'Chưa có kỷ lục'}</p>`}
     ${m.need > 0 ? `<p class="cultivation-path-warning">Còn thiếu ${m.need} bài để khai mạch.</p>` : ''}
+    ${m.unverified ? claimRows(claims, m.key) : ''}
     ${m.canCo != null ? `<p class="cultivation-condition${m.shaky ? ' is-shaky' : ''}">Căn cơ <b>${m.canCo}%</b>${m.shaky ? ' · Lung lay' : ''}</p>` : ''}
     ${next ? `<div class="cultivation-target">
       <div class="cultivation-target-label"><span>${target}</span><b>${h(next.realm)}</b></div>
@@ -186,6 +199,7 @@ export function breakthroughModal(event, { id = 'breakthrough', demo = false } =
         <span class="breakthrough-qi"></span>
         ${realmArt(index, 'breakthrough-figure')}
         ${seal(index, realm)}
+        ${event.verify ? '<svg class="breakthrough-verify-mark" viewBox="0 0 56 60" fill="none"><path d="M28 3 51 13v16c0 15-10 23-23 28C15 52 5 44 5 29V13L28 3Z"/><path d="m17 30 8 8 15-17"/></svg>' : ''}
       </div>
       <div class="breakthrough-content">
         <p class="breakthrough-kind">${h(event.name)}${demo ? ' · Số liệu mẫu' : ''}</p>
@@ -258,6 +272,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
       </div>
       <progress class="cultivation-meter" value="${linhKhi.into}" max="${linhKhi.need}" aria-label="Linh khí tới cấp tiếp theo"></progress>
       <p class="muted small">${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} Linh khí tới cấp ${linhKhi.level + 1}</p>
+      ${linhKhi.parts?.dao > 0 ? `<p class="cultivation-prior-qi"><b>${fmtNum(linhKhi.parts.dao)} Linh khí</b> · Tu vi tích luỹ trước khi nhập môn</p>` : ''}
     </section>
     ${challengeCard(challenge, challenge === SAMPLE_CHALLENGE)}
     ${questBoard(weekly, weekly === SAMPLE_QUESTS)}
@@ -279,7 +294,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
         <h2>Thất mạch</h2>
         ${bw != null ? `<span class="muted small">Cân nặng ${fmtNum(bw)} kg</span>` : ''}
       </div>
-      <ul class="cultivation-meridians">${meridians.map(meridianCard).join('')}</ul>
+      <ul class="cultivation-meridians">${meridians.map((m) => meridianCard(m, profile.claims)).join('')}</ul>
     </section>
     <details class="cultivation-atlas">
       <summary>Đồ phổ cảnh giới</summary>

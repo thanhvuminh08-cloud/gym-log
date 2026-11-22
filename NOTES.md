@@ -43,10 +43,10 @@
 - Nút và liên kết dùng vùng chạm tối thiểu 44 px và có phản hồi khi nhấn.
 - Động phủ dùng hồ sơ thật; nhiệm vụ, Thử thách Bình cảnh và hai nghi lễ xem thử dùng mẫu có nhãn. Hình núi, sương và sáu cảnh giới là SVG tự vẽ. Có thể đổi giới tính trong Cài đặt.
 - Âm thanh tự tổng hợp bằng Node.js và mã hoá bằng FFmpeg, không dùng bản thu hay mẫu âm thanh bên ngoài. Tệp trong `assets/audio/`: `dong-phu.mp3`, `loi-kiep.mp3`, `dot-pha.mp3`, `nhiem-vu.mp3`.
+- Nhập môn có nghi lễ đá linh căn, bảy mạch sáng lần lượt và ấn triện; hiện mốc Xác chứng bên cạnh Hư cảnh. Tiêu đề dùng Noto Serif tiếng Việt ngoại tuyến, theo giấy phép OFL trong `assets/fonts/`.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Nhập môn "có hồn" (RPG.md 5b, chơi thử 22/11): (1) bước 6 thành nghi lễ Trắc linh căn — đá linh căn sáng, 7 mạch bừng sáng lần lượt, ấn triện đóng xuống, `sfx('dotPha')`; mạch `unverified` hiện nhãn "Hư cảnh · chưa xác chứng" kèm `claims[].target`; (2) ẩn thanh nav trong `#/nhap-mon`, bước 1 có đoạn mở đầu tiên duyên, lần đầu không hiện "← Động phủ"; (3) bước 3 đổi select thành thẻ chọn (label lore + real); (4) bước 4 tiêu đề mạch hiện "2/2 ✓" + nhãn "Bài chuẩn" (`main`); (5) bước 5 bài Bụng (`core`) chỉ 1 ô giây/rep — Claude đã tạm làm, cần làm đẹp; (6) ấn triện không ngắt chữ "Nguy/ên Anh"; (7) "Nhận công pháp" về đầu Động phủ (cuộn lên đầu) thay vì chỉ toast; (8) Động phủ: thẻ Linh khí hiện `parts.dao` ("Tu vi tích luỹ trước khi nhập môn"), modal `data-breakthrough=verify` có kiểu riêng (js/views/dao.js, js/views/hero.js markup, css/).
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 

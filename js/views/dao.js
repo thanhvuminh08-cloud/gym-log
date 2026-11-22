@@ -3,15 +3,16 @@ import { DEFAULT_EXERCISES } from '../exercises.js';
 import { h, settings, uid, toast } from '../util.js';
 import { all, put, del } from '../db.js';
 import { snapshot } from '../hero.js';
-import { loadProfile, SEEN_KEY } from './hero.js';
+import { claimRows, loadProfile, SEEN_KEY } from './hero.js';
+import { sfx } from '../sfx.js';
 
 const STEPS = [
-  ['Nhập môn', 'Chọn tên dùng trong Động phủ.'],
+  ['Nhập môn', 'Sơn môn đã mở. Nếu hữu duyên, hãy để lại một đạo hiệu và bắt đầu con đường tu luyện của riêng mình.'],
   ['Thân thể', 'Dùng thông tin cơ thể để ước lượng cảnh giới khởi đầu.'],
   ['Đạo hạnh', 'Chọn mục tiêu và số buổi tập phù hợp với bạn.'],
   ['Chọn Công pháp', 'Mỗi mạch cần ít nhất hai bài được xét cảnh giới.'],
   ['Trắc linh căn', 'Nhập mức tạ và số rep tốt nhất gần đây. Có thể để trống từng bài.'],
-  ['Kết quả Nhập môn', 'Xem cảnh giới khởi đầu, lịch tuần và giáo án.'],
+  ['Nghi lễ Trắc linh căn', 'Đá linh căn soi Thất mạch và ghi lại cảnh giới khởi đầu của đạo hữu.'],
 ];
 const DAYS = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
@@ -26,21 +27,26 @@ const sampleTests = [
 ];
 const sampleDao = { at: Date.UTC(2026, 10, 16), name: 'Thanh Vân', height: 174, age: 29, experience: 'mid', goal: 'muscle', days: 3, path: samplePath, tested: sampleTests };
 
-function options(choices, value) {
-  return choices.map(({ id, label, real }) => `<option value="${h(id)}"${id === value ? ' selected' : ''}>${h(label)} · ${h(real)}</option>`).join('');
+function choiceCards(name, title, choices, selected) {
+  return `<fieldset class="dao-choice-group"><legend>${title}</legend>
+    <div class="dao-choices">${choices.map(({ id, label, real }) => `<label class="dao-choice">
+      <input type="radio" name="${name}" value="${h(id)}"${String(id) === String(selected) ? ' checked' : ''}>
+      <span><strong>${h(label)}</strong><small>${h(real)}</small></span>
+    </label>`).join('')}</div></fieldset>`;
 }
 
 function showPath(dao, groups, validation, preview) {
   return groups.map(({ key, name, min, options }, index) => {
     const selected = dao.path?.[key] || [];
     const need = validation?.problems.find((problem) => problem.key === key)?.need;
+    const have = options.filter((exercise) => exercise.ranked && selected.includes(exercise.id)).length;
     const choices = options.map((exercise) => {
       const id = `dao-path-${h(key)}-${h(exercise.id)}`;
       return `<input id="${id}" type="checkbox"${exercise.ranked ? ' class="dao-ranked"' : ''} data-path="${h(key)}" value="${h(exercise.id)}"${selected.includes(exercise.id) ? ' checked' : ''}>
-        <label for="${id}">${h(exercise.name)}${exercise.ranked ? '' : '<small>Chỉ cho Linh khí</small>'}</label>`;
+        <label for="${id}">${h(exercise.name)}${exercise.main ? '<small class="dao-main-lift">Bài chuẩn</small>' : exercise.ranked ? '' : '<small>Chỉ cho Linh khí</small>'}</label>`;
     }).join('');
     return `<details class="dao-branch" data-muscle="${h(key)}"${index === 0 || need ? ' open' : ''}>
-      <summary><span>${h(name)}</span>${preview
+      <summary><span>${h(name)}</span><b class="dao-branch-count${have >= min ? ' is-complete' : ''}">${have}/${min}${have >= min ? ' ✓' : ''}</b>${preview
         ? `<small class="dao-need-one">Mạch ${h(name)} cần thêm 1 bài</small><small class="dao-need-all">Mạch ${h(name)} cần thêm ${min} bài</small>`
         : need ? `<small class="dao-path-warning">Mạch ${h(name)} cần thêm ${need} bài</small>` : ''}</summary>
       <div class="dao-options">${choices}</div>
@@ -53,10 +59,11 @@ function showTests(tests, tested) {
   return tests.map((test) => {
     const entry = entries.get(test.exerciseId);
     const unit = test.bodyweight ? 'kg đeo thêm' : test.perHand ? 'kg mỗi tay' : 'kg';
-    return `<fieldset class="dao-test" data-test="${h(test.exerciseId)}" data-muscle="${h(test.meridian)}">
+    return `<fieldset class="dao-test${test.core ? ' dao-test-core' : ''}" data-test="${h(test.exerciseId)}" data-muscle="${h(test.meridian)}">
       <legend>${h(test.name)} <small>${h(test.meridianName)}</small></legend>
       <div class="dao-test-fields">${test.core
-        ? `<input type="hidden" name="w" value="0"><label>${test.unit === 'giây' ? 'Giữ được (giây)' : 'Số rep'}<input type="number" inputmode="numeric" min="1" step="1" name="r" value="${h(entry?.r ?? '')}"></label>`
+        ? `<input type="hidden" name="w" value="0"><label>${test.unit === 'giây' ? 'Thời gian giữ' : 'Số lần thực hiện'}
+          <span class="dao-test-measure"><input type="number" inputmode="numeric" min="1" step="1" name="r" value="${h(entry?.r ?? '')}"><span>${h(test.unit)}</span></span></label>`
         : `<label>${unit}<input type="number" inputmode="decimal" min="0" step="0.1" name="w" value="${h(entry?.w ?? '')}"></label>
         <span aria-hidden="true">×</span>
         <label>Rep<input type="number" inputmode="numeric" min="1" step="1" name="r" value="${h(entry?.r ?? '')}"></label>`}
@@ -66,14 +73,31 @@ function showTests(tests, tested) {
 }
 
 function showResult(result, plan, exerciseNames) {
-  const { tuvi, top, verdict, meridians } = result;
+  const { tuvi, top, verdict, meridians, claims } = result;
   return `<div class="dao-result">
-    <div class="dao-rank">
-      <span class="cultivation-seal" data-realm="${tuvi.realm.i}" aria-hidden="true">${h(tuvi.realm.name)}</span>
-      <div><strong>${h(tuvi.label)}</strong><p>${h(verdict)}</p>
-        ${top ? `<p class="dao-talent">Thiên phú: mạch ${h(top.name)} · ${h(top.label)}</p>` : ''}</div>
+    <div class="dao-altar" aria-hidden="true">
+      <svg class="dao-stone" viewBox="0 0 160 150" focusable="false">
+        <defs><linearGradient id="dao-stone-jade" x2="1" y2="1"><stop stop-color="#e5f9d1"/><stop offset=".5" stop-color="#61bb9d"/><stop offset="1" stop-color="#205e5e"/></linearGradient></defs>
+        <ellipse cx="80" cy="129" rx="69" ry="13" fill="none" stroke="#87b9a7" stroke-opacity=".48"/>
+        <ellipse cx="80" cy="129" rx="53" ry="8" fill="#132e31" stroke="#e9ca8d"/>
+        <path d="M80 7 117 31 126 75 101 110H59L34 75 43 31Z" fill="url(#dao-stone-jade)" stroke="#e8f4c6" stroke-width="1.5"/>
+        <path d="M80 7 62 43l18 21 18-21Zm18 36 19-12 9 44-46-11-21 46L34 75l28-32L43 31m37 33 21 46" fill="none" stroke="#ecfaca" stroke-opacity=".73"/>
+        <path d="m80 48 5 12 13 4-13 5-5 12-5-12-13-5 13-4Z" fill="#fff5c4"/>
+        <g>${meridians.map((m, i) => {
+          const angle = 2 * Math.PI * i / meridians.length - Math.PI / 2;
+          return `<circle class="dao-sigil" data-muscle="${h(m.key)}" style="--dao-order:${i}" cx="${(80 + 72 * Math.cos(angle)).toFixed(1)}" cy="${(72 + 60 * Math.sin(angle)).toFixed(1)}" r="3.5"/>`;
+        }).join('')}</g>
+      </svg>
+      <span class="cultivation-seal" data-realm="${tuvi.realm.i}">${h(tuvi.realm.name)}</span>
     </div>
-    <ul class="dao-result-branches">${meridians.map((m) => `<li data-muscle="${h(m.key)}"><b>${h(m.name)}</b><span>${h(m.label)}${m.need > 0 ? `<small>Còn thiếu ${m.need} bài</small>` : ''}</span></li>`).join('')}</ul>
+    <div class="dao-rank">
+      <strong>${h(tuvi.label)}</strong><p>${h(verdict)}</p>
+      ${top ? `<p class="dao-talent">Thiên phú: mạch ${h(top.name)} · ${h(top.label)}</p>` : ''}
+    </div>
+    <ul class="dao-result-branches">${meridians.map((m, index) => `<li data-muscle="${h(m.key)}" style="--dao-order:${index}">
+      <div class="dao-branch-result"><b>${h(m.name)}</b><span>${h(m.label)}${m.need > 0 ? `<small>Còn thiếu ${m.need} bài</small>` : ''}</span></div>
+      ${m.unverified ? `<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>${claimRows(claims, m.key)}` : ''}
+    </li>`).join('')}</ul>
   </div>
   <h3>Lịch bế quan</h3>
   <ul class="dao-schedule">${[1, 2, 3, 4, 5, 6, 0].filter((day) => plan.schedule[day]).map((day) => {
@@ -102,9 +126,11 @@ function stepContent({ step, dao, sex, weight, groups, validation, tests, result
       </div>`;
     case 3:
       return `<div class="dao-fields">
-        <label class="dao-field">Thời gian tu đạo<select name="experience">${options(G.EXPERIENCE, dao.experience)}</select></label>
-        <label class="dao-field">Đạo tâm<select name="goal">${options(G.GOALS, dao.goal)}</select></label>
-        <label class="dao-field">Số buổi bế quan mỗi tuần<select name="days">${Object.keys(G.DAYS).map((n) => `<option value="${n}"${+n === +dao.days ? ' selected' : ''}>${n} buổi / tuần</option>`).join('')}</select></label>
+        ${choiceCards('experience', 'Thời gian tu đạo', G.EXPERIENCE, dao.experience)}
+        ${choiceCards('goal', 'Đạo tâm', G.GOALS, dao.goal)}
+        ${choiceCards('days', 'Số buổi bế quan mỗi tuần', Object.entries(G.DAYS).map(([id, plan]) => ({
+          id, label: `${id} buổi`, real: plan.days.map((day) => day ? `T${day + 1}` : 'CN').join(' · '),
+        })), dao.days)}
       </div>`;
     case 4: return showPath(dao, groups, validation, preview);
     case 5: return `<div class="dao-tests">${showTests(tests, dao.tested)}</div>`;
@@ -112,7 +138,7 @@ function stepContent({ step, dao, sex, weight, groups, validation, tests, result
   }
 }
 
-function stepActions({ step, dao, validation }, preview) {
+function stepActions({ step, dao, validation, editing }, preview) {
   const novice = G.EXPERIENCE.find((entry) => entry.id === dao.experience)?.test === false;
   const route = (n, newToTraining = novice) => `#/nhap-mon/${n}${newToTraining ? '/new' : ''}`;
   const button = (act, label, cls, href, disabled = false) => preview && href && !disabled
@@ -120,6 +146,7 @@ function stepActions({ step, dao, validation }, preview) {
     : `<button type="button" class="${cls}" data-act="${act}"${disabled ? ' disabled' : ''}>${label}</button>`;
 
   return `<div class="dao-actions">
+    ${step === 1 && !editing ? button('daoSkip', 'Để sau', 'ghost', '#/') : ''}
     ${step > 1 ? button('daoBack', 'Quay lại', 'ghost', route(step === 6 && novice ? 4 : step - 1)) : ''}
     ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/hero') + button('daoSave', 'Nhận công pháp', 'primary', '#/hero')
       : button('daoNext', 'Tiếp tục', 'primary dao-next', route(step === 4 && novice ? 6 : step + 1, step !== 3 && novice), step === 4 && validation?.ok === false)}
@@ -131,7 +158,7 @@ function stepActions({ step, dao, validation }, preview) {
 export function daoView(state, { preview = false } = {}) {
   const [title, intro] = STEPS[state.step - 1];
   return `<article class="dao-wizard cultivation${preview ? ' dao-preview' : ''}">
-    <a class="cultivation-back small" href="#/hero">← Động phủ</a>
+    ${state.editing || preview ? '<a class="cultivation-back small" href="#/hero">← Động phủ</a>' : ''}
     <header class="dao-cover">
       <div class="dao-cover-top"><span>Bước ${state.step} / ${STEPS.length}</span>${preview ? '<span class="cultivation-data-badge">Số liệu mẫu</span>' : ''}</div>
       <h1>${title}</h1>
@@ -173,7 +200,7 @@ async function load() {
 
 /** Đọc ô nhập của bước đang hiện vào bản nháp. */
 function collect(el, step, exercises) {
-  const v = (n) => el.querySelector(`[name="${n}"]`)?.value ?? '';
+  const v = (n) => el.querySelector(`[name="${n}"]:checked, [name="${n}"]:not([type=radio])`)?.value ?? '';
   const num = (x) => (x === '' || !(+x > 0) ? '' : +x);
   const d = draft.dao;
   if (step === 1) d.name = v('name').trim().slice(0, 40);
@@ -198,11 +225,11 @@ function collect(el, step, exercises) {
 /** Bước 2 bắt buộc giới tính + cân nặng (để xếp cảnh giới). */
 const missing = (step) => step === 2 && (!['m', 'f'].includes(draft.sex) ? 'Chọn giới tính' : !(draft.weight > 0) ? 'Nhập thân trọng (kg)' : '');
 
-function state(step, { exercises, body, workouts }, now = Date.now()) {
+function state(step, { exercises, body, workouts, s }, now = Date.now()) {
   const d = draft.dao, dao = { ...d, at: now };
   const b = draft.weight > 0 ? [...body, { date: now, weight: draft.weight }] : body;
   return {
-    step, dao: d, sex: draft.sex, weight: draft.weight,
+    step, dao: d, sex: draft.sex, weight: draft.weight, editing: G.entered(s),
     groups: G.pathOptions(exercises), validation: G.validatePath(d.path, exercises),
     tests: G.testList(d.path, exercises),
     result: step === 6 ? G.assess({ dao, exercises, body: b, sex: draft.sex, workouts, now }) : null,
@@ -238,6 +265,10 @@ export async function render(el, [part] = []) {
   if (step > 2 && missing(2)) step = 2;
   const show = () => { el.innerHTML = daoView(state(step, data)); };
   show();
+  if (step === 6) {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) sfx('dotPha');
+    else el.querySelector('.dao-altar .cultivation-seal').addEventListener('animationend', () => sfx('dotPha'), { once: true });
+  }
   const goStep = (n) => { location.hash = `#/nhap-mon/${n}`; };
   el.onchange = (ev) => {
     if (step === 4 && ev.target.matches('input[data-path]')) {
@@ -245,6 +276,7 @@ export async function render(el, [part] = []) {
       const open = [...el.querySelectorAll('details[open]')].map((x) => x.dataset.muscle);
       show();
       el.querySelectorAll('details.dao-branch').forEach((x) => { if (open.includes(x.dataset.muscle)) x.open = true; });
+      document.getElementById(ev.target.id)?.focus({ preventScroll: true });
     }
   };
   el.onclick = async (ev) => {
@@ -270,8 +302,8 @@ export async function render(el, [part] = []) {
       location.hash = settings.get().dao ? '#/hero' : '#/';
     } else if (act === 'daoSave') {
       ev.target.disabled = true;
-      const { profile } = await saveDao();
-      toast(`Nhập môn thành công · ${profile.tuvi.label}`);
+      await saveDao();
+      window.scrollTo(0, 0);
       location.hash = '#/hero';
     }
   };
