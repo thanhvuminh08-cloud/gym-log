@@ -21,12 +21,11 @@
 - Nền xanh đen theo lớp, biểu đồ xanh lam và nút chính xanh chanh. Set vượt có ánh sáng theo hạng, huy chương mới có nhãn “Mới”, hiệu ứng tôn trọng chế độ giảm chuyển động.
 - Thanh nghỉ tự chừa chỗ phía cuối trang theo chiều cao thực. Toast nằm dưới header và dùng chiều rộng màn hình khi cần.
 - Hàng set dùng sáu cột trên điện thoại. Báo cáo tuần có điều hướng ngày, thẻ thống kê và màu theo hạng cho từng bài.
+- Hôm nay và Tiến độ dùng thẻ kính tối, số lớn và một bảng màu nhóm cơ cho biểu đồ, chú thích và viền thẻ bài. Nút “Tiếp tục tập” nổi trên thanh điều hướng và chừa chỗ riêng cho thanh nghỉ.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Sau khi bản có sửa thanh nghỉ/toast (`dae83be`) được đẩy lên GitHub Pages, kiểm lại trên iPhone còn che nội dung cuối trang hoặc đè logo không, rồi sửa nếu tái hiện.
-- [cho Codex] Ngôn ngữ thiết kế mới theo ảnh mẫu người dùng gửi (app tập sức mạnh, nền tối): header trang có vầng sáng xanh lam góc trên; thẻ kính mờ bo tròn, viền sáng mảnh; số liệu chính rất to + đơn vị nhỏ + mũi tên ↑↓ xanh/đỏ; chip màu có chấm tròn làm chú thích; nav dạng viên thuốc nổi, mục chọn có nền sáng; thẻ bài tập có vạch màu bên trái theo nhóm cơ; nút "Tiếp tục" nổi trên nav. Bảng màu nhóm cơ thống nhất (css/).
-- [cho Codex] Claude đã gắn markup tạm cho phần số liệu mới, cần làm giao diện: Hôm nay `.strength .lift-cards .lift-card[data-muscle] .lift-top .lift-name svg.spark .lift-total .trend.up/.down`; Tiến độ: 4 tab `.tabs` (thêm Tổng quan), `.year-card .year-nav .year-total svg.year-grid rect[data-muscle]/.off/.future` (có `--i` để làm hiệu ứng hiện dần), `.volume-card svg.chart.bars g.bar[--i] rect[data-muscle]`, `.legend .legend-chip i.dot`, `.max-box`, `.chips.range`, `svg.chart path.area/.line text.pt`; `[data-muscle]` có trên `section.entry` (đang tập) và thẻ bài trong chi tiết lịch sử để làm vạch màu bên trái. Có thể bỏ thanh `.dashboard svg` 20px cho các SVG này (đang có style inline dự phòng).
+- [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. GitHub Pages v10 đã có CSS của `dae83be`. Bản cục bộ v16 đã qua kiểm tra bố cục trên Chrome ở 375 px.
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).

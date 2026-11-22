@@ -12,7 +12,7 @@ const TABS = { overview: 'Tổng quan', ex: 'Bài tập', body: 'Cơ thể', med
 const state = { tab: 'overview', exId: '', metric: 'e1rm', range: 6, year: new Date().getFullYear() };
 
 /** Chú thích màu nhóm cơ: [[muscle, text]]. */
-const legend = (items) => `<div class="chips legend">${items.map(([m, t]) => `<span class="chip legend-chip" data-muscle="${MUSCLE[m].key}"><i class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${MUSCLE[m].color}"></i> ${h(m)}${t ? ` <b>${t}</b>` : ''}</span>`).join('')}</div>`;
+const legend = (items) => `<div class="chips legend">${items.map(([m, t]) => `<span class="chip legend-chip" data-muscle="${MUSCLE[m].key}"><i class="dot" aria-hidden="true"></i> ${h(m)}${t ? ` <b>${t}</b>` : ''}</span>`).join('')}</div>`;
 
 export async function render(el, [tab, exId] = []) {
   if (TABS[tab]) state.tab = tab;
@@ -32,19 +32,19 @@ export async function render(el, [tab, exId] = []) {
       const g = yearGrid(done, ex, state.year);
       const wv = weeklyVolume(done, ex, 12);
       const inWeeks = Object.keys(MUSCLE).filter((m) => wv.some((w) => w.byMuscle[m]));
-      body = `<section class="card year-card">
+      body = `<div class="progress-overview"><section class="card year-card">
           <div class="row year-nav"><button class="ghost icon" data-y="${state.year - 1}" ${state.year <= lo ? 'disabled' : ''} aria-label="Năm trước">‹</button>
-            <b class="grow" style="text-align:center">${state.year}</b>
+            <b class="grow">${state.year}</b>
             <button class="ghost icon" data-y="${state.year + 1}" ${state.year >= hi ? 'disabled' : ''} aria-label="Năm sau">›</button></div>
           <div class="year-total"><b data-count="${g.total}">${g.total}</b><small> ngày tập</small></div>
-          ${legend(Object.keys(MUSCLE).filter((m) => g.counts[m]).map((m) => [m, `${g.counts[m]} ngày`]))}
           ${yearGridSvg(g)}
+          ${legend(Object.keys(MUSCLE).filter((m) => g.counts[m]).map((m) => [m, `${g.counts[m]} ngày`]))}
         </section>
         <section class="card volume-card">
           <h2>Khối lượng 12 tuần</h2>
           ${stackedBars(wv)}
           ${legend(inWeeks.map((m) => [m, '']))}
-        </section>`;
+        </section></div>`;
     } else if (state.tab === 'ex') {
       if (!used.length) body = `<section class="card empty-state">
         <span class="tile-icon"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>

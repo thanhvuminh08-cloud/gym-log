@@ -1,25 +1,28 @@
 :root {
-  --bg: #0a0f14; --card: #141d27; --raised: #1c2935; --line: #2a3946; --text: #f1f5f8; --muted: #aab8c5;
+  --bg: #0a0f14; --card: #141d27; --raised: #1c2935; --line: #34485d; --text: #f1f5f8; --muted: #aab8c5;
   --accent: #c5f464; --accent-ink: #18220b; --accent-soft: #26351c; --danger: #ff8e91; --pr: #fbbf24;
   --cool: #79c8ff;
-  --surface: linear-gradient(155deg, rgb(125 176 212 / .06), transparent 65%) var(--card);
-  --r: 18px;
+  --surface: linear-gradient(155deg, rgb(116 176 229 / .13), transparent 70%) rgb(20 29 39 / .88);
+  --r: 20px;
   --nav-label-line: .825rem;
   /* Biểu tượng, khoảng cách và viền chiếm 43px, cộng tối đa hai dòng nhãn. */
   --nav-height: max(66px, calc(43px + 2 * var(--nav-label-line)));
   --nav-bottom: calc(8px + env(safe-area-inset-bottom));
   --rest-offset: calc(var(--nav-height) + var(--nav-bottom) + 12px);
+  --resume-height: 48px;
   --brand-size: 34px; --brand-line: 1.75rem; --header-pad: 12px;
   --header-height: calc(max(var(--brand-size), var(--brand-line)) + 2 * var(--header-pad) + 1px + env(safe-area-inset-top));
   color-scheme: dark;
 }
 * { box-sizing: border-box; }
 html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
-body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: radial-gradient(ellipse min(540px, 90vw) 370px at 72% 0, #192d42, transparent 100%) no-repeat var(--bg); }
+body { min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column; background: radial-gradient(ellipse min(580px, 100vw) 350px at 86% 0, #1d3f69, transparent 100%) no-repeat var(--bg); }
 main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 22px 16px calc(var(--nav-height) + var(--nav-bottom) + 34px); }
 main:has(.dashboard) { max-width: 1040px; }
+main:has(.resume-workout) { padding-bottom: calc(var(--rest-offset) + var(--resume-height) + 22px); }
 /* Thanh nghỉ nằm trong luồng trang nên tự chừa đúng chiều cao, kể cả khi nội dung xuống dòng. */
-body:has(.rest-bar.show) { padding-bottom: var(--rest-offset); }
+body:has(.rest-bar.show) { --rest-bar-bottom: var(--rest-offset); padding-bottom: var(--rest-bar-bottom); }
+body:has(.rest-bar.show):has(.resume-workout) { --rest-bar-bottom: calc(var(--rest-offset) + var(--resume-height) + 8px); }
 body:has(.rest-bar.show) main { padding-bottom: 16px; }
 h1 { font-size: clamp(2.15rem, 5vw, 3.3rem); font-weight: 800; letter-spacing: -.045em; line-height: 1.1; margin: 0 0 16px; overflow-wrap: anywhere; }
 h2 { font-size: 1.15rem; margin: 24px 0 10px; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
@@ -30,8 +33,17 @@ p { margin: 6px 0; }
 .small { font-size: .85rem; }
 .error { color: var(--danger); }
 
-.card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; margin: 10px 0; color: inherit; }
+.card { display: block; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 14px; margin: 10px 0; color: inherit; box-shadow: inset 0 1px rgb(211 231 255 / .06), 0 6px 18px rgb(0 0 0 / .14); }
 a.card:hover, a.card:active { background: var(--raised); }
+.card[data-muscle] { border-inline-start: 3px solid var(--muscle, var(--cool)); }
+[data-muscle="chest"] { --muscle: #ff8f91; }
+[data-muscle="back"] { --muscle: #79c8ff; }
+[data-muscle="shoulders"] { --muscle: #c1a2ff; }
+[data-muscle="legs"] { --muscle: #c5f464; }
+[data-muscle="biceps"] { --muscle: #ffd07c; }
+[data-muscle="triceps"] { --muscle: #ffad7d; }
+[data-muscle="core"] { --muscle: #6be0cf; }
+[data-muscle="other"] { --muscle: #aab8c5; }
 .row { display: flex; align-items: center; gap: 8px; }
 .row.wrap { flex-wrap: wrap; }
 .grow { flex: 1; min-width: 0; }
@@ -112,7 +124,7 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 
 /* Khung ứng dụng */
 .icon-library { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
-.brand svg, nav svg, .dashboard svg, .tile-icon svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.brand svg, nav svg, .dashboard-icon, .tile-icon svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }
 .site-header { padding-top: env(safe-area-inset-top); border-bottom: 1px solid rgb(154 190 221 / .17); background: rgb(10 15 20 / .54); }
 .site-bar { display: flex; max-width: 1040px; margin: auto; padding: var(--header-pad) 16px; }
 .brand { display: inline-flex; align-items: center; gap: 10px; font-size: 1.18rem; font-weight: 780; line-height: var(--brand-line); letter-spacing: -.04em; color: var(--text); }
@@ -128,7 +140,7 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .dashboard-heading h1 { margin-bottom: 7px; }
 .dashboard-heading p { display: flex; align-items: center; gap: 8px; color: var(--muted); margin: 0 0 18px; }
 .dashboard-heading p span::first-letter { text-transform: uppercase; }
-.dashboard-heading svg { width: 16px; height: 16px; }
+.dashboard-heading .dashboard-icon { width: 16px; height: 16px; }
 .workout-hero {
   display: flex; align-items: end; min-height: 228px; overflow: hidden;
   padding: 22px 18px; border: 1px solid #394e60; border-radius: 24px;
@@ -142,6 +154,11 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .hero-content h2 { display: block; margin: 0 0 6px; font-size: clamp(1.55rem, 4vw, 2.5rem); line-height: 1.12; letter-spacing: -.04em; }
 .hero-content p { color: #d4dde5; margin: 0 0 16px; overflow-wrap: anywhere; }
 .hero-content .primary { padding-inline: 15px; box-shadow: 0 4px 18px rgb(197 244 100 / .17); }
+.hero-content .resume-workout {
+  position: fixed; z-index: 11; bottom: var(--rest-offset); inset-inline: 16px;
+  width: max-content; max-width: calc(100% - 32px); min-height: var(--resume-height); margin-inline: auto;
+  border-radius: 999px; box-shadow: 0 8px 24px rgb(0 0 0 / .55), 0 0 18px rgb(197 244 100 / .22);
+}
 .section-heading { margin-top: 22px; }
 .section-heading a { font-size: .875rem; font-weight: 650; white-space: nowrap; }
 .week-stats { margin-bottom: 0; gap: 8px; }
@@ -159,6 +176,22 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .empty-card .grow { min-width: 115px; }
 .empty-card p { margin: 3px 0 0; }
 .empty-card .btn { margin-left: auto; color: var(--accent); font-size: .875rem; white-space: nowrap; }
+.lift-cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(6px, 2vw, 14px); }
+.lift-card { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin: 0; padding: clamp(8px, 2.5vw, 16px); }
+.lift-top { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 8px; }
+.lift-top > b, .year-total > b, .max-box > b {
+  font-size: clamp(2rem, 7vw, 3.5rem); font-variant-numeric: tabular-nums;
+  line-height: 1; letter-spacing: -.05em; overflow-wrap: anywhere;
+}
+.lift-card .lift-top > b { font-size: clamp(1.35rem, 5vw, 2.65rem); }
+.lift-top b small, .year-total small, .max-box small { color: var(--muted); font-size: .8rem; font-weight: 650; letter-spacing: normal; }
+.lift-name { color: var(--muted); overflow-wrap: anywhere; font-weight: 650; }
+.spark { display: block; max-height: 64px; margin-top: auto; color: var(--muscle, var(--cool)); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.lift-total > .lift-top { margin-bottom: 10px; }
+.lift-total .chart { max-height: 260px; }
+.trend { display: inline-flex; padding: 2px 7px; border-radius: 999px; font-size: .75rem; font-weight: 750; line-height: 1.35; white-space: nowrap; }
+.trend.up { color: #a2efaa; background: #203a2e; }
+.trend.down { color: #ffb0b3; background: #432830; }
 @media (min-width: 700px) {
   main { padding-inline: 24px; padding-top: 28px; }
   .site-bar { padding-inline: 24px; }
@@ -186,8 +219,6 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .set.celebrate[data-celebrate="silver"] { --burst: #bcdcff; --burst-glow: rgb(188 220 255 / .48); --burst-scale: 1.012; }
 .set.celebrate[data-celebrate="bronze"] { --burst: #f2ac7e; --burst-glow: rgb(242 172 126 / .36); --burst-scale: 1.006; }
 .set.celebrate[data-celebrate] { position: relative; border-radius: 10px; box-shadow: 0 0 0 2px var(--burst), 0 0 15px var(--burst-glow); }
-.entry { border-inline-start: 3px solid #47617a; }
-.entry:has(.set.done) { border-inline-start-color: #77964a; }
 .entry .row:first-child { margin-bottom: 8px; flex-wrap: wrap; }
 .entry .row:first-child b { min-width: 95px; overflow-wrap: anywhere; }
 .entry input.tiny { width: 48px; }
@@ -201,21 +232,21 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 }
 
 /* Đồng hồ nghỉ */
-.rest-bar { display: none; position: sticky; bottom: var(--rest-offset); width: min(608px, calc(100% - 32px)); margin-inline: auto; gap: 6px; align-items: center; background: var(--raised); border: 1px solid var(--accent); border-radius: 14px; padding: 8px; z-index: 20; }
+.rest-bar { display: none; position: sticky; bottom: var(--rest-bar-bottom, var(--rest-offset)); width: min(608px, calc(100% - 32px)); margin-inline: auto; gap: 6px; align-items: center; background: var(--raised); border: 1px solid var(--accent); border-radius: 14px; padding: 8px; z-index: 20; }
 .rest-bar.show { display: flex; }
 .rest-bar button { padding-inline: clamp(6px, 2.5vw, 14px); }
 .rest-time { flex: 1; text-align: center; font-size: 1.3rem; font-weight: 700; font-variant-numeric: tabular-nums; }
 
 /* Nav */
-nav { position: fixed; inset: auto 8px var(--nav-bottom); width: min(520px, calc(100% - 16px)); min-height: var(--nav-height); margin-inline: auto; padding: 4px; display: flex; justify-content: center; background: #111a23; border: 1px solid var(--line); border-radius: 20px; box-shadow: 0 8px 28px rgb(0 0 0 / .44); z-index: 10; }
+nav { position: fixed; inset: auto 8px var(--nav-bottom); width: min(520px, calc(100% - 16px)); min-height: var(--nav-height); margin-inline: auto; padding: 4px; display: flex; justify-content: center; background: #111a23; border: 1px solid var(--line); border-radius: 999px; box-shadow: 0 8px 28px rgb(0 0 0 / .44), inset 0 1px rgb(211 231 255 / .09); z-index: 10; }
 @supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
   nav { background: rgb(17 26 35 / .89); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 }
-nav a { flex: 1 1 0; max-width: 132px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; font-size: .75rem; line-height: var(--nav-label-line); font-weight: 650; color: var(--muted); text-align: center; }
-nav a span { display: grid; place-items: center; width: 42px; height: 30px; border-radius: 10px; }
-nav a:hover, nav a.on { color: var(--accent); }
-nav a.on span { background: var(--accent-soft); box-shadow: inset 0 0 0 1px rgb(197 244 100 / .20); }
-nav a:focus-visible { outline-offset: -3px; border-radius: 8px; }
+nav a { flex: 1 1 0; max-width: 132px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 999px; font-size: .75rem; line-height: var(--nav-label-line); font-weight: 650; color: var(--muted); text-align: center; }
+nav a span { display: grid; place-items: center; width: 42px; height: 30px; }
+nav a:hover { color: var(--text); }
+nav a.on { color: var(--accent-ink); background: var(--accent); }
+nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
 
 /* Modal chọn bài */
 .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); z-index: 30; display: flex; align-items: flex-end; justify-content: center; }
@@ -225,16 +256,47 @@ nav a:focus-visible { outline-offset: -3px; border-radius: 8px; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }
 .chip { flex: none; min-height: 34px; padding: 4px 12px; border-radius: 999px; font-size: .85rem; }
 .chip.on, .tabs .on { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.tabs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; padding: 4px; margin-bottom: 12px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; }
-.tabs button { padding-inline: 6px; }
+.tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 4px; margin-bottom: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; }
+.tabs button { min-width: 0; padding: 6px 3px; font-size: clamp(.75rem, 3.15vw, .95rem); line-height: 1.15; overflow-wrap: anywhere; }
+
+/* Tổng quan sức mạnh */
+.progress-overview { display: grid; gap: 12px; align-items: start; }
+.progress-overview > .card { min-width: 0; margin: 0; }
+.year-nav > b { text-align: center; color: var(--cool); font-variant-numeric: tabular-nums; }
+.year-nav button { width: 44px; min-height: 44px; font-size: 1.45rem; line-height: 1; }
+.year-total { margin-block: 8px 14px; text-align: center; }
+.year-grid { display: block; max-width: 220px; margin-inline: auto; color: var(--text); }
+.year-grid .off { fill: #2b3b50; }
+.year-grid .future { fill: #203044; }
+:is(.year-grid, .chart.bars) rect[data-muscle] { fill: var(--muscle); }
+.volume-card h2 { margin-top: 0; }
+.legend { flex-wrap: wrap; padding: 10px 0 0; overflow: visible; }
+.legend:empty { padding: 0; }
+.legend-chip {
+  display: inline-flex; flex-wrap: wrap; align-items: center; gap: 4px; min-height: 0;
+  padding: 4px 8px; color: var(--text); background: var(--bg); border: 1px solid var(--line); font-size: .75rem;
+}
+.legend-chip .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muscle); }
+.legend-chip b { color: var(--muted); font-weight: 600; }
+.max-box {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 10px;
+  margin-block: 10px 2px; padding: 14px; border: 1px solid var(--line); border-radius: var(--r); background: var(--surface);
+}
+.max-box > b { color: var(--cool); }
+.range { flex-wrap: wrap; padding-block: 2px 6px; }
+.range .chip { min-height: 38px; }
+@media (min-width: 620px) {
+  .progress-overview { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); }
+}
 
 /* Biểu đồ */
 .chart { width: 100%; height: auto; display: block; border-radius: 12px; background: linear-gradient(155deg, rgb(74 149 205 / .14), transparent 76%); }
-.chart path { fill: none; stroke: var(--cool); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 3px rgb(121 200 255 / .46)); }
+.chart path.line { fill: none; stroke: var(--cool); stroke-width: 2.5; stroke-linejoin: round; stroke-linecap: round; filter: drop-shadow(0 0 3px rgb(121 200 255 / .46)); }
 .chart circle { fill: var(--cool); stroke: var(--card); stroke-width: 1.25; }
 .chart circle:last-of-type { fill: var(--text); stroke: var(--cool); }
 .chart .grid { stroke: var(--line); stroke-dasharray: 3 4; }
 .chart text { fill: var(--muted); font-size: 10px; }
+.chart text.pt { fill: var(--text); font-weight: 750; paint-order: stroke; stroke: var(--card); stroke-width: 2.5; }
 .chart-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 8px; margin-bottom: 8px; }
 .chart-head b { font-size: clamp(1.5rem, 5vw, 2.2rem); font-variant-numeric: tabular-nums; }
 
@@ -262,7 +324,9 @@ nav a:focus-visible { outline-offset: -3px; border-radius: 8px; }
 
 /* Phản hồi khi tập và chuyển màn hình */
 @media (prefers-reduced-motion: no-preference) {
-  main > h1, .dashboard-heading, .workout-hero { animation: screen-in .24s ease-out both; }
+  main > h1, .dashboard-heading, .workout-hero:not(:has(.resume-workout)) { animation: screen-in .24s ease-out both; }
+  .year-grid rect[data-muscle] { animation: chart-in .26s ease-out backwards; animation-delay: calc(var(--i) * .55ms); }
+  .chart.bars .bar { animation: chart-in .3s ease-out backwards; animation-delay: calc(var(--i) * 24ms); }
   .modal { animation: shade-in .18s ease-out both; }
   .sheet { animation: sheet-in .24s ease-out both; }
   .rest-bar.show { animation: rest-in .2s ease-out both; }
@@ -280,6 +344,7 @@ nav a:focus-visible { outline-offset: -3px; border-radius: 8px; }
   }
   nav a, nav a span, a.card { transition: color .15s ease-out, background-color .15s ease-out; }
 }
+@keyframes chart-in { from { opacity: 0; } }
 @keyframes screen-in {
   from { opacity: .65; translate: 0 5px; }
 }

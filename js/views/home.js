@@ -5,7 +5,7 @@ import { startWorkout } from './workout.js';
 import { topLifts, muscleKey } from '../insights.js';
 import { sparkline, lineChart } from '../chart.js';
 
-const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const icon = (name) => `<svg class="dashboard-icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
 
 /** Thẻ mức tạ chính (~1RM) + tổng, mũi tên so với 30 ngày trước. */
@@ -44,7 +44,7 @@ export async function render(el) {
         <h2>${cur ? 'Buổi tập đang diễn ra' : 'Buổi tập mới'}</h2>
         <p>${cur ? h(cur.name) : 'Ghi số set, rep và mức tạ.'}</p>
         ${cur
-          ? `<a class="btn primary" href="#/workout">${icon('play')}Tiếp tục tập</a>`
+          ? `<a class="btn primary resume-workout" href="#/workout">${icon('play')}Tiếp tục tập</a>`
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
