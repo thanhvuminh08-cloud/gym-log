@@ -1,5 +1,5 @@
 // Tăng VERSION mỗi khi sửa file tĩnh để điện thoại tải bản mới.
-const VERSION = 'v6';
+const VERSION = 'v7';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/db.js', 'js/util.js', 'js/stats.js', 'js/exercises.js', 'js/timer.js', 'js/chart.js', 'js/picker.js', 'js/overload.js', 'js/medals.js',
