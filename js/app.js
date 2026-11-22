@@ -52,8 +52,8 @@ const ALIASES = {
 const navKey = (r = '') => (ALIASES[r] ? ALIASES[r]([]).replace(/^#\/?/, '').split('/')[0] : r);
 
 const main = document.getElementById('main');
-document.querySelector('.site-nav').innerHTML = NAV.map(({ route, r, icon, label }) =>
-  `<a href="${route}" data-r="${r}"><span><svg aria-hidden="true"><use href="#${icon}"/></svg></span>${label}</a>`).join('');
+document.querySelector('.site-nav').innerHTML = NAV.map(({ route, r, icon, label, hint }) =>
+  `<a href="${route}" data-r="${r}"><svg aria-hidden="true"><use href="#${icon}"/></svg><span>${label}</span><small>${hint}</small></a>`).join('');
 let cleanup;
 
 async function route() {

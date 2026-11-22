@@ -2,11 +2,11 @@ import { all, get, put, del } from '../db.js';
 import { h, uid, fmtDate, fmtTime, fmtDur, fmtNum, e1rm, exMap, toast } from '../util.js';
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
-import { analyzeWorkout, TIER_LABEL } from '../overload.js';
+import { analyzeWorkout } from '../overload.js';
 import { muscleKey } from '../insights.js';
 import { medals } from '../medals.js';
-import { gloss, term } from '../lore.js';
-import { journalHeader, phamSeal } from './sections.js';
+import { gloss, hint, term } from '../lore.js';
+import { hintLabel, journalHeader, phamSeal, termLabel } from './sections.js';
 
 export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
@@ -36,7 +36,7 @@ async function detail(el, id, ex) {
   const ledger = medals(sessions.filter((session) => session.end <= w.end), w.end);
   const stones = ledger.milestones.filter((item) => item.reached?.workoutId === w.id);
   const nCmp = ov.filter((o) => !o.first).length, nUp = ov.filter((o) => o.res).length;
-  const tierRow = (o) => o.res ? `<div class="tier small summary-medal" data-tier="${o.res.tier}">${phamSeal()}<strong>${TIER_LABEL[o.res.tier]}</strong><span>${h(o.res.msg)}</span></div>`
+  const tierRow = (o) => o.res ? `<div class="tier small summary-medal" data-tier="${o.res.tier}">${phamSeal()}<strong>${termLabel(o.res.tier)}</strong><span>${h(o.res.msg)}</span></div>`
     : `<div class="tier small muted" data-tier="${o.first ? 'first' : 'none'}">${o.first ? 'Lần đầu tập bài này' : 'Chưa vượt lần trước'}</div>`;
   const sets = setCount(w), kg = volume(w);
   el.innerHTML = `
@@ -54,9 +54,9 @@ async function detail(el, id, ex) {
     </div>
   </div>
   ${ledger.streak.cur || stones.length ? `<section class="card ledger-summary">
-    ${ledger.streak.cur ? `<b>${term('streak', ledger.streak.cur)}</b><small class="gloss">${gloss('streak')}</small>` : ''}
-    ${stones.length ? `<h3>${term('milestone')} mới</h3><ul>${stones.map((item) => `<li>${h(ex[item.exerciseId]?.name || 'Bài đã xoá')} · ${fmtNum(item.reached.kg)} kg</li>`).join('')}</ul>` : ''}
-    <a class="btn ghost" href="#/ky/cong-duc">${term('ledger')}</a>
+    ${ledger.streak.cur ? `<b>${hintLabel(term('streak', ledger.streak.cur), hint('streak'))}</b><small class="gloss">${gloss('streak')}</small>` : ''}
+    ${stones.length ? `<h3>${hintLabel(`${term('milestone')} mới`, hint('milestone'))}</h3><ul>${stones.map((item) => `<li>${h(ex[item.exerciseId]?.name || 'Bài đã xoá')} · ${fmtNum(item.reached.kg)} kg</li>`).join('')}</ul>` : ''}
+    <a class="btn ghost" href="#/ky/cong-duc">${termLabel('ledger')}</a>
   </section>` : ''}
   ${w.entries.map((e, ei) => {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));

@@ -2,7 +2,8 @@ import { all, get, put, del } from '../db.js';
 import { h, uid, exMap, settings, toast } from '../util.js';
 import { pickExercise } from '../picker.js';
 import { startWorkout } from './workout.js';
-import { NAV, term } from '../lore.js';
+import { NAV } from '../lore.js';
+import { hintLabel, termLabel } from './sections.js';
 import { pathOptions } from '../dao.js';
 import { cleanSchedule } from '../schedule.js';
 
@@ -22,14 +23,14 @@ export async function render(el, [id]) {
   if (id) return edit(el, id, ex);
   const list = (await all('templates')).sort((a, b) => a.name.localeCompare(b.name));
   const { dao, schedule, weekGoal, monthGoal } = settings.get(), plan = cleanSchedule(schedule);
-  const { label, icon } = NAV.find((item) => item.key === 'cong-phap');
-  el.innerHTML = `<header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${label}</h1></header>
+  const { label, icon, hint } = NAV.find((item) => item.key === 'cong-phap');
+  el.innerHTML = `<header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${hintLabel(label, hint)}</h1></header>
   <section class="card plan-overview">
-    <h2>Thất mạch</h2>${pathPreview(dao, Object.values(ex))}
-    <a class="btn ghost" href="#/nhap-mon${dao?.at ? '/4' : ''}">${dao?.at ? 'Sửa Công pháp' : 'Nhập môn'}</a>
+    <h2>Bài theo mạch</h2>${pathPreview(dao, Object.values(ex))}
+    <a class="btn ghost" href="#/nhap-mon${dao?.at ? '/4' : ''}">${dao?.at ? 'Sửa bài theo mạch' : termLabel('nhapMon')}</a>
   </section>
   <section class="card plan-overview plan-schedule" aria-labelledby="plan-schedule-title">
-    <h2 id="plan-schedule-title">Lịch bế quan</h2>
+    <h2 id="plan-schedule-title">Lịch tập</h2>
     <p class="muted small">Chọn ngày tập để xem lời nhắc ở Động phủ.</p>
     <ul class="plan-days" data-schedule>
       ${days.map(([day, name]) => `
@@ -43,15 +44,15 @@ export async function render(el, [id]) {
     </ul>
   </section>
   <section class="card plan-overview plan-goals" data-goals aria-labelledby="plan-goals-title">
-    <h2 id="plan-goals-title">Mục tiêu bế quan</h2>
+    <h2 id="plan-goals-title">Mục tiêu tập</h2>
     <div class="plan-goal-fields">
-      <label><span>Số buổi mỗi tuần</span><input type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(weekGoal)}"></label>
-      <label><span>Số buổi mỗi tháng</span><input type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(monthGoal)}"></label>
+      <label><span>Mục tiêu tuần <small>(buổi)</small></span><input type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(weekGoal)}"></label>
+      <label><span>Mục tiêu tháng <small>(buổi)</small></span><input type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(monthGoal)}"></label>
     </div>
   </section>
-  <h2>Giáo án</h2>
+  <h2>${termLabel('giaoAn')}</h2>
   ${list.map((t) => `<div class="card"><div class="row"><b class="grow">${h(t.name)}</b>
-      <a class="btn ghost" href="#/cong-phap/${h(t.id)}">Sửa</a><button data-id="${h(t.id)}">${term('start')}</button></div>
+      <a class="btn ghost" href="#/cong-phap/${h(t.id)}">Sửa</a><button data-id="${h(t.id)}">${termLabel('start')}</button></div>
       <div class="small muted">${t.items.map((i) => `${h(ex[i.exerciseId]?.name || '?')} ${i.sets}×${i.reps}`).join(' · ')}</div></div>`).join('')
     || `<section class="card empty-state">
       <span class="tile-icon empty-illustration is-template"><svg aria-hidden="true"><use href="#i-layers"/></svg></span>
@@ -73,7 +74,7 @@ export async function render(el, [id]) {
       const next = cleanSchedule(settings.get().schedule);
       if (on.checked) next[row.dataset.day] = row.querySelector('[data-f=tpl]').value; else delete next[row.dataset.day];
       settings.set({ schedule: next });
-      toast('Đã lưu lịch bế quan');
+      toast('Đã lưu lịch tập');
       return render(el, []); // vẽ lại lưới tuần
     }
     if (t.dataset.k === 'weekGoal' || t.dataset.k === 'monthGoal') {

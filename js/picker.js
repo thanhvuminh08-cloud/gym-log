@@ -26,7 +26,7 @@ export async function pickExercise() {
     if (lock) m.dataset.locked = 'path';
     m.innerHTML = `<div class="sheet">
       <div class="row"><input type="search" placeholder="Tìm bài tập…" class="grow" autofocus><button class="ghost" data-close>Đóng</button></div>
-      ${lock ? '<p class="muted small pick-lock"><span>Theo Công pháp đã chọn</span><a href="#/nhap-mon/4" data-close>Sửa Công pháp <svg class="dashboard-icon" aria-hidden="true"><use href="#i-chevron"/></svg></a></p>' : ''}
+      ${lock ? '<p class="muted small pick-lock"><span>Chỉ hiện bài đã chọn cho mỗi mạch</span><a href="#/nhap-mon/4" data-close>Sửa bài theo mạch <svg class="dashboard-icon" aria-hidden="true"><use href="#i-chevron"/></svg></a></p>' : ''}
       <div class="chips">${[['', 'Tất cả'], ...groups].map(([v, t], i) => `<button class="chip${i ? '' : ' on'}" data-g="${h(v)}">${h(t)}</button>`).join('')}</div>
       <div class="list pick-list"></div>
       ${lock ? '' : '<button class="ghost wide" data-new>+ Tạo bài tập mới</button>'}

@@ -164,14 +164,15 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
-  await step('Động phủ gọn: Khí huyết, mục tiêu tuần và Liên kích dùng dữ liệu thật', async () => {
-    await go('#/'); const s = await until(() => $('[data-readiness-score]'));
-    const sc = Number(s?.dataset.count), wk = $('[data-session-goal=week]');
+  await step('Động phủ giữ mục tiêu tuần và Liên kích; Khí huyết chỉ ở Thất mạch', async () => {
+    await go('#/'); const wk = await until(() => $('[data-session-goal=week]'));
     // Đọc data-count, không đọc chữ: số đang chạy hiệu ứng đếm từ 0.
-    const got = [sc >= 0 && sc <= 100, !!wk?.querySelector('[data-session-goal-count]')?.textContent.includes(' / '), $('[data-session-count]')?.dataset.count,
+    const got = [!$('[data-readiness-score]'), !!wk?.querySelector('[data-session-goal-count]')?.textContent.includes(' / '), $('[data-session-count]')?.dataset.count,
       $('.sanctum-stats .streak-multiplier [data-count]')?.dataset.count, !$('.lift-card, .cultivation-meridian, .cultivation-challenge')].join(',');
     if (got !== 'true,true,2,1,true') lines.push(`  ${got}`);
-    return got === 'true,true,2,1,true';
+    await go('#/tang-thu/that-mach'); const score = await until(() => $('[data-readiness-score]'));
+    return got === 'true,true,2,1,true' && !!score && /^\d+$/.test(score.textContent) && Number(score.textContent) <= 100
+      && !!$('[data-readiness-chart] svg.spark');
   });
   await step('Tổng quan: thẻ Tổng ~1RM SBD dùng dữ liệu thật', async () => {
     await go('#/progress/overview'); const v = await until(() => $('[data-strength-total-value]'));
@@ -209,9 +210,26 @@ try {
     box.checked = false; box.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
     const off = w.document.documentElement.hasAttribute('data-no-gloss') && JSON.parse(w.localStorage.getItem('gym.settings')).gloss === false;
     const b = vis();
-    box.checked = true; box.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    await go('#/ky/cong-duc'); const tier = await until(() => $('.stats.medals .tier'));
+    const shortStays = $$('nav a small').length === 5 && $$('nav a small').every((n) => n.offsetHeight > 0)
+      && tier?.querySelector('.term-hint')?.offsetHeight > 0 && w.getComputedStyle(tier.querySelector('.gloss')).display === 'none';
+    await go('#/tang-thu/library'); (await until(() => $('a[href="#/tang-thu/library/tu-dien"]'))).click();
+    const entry = await until(() => $('[data-term=start]'));
+    const dict = !!entry?.querySelector('dd')?.offsetHeight && $$('[data-term]').length === (await import('./js/lore.js')).GLOSSARY.length;
+    await go('#/tang-thu/cai-dat'); const restore = await until(() => $('[data-k=gloss]'));
+    restore.checked = true; restore.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
     const c = vis(); el.remove();
-    return a && off && !b && c && !w.document.documentElement.hasAttribute('data-no-gloss');
+    return a && off && !b && c && shortStays && dict && !w.document.documentElement.hasAttribute('data-no-gloss');
+  });
+  await step('Mẫu Bế quan: bốn cách bắt đầu, thiếu dữ liệu thì chỉ hiện buổi trống', async () => {
+    const { workoutStartView } = await w.eval("import('./js/views/workout.js')");
+    const view = w.document.createElement('div');
+    const t = { id: 'sample', name: 'Thân trên', items: [{ exerciseId: 'x-bench-press-on' }] };
+    view.innerHTML = workoutStartView({ scheduled: t, templates: [t], last: { name: 'Thân dưới', start: Date.now() } });
+    const full = !!view.querySelector('[data-act=scheduled][data-id=sample]') && !!view.querySelector('.start-templates button[data-id=sample]')
+      && !!view.querySelector('[data-act=again]') && !!view.querySelector('[data-act=empty]');
+    view.innerHTML = workoutStartView();
+    return full && view.querySelectorAll('button').length === 1 && !!view.querySelector('[data-act=empty]');
   });
   await step('Bế quan: đánh dấu set xong → set sau còn trống tự điền kg × rep', async () => {
     const { startWorkout } = await w.eval("import('./js/views/workout.js')");
@@ -449,7 +467,7 @@ try {
     await go('#/');
     return !!gone && seen.chest[0] + seen.chest[1] > 0;
   });
-  await step('Nhập môn: khai báo, bỏ Deadlift, Trắc linh căn, Nhận công pháp → giáo án + lịch + mốc', async () => {
+  await step('Nhập môn: khai báo, bỏ Deadlift, Trắc linh căn, lưu kế hoạch → giáo án + lịch + mốc', async () => {
     const S = () => JSON.parse(w.localStorage.getItem('gym.settings'));
     const at = async (n) => !!(await until(() => $(`[data-dao-step="${n}"]`)));
     const next = async (n) => { $('[data-act=daoNext]').click(); return at(n); };
@@ -477,7 +495,7 @@ try {
     const s = S(), tpl = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp'));
     const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
     const got = [!!done, !!rank, days, s.dao.name, s.dao.path.back.join('+'), s.dao.tested.length, tpl.length, Object.keys(s.schedule).join(''), s.weekGoal,
-      s.dao.templateIds.length, !!seen, ceremonyShown, $('.cultivation-navigation')?.textContent.includes('Sửa Công pháp'),
+      s.dao.templateIds.length, !!seen, ceremonyShown, $('.cultivation-navigation')?.textContent.includes('Sửa bài theo mạch'),
       !!$('.cultivation-meridian[data-muscle=legs] .cultivation-tested')].join(',');
     // Làm lại Nhập môn: ghi đè giáo án cũ, không nhân đôi.
     await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/' && $('.tuvi-strip'), 5000);

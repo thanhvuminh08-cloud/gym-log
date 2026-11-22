@@ -1,6 +1,6 @@
 import { all, del, exportAll, importAll, validateBackup } from '../db.js';
 import { h, settings, toast, fmtDate } from '../util.js';
-import { archiveHeader } from './sections.js';
+import { archiveHeader, termLabel } from './sections.js';
 import { lastBackup, markBackup, snapshot, snapshotInfo, undoRestore, errorLog, clearErrors } from '../safety.js';
 
 const LABEL = { workouts: 'buổi tập', templates: 'giáo án', exercises: 'bài tập', body: 'lần cân' };
@@ -12,7 +12,7 @@ export async function render(el) {
   const persisted = (await navigator.storage?.persisted?.()) ?? false;
 
   el.innerHTML = `${archiveHeader('settings')}
-  <p class="muted small">Lịch bế quan và mục tiêu buổi/tuần nằm ở <a href="#/cong-phap">Công pháp</a>.</p>
+  <p class="muted small">Lịch tập và mục tiêu tuần nằm ở <a href="#/cong-phap">${termLabel('congPhap')}</a>.</p>
   <h2 id="rest-settings">Đồng hồ nghỉ</h2>
   <section class="card settings-options" aria-labelledby="rest-settings">
     <label class="row">Thời gian nghỉ mặc định (giây)<span class="grow"></span><input class="tiny" type="number" inputmode="numeric" data-k="rest" value="${s.rest}"></label>

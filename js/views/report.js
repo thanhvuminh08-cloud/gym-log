@@ -2,7 +2,7 @@ import { all } from '../db.js';
 import { h, fmtNum, fmtDur, fmtShort, exMap, toast } from '../util.js';
 import { weekStart, weekReport, reportText, pct } from '../report.js';
 import { PHAM } from '../lore.js';
-import { journalHeader, phamSeal } from './sections.js';
+import { journalHeader, phamSeal, termLabel } from './sections.js';
 
 /** #/ky/tuan/<offset>: 0 = tuần này, -1 = tuần trước… */
 export async function render(el, [off = '0']) {
@@ -16,7 +16,7 @@ export async function render(el, [off = '0']) {
   <header class="top row report-top">
     <button class="ghost icon" data-act="week" data-k="${offset - 1}" aria-label="Tuần trước">‹</button>
     <div class="grow">
-      <h2>Tuần ký</h2>
+      <h2>${termLabel('tuanKy')}</h2>
       <p>${h(fmtShort(r.start))} – ${h(fmtShort(r.end - 1))}</p>
     </div>
     <button class="ghost icon" data-act="week" data-k="${offset + 1}" aria-label="Tuần sau" ${offset ? '' : 'disabled'}>›</button>
@@ -31,7 +31,7 @@ export async function render(el, [off = '0']) {
     <div class="row"><span class="grow">Ngày tập</span><b>${h(r.days.map((d) => d.day).join(', '))}</b></div>
     <div class="row"><span class="grow">Thời gian</span><b>${h(fmtDur(r.cur.time))}</b></div>
     ${r.compared ? `<div class="row"><span class="grow">Vượt lần trước</span><b>${r.beats}/${r.compared} bài</b></div>
-    <div class="report-pham">${Object.entries(PHAM).map(([tier, name]) => `<span data-tier="${tier}">${phamSeal()}${name} <b>${r.medals[tier]}</b></span>`).join('')}</div>` : ''}
+    <div class="report-pham">${Object.keys(PHAM).map((tier) => `<span data-tier="${tier}">${phamSeal()}${termLabel(tier)} <b>${r.medals[tier]}</b></span>`).join('')}</div>` : ''}
     ${r.rpe ? `<div class="row"><span class="grow">RPE trung bình</span><b>${fmtNum(r.rpe)}</b></div>` : ''}
     ${r.weight ? `<div class="row"><span class="grow">Cân nặng</span><b>${fmtNum(r.weight.kg)} kg${r.weight.delta != null ? ` <small class="muted">(${r.weight.delta >= 0 ? '+' : ''}${fmtNum(r.weight.delta)})</small>` : ''}</b></div>` : ''}
   </section>
@@ -40,7 +40,7 @@ export async function render(el, [off = '0']) {
     <section class="card report-ex"${e.best ? ` data-tier="${e.best.tier}"` : ''}>
       <div class="row"><b class="grow">${h(e.name)}</b><span class="muted small">${e.sets} set · ${fmtNum(e.vol)} kg</span></div>
       <div class="small">Top ${fmtNum(e.top.w)}×${e.top.r} · ~1RM ${fmtNum(e.e1)} kg</div>
-      ${e.best ? `<div class="small target">${phamSeal()} <b>${PHAM[e.best.tier]}</b> · ${h(e.best.msg)}</div>` : ''}
+      ${e.best ? `<div class="small target">${phamSeal()} <b>${termLabel(e.best.tier)}</b> · ${h(e.best.msg)}</div>` : ''}
     </section>`).join('')}
   <h2 class="section-heading">Buổi tập</h2>
   ${r.days.map((d) => `<a class="card row report-day" href="#/ky/${h(d.id)}"><span class="grow">${h(d.name)}</span><span class="muted small">${h(d.day)} ${h(fmtShort(d.t))}</span></a>`).join('')}

@@ -13,8 +13,8 @@
   --surface: linear-gradient(155deg, rgb(127 188 255 / .15), transparent 62%) rgb(15 26 40 / .78);
   --r: 20px;
   --nav-label-line: .825rem;
-  /* Biểu tượng, khoảng cách và viền chiếm 43px, cộng tối đa hai dòng nhãn. */
-  --nav-height: max(66px, calc(43px + 2 * var(--nav-label-line)));
+  /* Chừa chỗ cho biểu tượng, tên mục và chú ngắn trên thanh điều hướng. */
+  --nav-height: calc(48px + 2 * var(--nav-label-line));
   --nav-bottom: calc(8px + env(safe-area-inset-bottom));
   --rest-offset: calc(var(--nav-height) + var(--nav-bottom) + 12px);
   --brand-size: 34px; --brand-line: 1.75rem; --header-pad: 12px;
@@ -119,7 +119,8 @@ label.row { padding: 6px 0; }
 
 /* Công đức bạ */
 .gloss { color: var(--muted); font-size: .82rem; }
-[data-no-gloss] .gloss { display: none; } /* Tàng thư › Cài đặt › Chú giải tắt */
+.term-hint { color: inherit; opacity: .8; font: 600 .75em/1.2 system-ui, sans-serif; }
+.label-with-hint > .term-hint::before { content: '· '; }
 .pham-seal {
   display: inline-grid; width: 1em; height: 1em; place-items: center; vertical-align: -.15em; flex: none;
   color: var(--tier-text, var(--accent)); border: 1px solid var(--tier-line, currentColor);
@@ -371,8 +372,8 @@ nav { position: fixed; inset: auto 8px var(--nav-bottom); width: min(520px, calc
 @supports (backdrop-filter: blur(12px)) or (-webkit-backdrop-filter: blur(12px)) {
   nav { background: rgb(17 26 35 / .89); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
 }
-nav a { flex: 1 1 0; max-width: 132px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 999px; font-size: .75rem; line-height: var(--nav-label-line); font-weight: 650; color: var(--muted); text-align: center; }
-nav a span { display: grid; place-items: center; width: 42px; height: 30px; }
+nav a { flex: 1 1 0; max-width: 132px; min-width: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; border-radius: 999px; font-size: clamp(.64rem, 3.2vw, .75rem); line-height: var(--nav-label-line); font-weight: 700; color: var(--muted); text-align: center; }
+nav a small { font-size: .66rem; font-weight: 550; line-height: var(--nav-label-line); }
 nav a:hover { color: var(--text); }
 nav a.on { color: var(--accent-ink); background: var(--accent); }
 nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
@@ -398,11 +399,14 @@ button.chip { min-height: 44px; }
 }
 .section-masthead h1, .dashboard-heading h1 { font-family: var(--cultivation-serif); font-weight: 700; color: #f2d49b; }
 .section-masthead h1 { margin: 0; }
+.section-masthead .term-hint, .dashboard-heading .term-hint { font-size: .45em; color: var(--muted); letter-spacing: 0; }
 .section-tabs { grid-template-columns: none; grid-auto-columns: minmax(0, 1fr); grid-auto-flow: column; }
 .section-tabs a {
   display: grid; place-items: center; min-height: 44px; min-width: 0; padding: 4px 2px; text-align: center;
   font-size: clamp(.75rem, 3.3vw, .95rem); line-height: 1.15; border-radius: 11px;
 }
+.section-tabs .term-hint { display: block; margin-top: 2px; }
+.section-tabs .term-hint::before { content: none; }
 @media (max-width: 480px) {
   .section-tabs:has([data-tab="that-mach"]) { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-flow: row; }
 }
@@ -438,6 +442,20 @@ button.chip { min-height: 44px; }
 .library-group summary { min-height: 44px; padding-block: 10px; font-weight: 700; cursor: pointer; }
 .library-group ul { padding-inline-start: 1.18em; }
 .library-group li { padding-block: 4px; }
+.glossary { margin: 0; padding-block: 4px; }
+.glossary > div { padding-block: 10px; }
+.glossary > div + div { border-top: 1px solid var(--line); }
+.glossary dt { font-weight: 750; }
+.glossary dd { margin: 3px 0 0; color: var(--muted); font-size: .9rem; }
+.workout-start .card h2 { margin: 0 0 4px; }
+.workout-start .card p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.start-scheduled { border-inline-start: 3px solid var(--accent); }
+.start-templates ul { list-style: none; margin: 0; padding: 0; }
+.start-templates li { padding-block: 6px; }
+.start-templates li + li { border-top: 1px solid var(--line); }
+.start-templates .grow { overflow-wrap: anywhere; }
+.start-templates small { display: block; }
+.entry-rest .label-with-hint { display: block; }
 
 /* Tổng quan sức mạnh */
 .progress-overview { display: grid; gap: 12px; align-items: start; }
@@ -675,7 +693,7 @@ button.chip { min-height: 44px; }
 .sanctum-cultivation .quest-list p { font-size: .76rem; line-height: 1.25; overflow-wrap: anywhere; }
 .sanctum-cultivation .quest-status { display: flex; align-items: center; font-size: .86rem; }
 .sanctum-stats {
-  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border: 1px solid var(--line);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border: 1px solid var(--line);
   border-radius: 14px; background: var(--surface); text-align: center;
 }
 .sanctum-stats > * { display: grid; align-content: center; min-height: 62px; min-width: 0; padding: 5px; color: var(--text); }
@@ -685,6 +703,9 @@ button.chip { min-height: 44px; }
 .sanctum-stats b { font-size: 1.2rem; line-height: 1.2; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
 .sanctum-stats [data-done] b, .sanctum-stats a:hover b { color: var(--accent); }
 .sanctum-cultivation .cultivation-profile { margin: 0; }
+.readiness-detail summary { min-height: 44px; padding-block: 10px; color: var(--gold); cursor: pointer; }
+.readiness-detail summary > b { float: inline-end; }
+.readiness-detail .spark { margin-top: 8px; }
 .cultivation-demo { display: none; margin: 12px 0 18px; }
 .cultivation-demo h2 { margin: 0 0 7px; }
 @supports selector(:popover-open) {
@@ -933,3 +954,5 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
   to { box-shadow: 0 0 0 1px var(--burst); }
 }
 @keyframes set-shine { to { background-position: 0 0; opacity: 0; } }
+
+html[data-no-gloss] .gloss { display: none; }

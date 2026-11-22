@@ -2,16 +2,20 @@ import { all, put, DB_NAME } from '../db.js';
 import { hero, REALMS, TEMPERS, MASTERY, snapshot, breakthroughs, quests } from '../hero.js';
 import { fmtNum, h, uid, settings, countUp, tap } from '../util.js';
 import { sfx, music } from '../sfx.js';
-import { archiveHeader } from './sections.js';
+import { readiness } from '../insights.js';
+import { gloss, hint, term } from '../lore.js';
+import { archiveHeader, hintLabel, termLabel } from './sections.js';
+import { sparkline } from '../chart.js';
 
 /** Dữ liệu thật cho Động phủ: hero() + nhiệm vụ tuần (profile.weekly) từ toàn bộ buổi tập, thư viện bài, cân nặng và cài đặt. */
-export async function loadProfile(now = Date.now()) {
+export async function loadProfile(now = Date.now(), { detail = false } = {}) {
   const [workouts, exercises, body] = await Promise.all([all('workouts'), all('exercises'), all('body')]);
   const s = settings.get(), ctx = { workouts, exercises, schedule: s.schedule, weekGoal: s.weekGoal, now };
   const profile = hero({ ...ctx, body, sex: s.sex, dao: s.dao });
   // Nhiệm vụ chọn mạch theo hồ sơ đầu tuần (T2 0h) để không đổi giữa tuần.
   const base = hero({ ...ctx, body, sex: s.sex, dao: s.dao, now: Math.min(now, Math.max(weekStart(now), s.dao?.at || 0)) });
   profile.weekly = quests({ ...ctx, profile, base });
+  if (detail) profile.readiness = readiness(workouts, now);
   return profile;
 }
 
@@ -123,7 +127,7 @@ function loadText(next, kg) {
   return `${fmtNum(kg)} kg${next.added ? ' đeo thêm' : next.perHand ? ' mỗi tay' : ''}`;
 }
 
-export function claimRows(claims = [], meridian) {
+function claimRows(claims = [], meridian) {
   const pending = claims.filter((claim) => claim.meridian === meridian && !claim.verified && claim.target);
   if (!pending.length) return '';
   return `<div class="cultivation-claims"><b>Mốc xác chứng</b><ul>${pending.map(({ name, label, target }) => {
@@ -144,7 +148,7 @@ function meridianCard(m, claims) {
     <div class="cultivation-meridian-head">
       <h3>${h(m.name)}</h3><strong class="cultivation-temper-rank">${h(m.label)}</strong>
     </div>
-    ${m.unverified ? '<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>' : ''}
+    ${m.unverified ? `<small class="cultivation-claim-badge" data-unverified>${termLabel('huCanh')}</small>` : ''}
     ${lifts?.length ? `<ul class="cultivation-lifts">${lifts.map((lift) => `<li class="cultivation-lift">
       <span><b>${h(lift.name)}</b>${lift.unverified ? ' <small class="cultivation-tested" data-unverified>hư cảnh</small>' : lift.tested ? ' <small class="cultivation-tested">tự khai</small>' : ''}</span>
       <span>${lift.unit ? `${fmtNum(lift.reps)} ${h(lift.unit)}` : `${lift.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(lift.kg)} kg`}</span>
@@ -174,7 +178,8 @@ export function profileForm({ needsWeight, needsSex }) {
 export function breakthroughModal(event, { id = 'breakthrough', demo = false } = {}) {
   const kind = event.kind ?? (event.verify ? 'verify' : 'tuvi');
   const tribulation = kind === 'tuvi' && Boolean(event.tribulation);
-  const title = kind === 'temper' ? 'Thối thể' : kind === 'verify' ? 'Xác chứng' : tribulation ? 'Độ kiếp' : 'Đột phá';
+  const titleKey = kind === 'temper' ? 'thoiThe' : kind === 'verify' ? 'xacChung' : tribulation ? 'doKiep' : 'dotPha';
+  const title = kind === 'verify' ? hint(titleKey) : termLabel(titleKey);
   const realm = event.to.split(' · ')[0];
   const index = event.level ?? Math.max(0, (kind === 'tuvi' ? REALMS : TEMPERS).indexOf(realm));
   const key = h(id);
@@ -195,9 +200,9 @@ export function breakthroughModal(event, { id = 'breakthrough', demo = false } =
         ${kind === 'verify' ? '<svg class="breakthrough-verify-mark" viewBox="0 0 56 60" fill="none"><path d="M28 3 51 13v16c0 15-10 23-23 28C15 52 5 44 5 29V13L28 3Z"/><path d="m17 30 8 8 15-17"/></svg>' : ''}
       </div>
       <div class="breakthrough-content">
-        <p class="breakthrough-kind">${h(event.name)}${demo ? ' · Số liệu mẫu' : ''}</p>
+        <p class="breakthrough-kind">${h(kind === 'verify' ? event.name.replace(`${term('xacChung')} · `, '') : event.name)}${demo ? ' · Số liệu mẫu' : ''}</p>
         <h2 id="${key}-title">${title}</h2>
-        <div class="breakthrough-ranks"><span>${h(event.from)}</span><span aria-hidden="true">↓</span><strong>${h(event.to)}</strong></div>
+        <div class="breakthrough-ranks"><span>${h(kind === 'verify' ? hint('huCanh') : event.from)}</span><span aria-hidden="true">↓</span><strong>${h(event.to)}</strong></div>
         <p class="breakthrough-real">${event.real ? h(event.real) : 'Chưa có số liệu'}</p>
         <form method="dialog">
           <button class="primary breakthrough-close" data-act="closeBreak"${demo ? ` type="button" popovertarget="${key}" popovertargetaction="hide"` : ''}>Đóng</button>
@@ -210,10 +215,10 @@ export function breakthroughModal(event, { id = 'breakthrough', demo = false } =
 export function questBoard(weekly, sample = false, compact = false) {
   if (!weekly) return '';
   return `<section class="cultivation-scroll" data-quests>
-    <header class="cultivation-section-heading"><h2>Nhiệm vụ tuần</h2><span><b>${weekly.done}/${weekly.total}</b> hoàn thành</span></header>
+    <header class="cultivation-section-heading"><h2>${termLabel('quests')}</h2><span><b>${weekly.done}/${weekly.total}</b> hoàn thành</span></header>
     ${compact ? '' : `<p class="quest-sample">${sample ? 'Số liệu mẫu · ' : ''}Thứ hai đến Chủ nhật</p>`}
     <ul class="quest-list">${weekly.quests.map((q) => `<li data-quest="${h(q.id)}"${q.meridian ? ` data-muscle="${h(q.meridian)}"` : ''}>
-      <div><h3>${h(q.title)}</h3><p>${h(q.detail)}</p></div>
+      <div><h3>${q.kind === 'verify' ? h(q.title.replace(`${term('xacChung')} mạch `, 'Đạt mốc ở nhóm cơ ')) : q.kind === 'open' ? hintLabel(h(q.title), hint('khaiMach')) : h(q.title)}</h3><p>${h(q.detail)}</p></div>
       <div class="quest-status"><b>${q.done}/${q.goal}</b>${q.complete ? '<span class="quest-stamp">Đã xong</span>' : ''}</div>
     </li>`).join('')}</ul>
   </section>`;
@@ -222,8 +227,9 @@ export function questBoard(weekly, sample = false, compact = false) {
 export function tuviStrip({ tuvi, linhKhi }) {
   return `<a class="tuvi-strip" href="#/tang-thu/that-mach">
     ${seal(tuvi.realm.i, tuvi.realm.name)}
-    <span class="tuvi-strip-info"><small>Tu vi</small><strong>${h(tuvi.label)}</strong>
-      <small>Công lực cấp ${linhKhi.level} · ${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} Linh khí</small>
+    <span class="tuvi-strip-info"><small>${termLabel('tuvi')}</small><strong>${h(tuvi.label)}</strong>
+      <small>${hintLabel(`${term('congLuc')} cấp ${linhKhi.level}`, hint('congLuc'))}</small>
+      <small>${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} ${termLabel('linhKhi')}</small>
       <progress class="cultivation-meter" value="${linhKhi.into}" max="${linhKhi.need}" aria-label="Linh khí tới cấp tiếp theo"></progress>
     </span>
     <svg class="dashboard-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
@@ -234,7 +240,7 @@ function challengeCard(challenge, sample) {
   if (!challenge) return '';
   const { next } = challenge;
   return `<section class="cultivation-challenge" data-muscle="${h(challenge.key)}">
-    <header class="cultivation-section-heading"><h2>Thử thách Bình cảnh</h2>${sample ? '<span class="cultivation-data-badge">Số liệu mẫu</span>' : ''}</header>
+    <header class="cultivation-section-heading"><h2>${termLabel('binhCanh')}</h2>${sample ? '<span class="cultivation-data-badge">Số liệu mẫu</span>' : ''}</header>
     <p class="challenge-realm">${h(challenge.name)} · ${h(challenge.label)}</p>
     <div class="challenge-goal">
       <div><p>${h(next.name)}</p><strong>${loadText(next, next.alt?.kg ?? next.kg)} × ${next.alt?.r ?? 1}</strong>
@@ -246,10 +252,10 @@ function challengeCard(challenge, sample) {
 }
 
 export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, challenge = SAMPLE_CHALLENGE, demo = true } = {}) {
-  const { tuvi, canCo, shaky, linhKhi, meridians, bw } = profile;
+  const { tuvi, canCo, shaky, linhKhi, meridians, bw, readiness: ready } = profile;
   return `<article class="cultivation">
     <div class="cultivation-navigation">
-      <a class="cultivation-back small" href="#/nhap-mon">${settings.get().dao ? 'Sửa Công pháp' : 'Nhập môn'} →</a>
+      <a class="cultivation-back small" href="#/nhap-mon${settings.get().dao ? '/4' : ''}">${settings.get().dao ? 'Sửa bài theo mạch' : termLabel('nhapMon')} →</a>
     </div>
     <header class="cultivation-cover">
       <span class="cultivation-mist" aria-hidden="true"></span>
@@ -260,22 +266,29 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
       <div class="cultivation-rank">
         ${seal(tuvi.realm.i, tuvi.realm.name)}
         <div>
-          <h2>Tu vi</h2>
+          <h2>${termLabel('tuvi')}</h2>
           <strong>${h(tuvi.label)}</strong>
-          ${canCo != null ? `<p class="cultivation-condition${shaky ? ' is-shaky' : ''}">Căn cơ <b>${canCo}%</b>${shaky ? ' · Lung lay' : ''}</p>` : ''}
+          ${canCo != null ? `<p class="cultivation-condition${shaky ? ' is-shaky' : ''}">${termLabel('canCo')} <b>${canCo}%</b>${shaky ? ' · Lung lay' : ''}</p>` : ''}
         </div>
       </div>
     </header>
     ${profileForm(profile)}
     <section class="card cultivation-panel">
       <div class="cultivation-section-heading">
-        <h2>Công lực cấp ${linhKhi.level}</h2>
-        <span><b data-count="${linhKhi.xp}">${fmtNum(linhKhi.xp)}</b> Linh khí</span>
+        <h2>${hintLabel(`${term('congLuc')} cấp ${linhKhi.level}`, hint('congLuc'))}</h2>
+        <span><b data-count="${linhKhi.xp}">${fmtNum(linhKhi.xp)}</b> ${termLabel('linhKhi')}</span>
       </div>
       <progress class="cultivation-meter" value="${linhKhi.into}" max="${linhKhi.need}" aria-label="Linh khí tới cấp tiếp theo"></progress>
       <p class="muted small">${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} Linh khí tới cấp ${linhKhi.level + 1}</p>
       ${linhKhi.parts?.dao > 0 ? `<p class="cultivation-prior-qi"><b>${fmtNum(linhKhi.parts.dao)} Linh khí</b> · Tu vi tích luỹ trước khi nhập môn</p>` : ''}
     </section>
+    ${ready ? `<details class="card cultivation-panel readiness-detail" data-readiness>
+      <summary>${termLabel('khiHuyet')} <b><span data-readiness-score>${ready.score ?? '–'}</span>${ready.score != null ? ' /100' : ''}</b></summary>
+      ${ready.score == null ? '<p class="muted small">Hoàn thành buổi tập đầu tiên để có điểm.</p>' : `
+        <p class="gloss">${gloss('khiHuyet')}</p>
+        ${ready.delta ? `<p class="muted small">${ready.delta > 0 ? '+' : '−'}${Math.abs(ready.delta)} điểm so với hôm qua</p>` : ''}
+        <div data-readiness-chart>${sparkline(ready.days, 260, 44)}</div>`}
+    </details>` : ''}
     ${challengeCard(challenge, challenge === SAMPLE_CHALLENGE)}
     ${questBoard(weekly, weekly === SAMPLE_QUESTS)}
     ${demo ? `<section class="cultivation-demo" aria-labelledby="cultivation-demo-title">
@@ -290,12 +303,12 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
       ${breakthroughModal(SAMPLE_BREAKTHROUGHS[2], { id: 'sample-temper', demo: true })}
     </section>` : ''}
     <section class="card cultivation-panel cultivation-chart">
-      <h2>Thất mạch đồ</h2>
+      <h2>${hintLabel(`${term('thatMach')} đồ`, hint('thatMach'))}</h2>
       ${radar(meridians)}
     </section>
     <section>
       <div class="cultivation-section-heading">
-        <h2>Luyện thể · Thất mạch</h2>
+        <h2>${termLabel('luyenThe')}</h2>
         ${bw != null ? `<span class="muted small">Cân nặng ${fmtNum(bw)} kg</span>` : ''}
       </div>
       <details class="cultivation-temper-guide">
@@ -316,7 +329,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
 
 const view = (profile) => archiveHeader('that-mach') + heroView(profile, { weekly: null, challenge: profile.challenge, demo: false });
 
-export function bindProfileForm(el, draw) {
+export function bindProfileForm(el, draw, profileOptions) {
   // Lưu cân nặng (bảng body, như Tiến độ › Cơ thể) và giới tính rồi tính lại.
   el.onsubmit = async (ev) => {
     const form = ev.target.closest('[data-hero-profile]');
@@ -327,7 +340,7 @@ export function bindProfileForm(el, draw) {
     if (f.has('sex') && sex !== 'm' && sex !== 'f') return;
     if (f.has('weight')) await put('body', { id: uid(), date: Date.now(), weight, waist: null });
     if (f.has('sex')) settings.set({ sex });
-    const next = await loadProfile();
+    const next = await loadProfile(Date.now(), profileOptions);
     if (!el.contains(form)) return;
     draw(next);
     countUp(el);
@@ -336,9 +349,10 @@ export function bindProfileForm(el, draw) {
 }
 
 export async function render(el) {
-  const profile = await loadProfile();
+  const options = { detail: true };
+  const profile = await loadProfile(Date.now(), options);
   el.innerHTML = view(profile);
-  bindProfileForm(el, (next) => { el.innerHTML = view(next); });
+  bindProfileForm(el, (next) => { el.innerHTML = view(next); }, options);
   ceremony(profile);
   return music();
 }

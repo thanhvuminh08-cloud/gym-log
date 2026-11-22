@@ -3,16 +3,17 @@ import { DEFAULT_EXERCISES } from '../exercises.js';
 import { h, settings, uid, toast } from '../util.js';
 import { all, put, del } from '../db.js';
 import { snapshot } from '../hero.js';
-import { claimRows, loadProfile, SEEN_KEY } from './hero.js';
+import { loadProfile, SEEN_KEY } from './hero.js';
+import { termLabel } from './sections.js';
 import { sfx } from '../sfx.js';
 
 const STEPS = [
-  ['Nhập môn', 'Sơn môn đã mở. Nếu hữu duyên, hãy để lại một đạo hiệu và bắt đầu con đường tu luyện của riêng mình.'],
+  [termLabel('nhapMon'), 'Đặt tên cho hồ sơ tập luyện của bạn.'],
   ['Thân thể', 'Dùng thông tin cơ thể để ước lượng cảnh giới khởi đầu.'],
   ['Đạo hạnh', 'Chọn mục tiêu và số buổi tập phù hợp với bạn.'],
-  ['Chọn Công pháp', 'Mỗi mạch cần ít nhất hai bài được xét bậc Luyện thể.'],
-  ['Trắc linh căn', 'Nhập mức tạ và số rep tốt nhất gần đây. Có thể để trống từng bài.'],
-  ['Nghi lễ Trắc linh căn', 'Đá linh căn soi Thất mạch và ghi lại cảnh giới khởi đầu của đạo hữu.'],
+  ['Bài theo mạch', 'Chọn ít nhất hai bài được tính cấp cho mỗi nhóm cơ.'],
+  [termLabel('tracLinhCan'), 'Nhập mức tạ và số rep tốt nhất gần đây. Có thể để trống từng bài.'],
+  ['Kết quả kiểm tra sức', 'Cấp khởi đầu được ước tính từ số liệu bạn nhập.'],
 ];
 const DAYS = ['Chủ nhật', 'Thứ hai', 'Thứ ba', 'Thứ tư', 'Thứ năm', 'Thứ sáu', 'Thứ bảy'];
 
@@ -73,7 +74,7 @@ function showTests(tests, tested) {
 }
 
 function showResult(result, plan, exerciseNames) {
-  const { tuvi, top, verdict, meridians, claims } = result;
+  const { tuvi, top, verdict, meridians } = result;
   return `<div class="dao-result">
     <div class="dao-altar" aria-hidden="true">
       <svg class="dao-stone" viewBox="0 0 160 150" focusable="false">
@@ -94,13 +95,12 @@ function showResult(result, plan, exerciseNames) {
       <strong>${h(tuvi.label)}</strong><p>${h(verdict)}</p>
       ${top ? `<p class="dao-talent">Thiên phú: mạch ${h(top.name)} · ${h(top.label)}</p>` : ''}
     </div>
-    <h3>Luyện thể · Thất mạch</h3>
+    <h3>${termLabel('luyenThe')}</h3>
     <ul class="dao-result-branches">${meridians.map((m, index) => `<li data-muscle="${h(m.key)}" style="--dao-order:${index}">
       <div class="dao-branch-result"><b>${h(m.name)}</b><span>${h(m.label)}${m.need > 0 ? `<small>Còn thiếu ${m.need} bài</small>` : ''}</span></div>
-      ${m.unverified ? `<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>${claimRows(claims, m.key)}` : ''}
     </li>`).join('')}</ul>
   </div>
-  <h3>Lịch bế quan</h3>
+  <h3>Lịch tập</h3>
   <ul class="dao-schedule">${[1, 2, 3, 4, 5, 6, 0].filter((day) => plan.schedule[day]).map((day) => {
     const template = plan.templates.find((item) => item.id === plan.schedule[day]);
     return `<li><b>${DAYS[day]}</b><span>${h(template?.name ?? '')}</span></li>`;
@@ -121,15 +121,15 @@ function stepContent({ step, dao, sex, weight, groups, validation, tests, result
         <label class="dao-field">Giới tính<select name="sex" required>
           <option value="">Chọn giới tính</option><option value="m"${sex === 'm' ? ' selected' : ''}>Nam</option><option value="f"${sex === 'f' ? ' selected' : ''}>Nữ</option>
         </select></label>
-        <label class="dao-field">Thân trọng (kg)<input type="number" inputmode="decimal" name="weight" min="1" step="0.1" value="${h(weight ?? '')}" required></label>
+        <label class="dao-field">Cân nặng (kg)<input type="number" inputmode="decimal" name="weight" min="1" step="0.1" value="${h(weight ?? '')}" required></label>
         <label class="dao-field">Thân cao (cm)<input type="number" inputmode="numeric" name="height" min="1" value="${h(dao.height ?? '')}"></label>
         <label class="dao-field">Tuổi<input type="number" inputmode="numeric" name="age" min="1" value="${h(dao.age ?? '')}"></label>
       </div>`;
     case 3:
       return `<div class="dao-fields">
         ${choiceCards('experience', 'Thời gian tu đạo', G.EXPERIENCE, dao.experience)}
-        ${choiceCards('goal', 'Chí hướng', G.GOALS, dao.goal)}
-        ${choiceCards('days', 'Số buổi bế quan mỗi tuần', Object.entries(G.DAYS).map(([id, plan]) => ({
+        ${choiceCards('goal', termLabel('chiHuong'), G.GOALS, dao.goal)}
+        ${choiceCards('days', 'Số buổi tập mỗi tuần', Object.entries(G.DAYS).map(([id, plan]) => ({
           id, label: `${id} buổi`, real: plan.days.map((day) => day ? `T${day + 1}` : 'CN').join(' · '),
         })), dao.days)}
       </div>`;
@@ -149,7 +149,7 @@ function stepActions({ step, dao, validation, editing }, preview) {
   return `<div class="dao-actions">
     ${step === 1 && !editing ? button('daoSkip', 'Để sau', 'ghost', '#/') : ''}
     ${step > 1 ? button('daoBack', 'Quay lại', 'ghost', route(step === 6 && novice ? 4 : step - 1)) : ''}
-    ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/') + button('daoSave', 'Nhận công pháp', 'primary', '#/')
+    ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/') + button('daoSave', 'Lưu kế hoạch tập', 'primary', '#/')
       : button('daoNext', 'Tiếp tục', 'primary dao-next', route(step === 4 && novice ? 6 : step + 1, step !== 3 && novice), step === 4 && validation?.ok === false)}
     ${preview && step === 3 ? button('daoNext', 'Tiếp tục', 'primary dao-next-new', route(4, true)) : ''}
     ${preview && step === 4 && validation?.ok ? button('daoNext', 'Tiếp tục', 'primary dao-next-blocked', '', true) : ''}

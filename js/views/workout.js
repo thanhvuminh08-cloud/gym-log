@@ -1,6 +1,7 @@
 import { all, put, del, activeWorkout } from '../db.js';
-import { h, uid, e1rm, toast, settings, exMap, fmtNum, celebrate, tap } from '../util.js';
-import { gloss, term } from '../lore.js';
+import { h, uid, e1rm, toast, settings, exMap, fmtDate, fmtNum, celebrate, tap } from '../util.js';
+import { term } from '../lore.js';
+import { termLabel } from './sections.js';
 import { lastSets, records, doneSets } from '../stats.js';
 import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
@@ -29,10 +30,38 @@ export async function startWorkout({ template, from } = {}) {
   for (const it of items.kept) entries.push(await newEntry(it.exerciseId, it.sets, it.reps, it.rest));
   for (const e of olds.kept) entries.push(await newEntry(e.exerciseId, doneSets(e).length, 0, e.rest));
   const dropped = items.dropped.length + olds.dropped.length;
-  if (dropped) toast(`Bỏ ${dropped} bài ngoài Công pháp`);
+  if (dropped) toast(`Bỏ ${dropped} bài ngoài danh sách bài theo mạch`);
   const name = template?.name || from?.name || 'Buổi tập ' + new Date().toLocaleDateString('vi-VN');
   await put('workouts', { id: uid(), name, start: Date.now(), end: null, templateId: template?.id || null, note: '', entries });
   location.hash = '#/workout';
+}
+
+export function workoutStartView({ scheduled = null, templates = [], last = null } = {}) {
+  return `<section class="workout-start" aria-labelledby="workout-start-title">
+    <header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#i-dumbbell"/></svg></span>
+      <h1 id="workout-start-title">${termLabel('start')}</h1>
+    </header>
+    ${scheduled ? `<section class="card start-scheduled">
+      <h2>Hôm nay có lịch tập</h2>
+      <p>${h(scheduled.name || 'Tập tự do')}</p>
+      <button type="button" class="primary" data-act="scheduled"${scheduled.id ? ` data-id="${h(scheduled.id)}"` : ''}>Tập theo lịch</button>
+    </section>` : ''}
+    ${templates.length ? `<section class="card start-templates">
+      <h2>${termLabel('giaoAn')}</h2>
+      <ul>${templates.map((t) => `<li class="row"><div class="grow"><b>${h(t.name)}</b><small class="muted">${t.items.length} bài</small></div>
+        <button type="button" data-id="${h(t.id)}" aria-label="Tập theo giáo án ${h(t.name)}">Chọn</button></li>`).join('')}</ul>
+    </section>` : ''}
+    ${last ? `<section class="card">
+      <h2>Lặp lại buổi gần nhất</h2>
+      <p>${h(last.name)} <small class="muted">· ${fmtDate(last.start)}</small></p>
+      <button type="button" data-act="again">Tập lại</button>
+    </section>` : ''}
+    <section class="card">
+      <h2>Buổi trống</h2>
+      <p class="muted small">Chọn từng bài khi tập.</p>
+      <button type="button"${!scheduled ? ' class="primary"' : ''} data-act="empty">Bắt đầu buổi trống</button>
+    </section>
+  </section>`;
 }
 
 export async function render(el) {
@@ -73,12 +102,12 @@ export async function render(el) {
       <input class="title-input" data-f="name" aria-label="Tên buổi tập" value="${h(w.name)}">
       <div class="row"><span class="muted" id="elapsed"></span><span class="grow"></span>
         <button class="ghost danger" data-act="discard">Huỷ</button>
-        <button class="primary" data-act="finish" title="${gloss('finish')}">${term('finish')}</button></div>
+        <button class="primary" data-act="finish">${termLabel('finish')}</button></div>
     </header>
     ${w.entries.map((e, ei) => `
       <section class="card entry" data-muscle="${muscleKey(ex[e.exerciseId])}">
         <div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b>
-          <label class="muted small" title="${gloss('rest')}">${term('rest')} <input type="number" inputmode="numeric" class="tiny" data-ei="${ei}" data-f="rest" value="${e.rest}">s</label>
+          <label class="muted small entry-rest">${termLabel('rest')} <input type="number" inputmode="numeric" class="tiny" data-ei="${ei}" data-f="rest" value="${e.rest}">s</label>
           <button class="ghost icon" data-act="up" data-ei="${ei}" ${ei ? '' : 'disabled'}>↑</button>
           <button class="ghost icon danger" data-act="rmEntry" data-ei="${ei}">✕</button></div>
         ${prev[e.exerciseId].length ? `<div class="target small">${h(target(prev[e.exerciseId]))}</div>` : ''}
