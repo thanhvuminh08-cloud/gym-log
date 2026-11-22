@@ -213,17 +213,24 @@ a.backup-reminder:is(:hover, :active) { background: #293a24; }
 .dashboard-summaries { display: grid; gap: 12px; margin-block: 14px; }
 .dashboard-summaries > .card { min-width: 0; margin: 0; }
 .summary-card h2 { margin: 0 0 14px; align-items: center; }
-.sample-label {
-  padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line);
-  color: var(--muted); background: rgb(10 15 20 / .35); font-size: .7rem; font-weight: 650;
-}
+.goal-settings-link { display: inline-flex; align-items: center; min-height: 44px; }
 .readiness-chart { margin: 12px 0 2px; padding: 8px 0; }
 .readiness-chart .spark { max-height: none; }
 .session-goal { margin-top: 12px; color: var(--muted); font-size: .8rem; }
-.session-goal b { color: var(--text); }
+.session-goal-heading { align-items: baseline; }
+.session-goal b { color: var(--text); flex: none; }
+.session-goal[data-done] b { color: var(--accent); }
+.goal-achieved {
+  display: inline-block; margin-inline-start: 2px; padding: 2px 6px;
+  border-radius: 999px; background: var(--accent-soft); color: var(--accent);
+  font-size: .7rem; font-weight: 700;
+}
 .goal-dots { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
 .goal-dots i { width: 12px; height: 12px; border-radius: 50%; border: 1px solid var(--line); background: var(--bg); }
 .goal-dots .filled { border-color: var(--accent); background: var(--accent); }
+.settings-options > label { min-height: 44px; }
+.settings-options > label + label { margin-top: 6px; }
+.settings-options input.tiny { min-height: 44px; flex: none; }
 @media (min-width: 560px) {
   .dashboard-summaries { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }

@@ -31,7 +31,10 @@ function goal(key, label, n, target) {
   target = Math.max(1, Math.round(target) || 1);
   const dots = Math.min(31, Math.max(n, target));
   return `<div class="session-goal" data-session-goal="${key}"${n >= target ? ' data-done' : ''}>
-          <div class="row"><span class="grow">${label}</span><b data-session-goal-count>${n} / ${target} buổi</b></div>
+          <div class="row session-goal-heading">
+            <span class="grow">${label}${n >= target ? ' <span class="goal-achieved">✓ Đạt mục tiêu</span>' : ''}</span>
+            <b data-session-goal-count>${n} / ${target} buổi</b>
+          </div>
           <div class="goal-dots" data-session-goal-dots aria-hidden="true">${Array.from({ length: dots }, (_, i) => `<i${i < n ? ' class="filled"' : ''}></i>`).join('')}</div>
         </div>`;
 }
@@ -87,7 +90,7 @@ export async function render(el) {
         <small class="muted">7 ngày gần nhất</small>
       </section>
       <section class="card summary-card" data-session-goals>
-        <h2>Mục tiêu tập</h2>
+        <h2 class="section-heading">Mục tiêu tập <a class="goal-settings-link" href="#/settings">Đổi mục tiêu</a></h2>
         <div class="lift-top"><b><span data-session-count data-count="${sess.month}">${sess.month}</span><small> buổi tháng này</small></b></div>
         ${goal('week', 'Tuần này', sess.week, goals.weekGoal)}
         ${goal('month', 'Tháng này', sess.month, goals.monthGoal)}
