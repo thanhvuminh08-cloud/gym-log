@@ -94,6 +94,22 @@ export function ratioAt(p, t) {
 /** Số bài tối thiểu mỗi mạch phải luyện: cảnh giới mạch = trung bình 2 bài mạnh nhất (thiếu bài = 0). */
 export const PAIR = 2;
 
+/** Hư cảnh: mức tự khai chưa xác chứng chỉ tính tới Kết Đan · Đại viên mãn. */
+export const TEST_CAP = 3.9;
+/** Xác chứng: buổi thật đạt ≥ 90% mức khai (cùng quy đổi ~1RM chuẩn, hoặc giây/rep với Bụng). */
+export const VERIFY = 0.9;
+/** Mức khai bị hỏi lại ("Đạo hữu chắc chứ?"): từ Nguyên Anh trở lên. */
+export const DOUBT_FROM = 4;
+/** Công lực khởi đầu theo thời gian tu đạo (Linh khí, ≈ cấp 1 / 11 / 19 / 27 / 33). */
+export const START_XP = { new: 0, novice: 15000, mid: 60000, veteran: 150000, elder: 250000 };
+/** Bài Bụng đo được ở Trắc linh căn: ngưỡng Luyện Khí → Hoá Thần theo giây (Plank) hoặc rep. */
+export const CORE_TESTS = [
+  { re: /^plank/, unit: 'giây', t: [45, 90, 150, 240, 360] },
+  { re: /^hanging leg raise/, unit: 'rep', t: [5, 10, 15, 20, 30] },
+  { re: /^ab wheel/, unit: 'rep', t: [5, 10, 20, 30, 50] },
+];
+export const coreTest = (ex) => (ex?.custom ? null : CORE_TESTS.find((c) => c.re.test(String(ex?.name || '').trim().toLowerCase())) || null);
+
 /** Mạch của một bài: theo bảng quy đổi nếu có, không thì theo nhóm cơ. */
 export const meridianOf = (ex) => liftOf(ex)?.m || MUSCLE[ex?.muscle]?.key || 'other';
 
@@ -176,35 +192,66 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
   const tested = dao?.at <= now && Array.isArray(dao.tested) && dao.tested.length
     ? [{ id: 'dao', start: dao.at, tested: true, entries: dao.tested.map((t) => ({ exerciseId: t.exerciseId, sets: [{ w: +t.w || 0, r: +t.r || 0, done: true }] })) }] : [];
 
-  // Kỷ lục từng bài: set có p cao nhất (theo cân nặng lúc tập); n = ~1RM chuẩn / ngưỡng Kết Đan (so sánh được giữa các bài, không phụ thuộc cân nặng) cho Căn cơ.
+  // Công lực khởi đầu theo thời gian tu đạo (không còn cảnh "Nguyên Anh · cấp 1").
+  const startXp = dao?.at <= now ? START_XP[dao.experience] || 0 : 0;
+  if (startXp) { lk.total += startXp; lk.parts.dao = startXp; }
+
+  // Kỷ lục từng bài, tách hai nguồn: real (buổi thật) và test (tự khai). n = ~1RM chuẩn / ngưỡng Kết Đan cho Căn cơ.
+  // Bụng: bài có CORE_TESTS xét theo giây/rep (không theo cân nặng).
   const rec = {}, recent = {}, cut = now - 90 * D;
   for (const w of [...tested, ...done]) {
-    const bwT = bwAt(body, w.start);
+    const bwT = bwAt(body, w.start), slot = w.tested ? 'test' : 'real';
     for (const e of w.entries) {
-      const ex = exMap[e.exerciseId], L = liftOf(ex);
-      if (!L || !counted(L.m, e.exerciseId)) continue;
-      const t = thresholds(L.std, sex);
+      const ex = exMap[e.exerciseId], L = liftOf(ex), C = L ? null : coreTest(ex);
+      const m = L ? L.m : C ? 'core' : null;
+      if (!m || !counted(m, e.exerciseId)) continue;
+      const cur = rec[e.exerciseId] || (rec[e.exerciseId] = { m, ex, L, C, n: 0, realEq: 0, real: null, test: null });
       for (const s of doneSets(e)) {
-        const load = L.bwf * (bwT || 0) + (+s.w || 0) * L.hands;
-        const one = e1rm(load, Math.min(+s.r, MAX_REPS)), eq = one / L.f;
-        if (!(eq > 0)) continue;
-        const n = eq / t[2];
-        if (w.start >= cut) recent[L.m] = Math.max(recent[L.m] || 0, n);
-        const cur = rec[e.exerciseId] || (rec[e.exerciseId] = { m: L.m, ex, L, n: 0, p: -1 });
-        cur.n = Math.max(cur.n, n);
-        if (!bwT) continue;
-        const ratio = eq / bwT, p = progress(ratio, t);
-        if (p > cur.p) Object.assign(cur, { p, ratio, best: { exerciseId: e.exerciseId, name: ex.name, w: +s.w, r: +s.r, kg: r1(one), eq: r1(eq), ratio: r2(ratio), bw: bwT, t: w.start, workoutId: w.tested ? null : w.id, tested: !!w.tested } });
+        let p, ratio = null, eq, one = null;
+        if (C) {
+          eq = Math.round(+s.r || 0);
+          if (!(eq > 0)) continue;
+          p = progress(eq, C.t);
+        } else {
+          const t = thresholds(L.std, sex), load = L.bwf * (bwT || 0) + (+s.w || 0) * L.hands;
+          one = e1rm(load, Math.min(+s.r, MAX_REPS)); eq = one / L.f;
+          if (!(eq > 0)) continue;
+          const n = eq / t[2];
+          if (w.start >= cut) recent[m] = Math.max(recent[m] || 0, n);
+          cur.n = Math.max(cur.n, n);
+          if (!w.tested) cur.realEq = Math.max(cur.realEq, eq);
+          if (!bwT) continue;
+          ratio = eq / bwT; p = progress(ratio, t);
+        }
+        if (C && !w.tested) cur.realEq = Math.max(cur.realEq, eq);
+        if (!cur[slot] || p > cur[slot].p) cur[slot] = { p, ratio, eq, best: { exerciseId: e.exerciseId, name: ex.name, w: +s.w, r: +s.r, kg: one == null ? null : r1(one), eq: r1(eq),
+          ratio: ratio == null ? null : r2(ratio), bw: bwT, t: w.start, workoutId: w.tested ? null : w.id, tested: !!w.tested, unit: C?.unit || null } };
       }
     }
   }
+  // Hư cảnh: mức tự khai chỉ tính tới TEST_CAP cho tới khi một buổi thật đạt ≥ VERIFY × mức khai (Xác chứng).
+  for (const r of Object.values(rec)) {
+    const T = r.test, R = r.real;
+    r.verified = !!T && r.realEq >= VERIFY * T.eq;
+    const tp = T ? (r.verified ? T.p : Math.min(T.p, TEST_CAP)) : -1;
+    const fromTest = !!T && tp > (R?.p ?? -1);
+    const use = fromTest ? { ...T, p: tp } : R;
+    Object.assign(r, { p: use?.p ?? -1, ratio: use?.ratio ?? null, best: use?.best || null,
+      unverified: fromTest && !r.verified, capped: fromTest && !r.verified && T.p > TEST_CAP });
+  }
+  const liftView = (r) => ({ exerciseId: r.ex.id, name: r.ex.name, ...rank(r.p), ratio: r.ratio == null ? null : r2(r.ratio), kg: r.best?.kg ?? null,
+    reps: r.C ? r.best?.r ?? null : null, unit: r.C?.unit || null, tested: !!r.best?.tested, unverified: r.unverified, capped: r.capped });
 
   const meridians = MERIDIANS.map((M) => {
     const xp = lk.byMeridian[M.key] || 0;
     if (M.key === 'core') {
-      const p = progress(xp, CORE_XP), rk = rank(p), ni = rk.realm.i;
-      return { key: M.key, name: M.name, ...rk, ratio: null, best: null, canCo: null, shaky: false, xp, lifts: [], need: 0,
-        next: ni < 5 ? { realm: REALMS[ni + 1], xp: CORE_XP[ni], left: CORE_XP[ni] - xp } : null };
+      // Bụng: max(Linh khí mạch, TB 2 bài đo được) — người tập lâu khai Plank/Leg Raise không phải bắt đầu Phàm nhân.
+      const cl = Object.values(rec).filter((r) => r.m === 'core' && r.p > 0).sort((a, b) => b.p - a.p), top = cl.slice(0, PAIR);
+      const xpP = progress(xp, CORE_XP), testP = top.reduce((a, r) => a + r.p, 0) / PAIR;
+      const p = Math.max(xpP, testP), rk = rank(p), ni = rk.realm.i;
+      return { key: M.key, name: M.name, ...rk, ratio: null, best: null, canCo: null, shaky: false, xp, lifts: top.map(liftView), need: 0,
+        unverified: testP > xpP && top.some((r) => r.unverified),
+        next: ni < 5 ? { realm: REALMS[ni + 1], xp: CORE_XP[ni], left: Math.max(0, CORE_XP[ni] - xp) } : null };
     }
     // Cảnh giới mạch = trung bình PAIR bài mạnh nhất (bài thiếu tính 0) → phải luyện đủ bài mới lên được.
     const all = Object.values(rec).filter((r) => r.m === M.key), lifts = all.filter((r) => r.p > 0).sort((a, b) => b.p - a.p);
@@ -229,8 +276,21 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
         alt: { r: CHALLENGE_REPS, kg: kgAt(CHALLENGE_REPS) } };
     }
     return { key: M.key, name: M.name, ...rk, ratio: A?.ratio != null ? r2(A.ratio) : null, best: A?.best || null, canCo, shaky: canCo != null && canCo < SHAKY, xp,
-      lifts: top.map((r) => ({ exerciseId: r.ex.id, name: r.ex.name, ...rank(r.p), ratio: r2(r.ratio), kg: r.best.kg, tested: r.best.tested })),
+      lifts: top.map(liftView), unverified: top.some((r) => r.unverified),
       need: Math.max(0, PAIR - lifts.length), next };
+  });
+
+  // Lời khai (mức tự khai gốc, chưa giới hạn) + việc cần làm để Xác chứng từng bài.
+  const claims = Object.values(rec).filter((r) => r.test).map((r) => {
+    const T = r.test, L = r.L, goal = VERIFY * T.eq;
+    let target = null;
+    if (r.C) target = { reps: Math.ceil(goal - 1e-9), unit: r.C.unit };
+    else if (bw) {
+      const one = goal * L.f, kgAt = (n) => ceilHalf(Math.max(0, ((n === 1 ? one : one / (1 + n / 30)) - L.bwf * bw) / L.hands));
+      target = { kg: kgAt(1), alt: { r: CHALLENGE_REPS, kg: kgAt(CHALLENGE_REPS) }, added: L.bwf > 0, perHand: L.hands === 2 };
+    }
+    return { exerciseId: r.ex.id, name: r.ex.name, meridian: r.m, ...rank(T.p), verified: r.verified, capped: !r.verified && T.p > TEST_CAP,
+      pct: T.eq ? Math.min(100, Math.round((r.realEq / T.eq) * 100)) : 0, target };
   });
 
   const wSum = MERIDIANS.reduce((a, m) => a + m.w, 0);
@@ -244,7 +304,8 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
     needsWeight: !bw, needsSex: sex !== 'm' && sex !== 'f', bw, sex,
     tuvi, canCo, shaky: canCo != null && canCo < SHAKY,
     linhKhi: { ...level(lk.total), parts: lk.parts },
-    meridians,
+    meridians, claims, unverified: meridians.some((m) => m.unverified),
+    verified: claims.filter((c) => c.verified).map((c) => c.exerciseId),
     challenge: near ? { key: near.key, name: near.name, label: near.label, pct: Math.round((near.p - near.realm.i) * 100), next: near.next } : null,
   };
 }
@@ -257,6 +318,7 @@ const fmt = (x) => x.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
 export function snapshot(profile) {
   const s = { tuvi: [profile.tuvi.realm.i, profile.tuvi.phase.i] };
   for (const m of profile.meridians) s[m.key] = [m.realm.i, m.phase.i];
+  s.verified = [...(profile.verified || [])];
   return s;
 }
 
@@ -279,7 +341,15 @@ export function breakthroughs(seen, profile) {
     out.push({ key: it.key, name: it.name, from: ri ? `${REALMS[ri]} · ${PHASES[pi]}` : REALMS[0], to: it.label, realm,
       tribulation: realm && it.realm.i >= TRIB_FROM, real: it.real });
   }
-  const score = (e) => (e.tribulation ? 4 : 0) + (e.realm ? 2 : 0) + (e.key === 'tuvi' ? 1 : 0);
+  // Xác chứng: bài tự khai vừa được buổi thật chứng minh (mốc cũ chưa có danh sách → coi như chưa bài nào).
+  const was = new Set(Array.isArray(seen.verified) ? seen.verified : []);
+  for (const c of profile.claims || []) {
+    if (!c.verified || was.has(c.exerciseId)) continue;
+    const mer = profile.meridians.find((m) => m.key === c.meridian);
+    out.push({ key: 'verify', exerciseId: c.exerciseId, verify: true, name: `Xác chứng · ${c.name}`, from: 'Hư cảnh', to: c.label, realm: false, tribulation: false,
+      real: `Lời khai đã được chứng minh · mạch ${mer?.name || ''} ${mer?.label || ''}`.trim() });
+  }
+  const score = (e) => (e.tribulation ? 4 : 0) + (e.realm ? 2 : 0) + (e.verify ? 1.5 : 0) + (e.key === 'tuvi' ? 1 : 0);
   return out.sort((a, b) => score(b) - score(a));
 }
 
@@ -306,7 +376,16 @@ export function quests({ workouts = [], exercises = [], profile, base = null, sc
   const body = (base || profile).meridians.filter((m) => m.key !== 'core');
   const weak = [...body].sort((a, b) => a.p - b.p || weight(b.key) - weight(a.key))[0];
   const hint = weak.next?.name || weak.best?.name || exercises.filter((e) => !e.custom && liftOf(e)?.m === weak.key).sort((a, b) => LIFTS.indexOf(liftOf(a)) - LIFTS.indexOf(liftOf(b)))[0]?.name;
-  if (weak.need) {
+  // Còn lời khai chưa xác chứng → nhiệm vụ Xác chứng (bài nặng ký nhất của mạch có trọng số lớn nhất).
+  const P0 = base || profile;
+  const claim = (P0.claims || []).filter((c) => !c.verified && c.target)
+    .sort((a, b) => weight(b.meridian) - weight(a.meridian) || b.p - a.p)[0];
+  if (claim) {
+    const mer = MERIDIANS.find((m) => m.key === claim.meridian), t = claim.target;
+    const goal = t.unit ? `${t.reps} ${t.unit}` : `~1RM ${fmt(t.kg)} kg${t.added ? ' đeo thêm' : t.perHand ? ' mỗi tay' : ''} (vd. ${fmt(t.alt.kg)} kg × ${t.alt.r})`;
+    const ok = (profile.verified || []).includes(claim.exerciseId);
+    list.push({ id: 'overload', kind: 'verify', title: `Xác chứng mạch ${mer.name}`, detail: `${claim.name} ${goal}`, meridian: claim.meridian, exerciseId: claim.exerciseId, goal: 1, done: ok ? 1 : 0 });
+  } else if (weak.need) {
     // Mạch chưa đủ bài để xét cảnh giới → "Khai mạch": tập bài còn thiếu (chưa có lần trước thì không thể "vượt").
     const opened = week.some((w) => w.entries.some((e) => e.exerciseId === weak.next?.exerciseId && doneSets(e).length));
     const any = week.some((w) => trains(w, weak.key));

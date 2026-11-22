@@ -16,6 +16,7 @@ await new Promise((r) => { const q = indexedDB.deleteDatabase(DB); q.onsuccess =
 localStorage.removeItem('gym.restEnd'); localStorage.removeItem('gym.restStart');
 const seenBak = localStorage.getItem('gym.medalSeen'); localStorage.removeItem('gym.medalSeen');
 const setBak = localStorage.getItem('gym.settings'); localStorage.removeItem('gym.settings');
+sessionStorage.removeItem('gym.daoDraft'); // bản nháp Nhập môn dở (iframe dùng chung sessionStorage với tab)
 frame.src = `index.html?db=${DB}#/`;
 await new Promise((r) => (frame.onload = r));
 const w = frame.contentWindow, $ = (s) => w.document.querySelector(s), $$ = (s) => [...w.document.querySelectorAll(s)];
@@ -220,7 +221,7 @@ try {
       m.legs.need, m.legs.lifts.map((l) => l.label).join('|'), m.legs.next.name, m.legs.next.pair, m.triceps.need, m.triceps.next].join(',');
     const want = ['Kết Đan · Sơ kỳ', 32, 'Luyện Khí · Sơ kỳ', 13, 18, true, 470, 3, 87, 520,
       'Luyện Khí · Hậu kỳ', 17, 90, 37.5, 'Luyện Khí · Trung kỳ', 19, false, 20, 0.5, 'Luyện Khí · Sơ kỳ',
-      'Luyện Khí · Sơ kỳ', 20, 0.06, 470, 1.125, '0.60', true, true, 7,
+      'Luyện Khí · Sơ kỳ', 20, 0.667, 470, 1.125, '0.60', true, true, 7, // Bụng: Plank 60 giây thật → TB 2 bài = 0,667
       1, 'Kết Đan · Sơ kỳ', 'Front Squat', false, 2, null].join(',');
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
     if (got !== want) return false;
@@ -263,8 +264,32 @@ try {
       a.profile.meridians.find((m) => m.key === 'legs').best.tested, plan.templates.map((t) => `${t.name}:${t.items.length}`).join('/'),
       Object.entries(plan.schedule).map(([d, t]) => `${d}=${plan.templates.findIndex((x) => x.id === t)}`).join(' '),
       plan.templates[0].items[0].reps + '×' + plan.templates[0].items[0].sets, tl.length, tl.find((t) => t.name === 'Dips').bodyweight].join(',');
-    const want = [true, 'back:1', true, 'Kết Đan · Trung kỳ', 'Vai', 'Kết Đan · Hậu kỳ', 'Kết Đan · Hậu kỳ', true,
-      'Công pháp · Thượng thân A:5/Công pháp · Hạ thân A:3/Công pháp · Thượng thân B:5/Công pháp · Hạ thân B:3', '1=0 2=1 4=2 5=3', '5×4', 12, true].join(',');
+    const want = [true, 'back:1', true, 'Kết Đan · Trung kỳ', 'Ngực', 'Kết Đan · Hậu kỳ', 'Kết Đan · Hậu kỳ', true, // Vai khai tới Nguyên Anh → hư cảnh, giới hạn Kết Đan
+      'Công pháp · Thượng thân A:5/Công pháp · Hạ thân A:3/Công pháp · Thượng thân B:5/Công pháp · Hạ thân B:3', '1=0 2=1 4=2 5=3', '5×4', 14, true].join(','); // 14 = 12 bài tạ + Plank, Hanging Leg Raise
+    if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
+    return got === want;
+  });
+  await step('Hư cảnh & Xác chứng: khai lố bị giới hạn + hỏi lại, Công lực khởi đầu, đo Bụng, tập thật 90% → Xác chứng', async () => {
+    const H = await import('./js/hero.js'), G = await import('./js/dao.js'), { DEFAULT_EXERCISES: ex } = await import('./js/exercises.js');
+    const id = (n) => ex.find((e) => e.name === n).id, now = new Date(2026, 2, 2, 9).getTime(), D = 864e5;
+    const T = (n, w, r) => ({ exerciseId: id(n), w, r }), body = [{ date: now, weight: 80 }];
+    const dao = { at: now, experience: 'veteran', path: G.defaultPath(ex), tested: [T('Overhead Press', 60, 5), T('Dumbbell Shoulder Press', 26, 8), T('Squat', 140, 5),
+      T('Plank', 0, 150), T('Hanging Leg Raise', 0, 15)] };
+    const ctx = { exercises: ex, body, sex: 'm', dao, schedule: {}, weekGoal: 3 };
+    const p0 = H.hero({ ...ctx, now: now + 1 });
+    const sh = p0.meridians.find((m) => m.key === 'shoulders'), dsp = sh.lifts.find((l) => l.name === 'Dumbbell Shoulder Press');
+    const core = p0.meridians.find((m) => m.key === 'core');
+    const q0 = H.quests({ workouts: [], exercises: ex, profile: p0, now: now + 1 }).quests[1];
+    // Tập thật: DB Shoulder Press 24 kg × 8 ≈ 92% mức khai 26 × 8 → xác chứng.
+    const real = { id: 'r', start: now + D, end: now + D + 1, entries: [{ exerciseId: id('Dumbbell Shoulder Press'), sets: [{ w: 24, r: 8, done: true }] }] };
+    const p1 = H.hero({ ...ctx, workouts: [real], now: now + 2 * D });
+    const ev = H.breakthroughs(H.snapshot(p0), p1).filter((e) => e.verify);
+    const dsp1 = p1.meridians.find((m) => m.key === 'shoulders').lifts.find((l) => l.name === 'Dumbbell Shoulder Press');
+    const got = [dsp.unverified, dsp.capped, dsp.p, G.doubts({ dao, exercises: ex, body, sex: 'm', now }).map((d) => d.name).join('|'),
+      p0.linhKhi.level >= 25, core.label, core.lifts.map((l) => `${l.reps} ${l.unit}`).join('|'),
+      q0.kind, q0.title, dsp1.unverified, dsp1.label, ev.map((e) => `${e.name}:${e.from}>${e.to}`).join(), p1.verified.length].join(',');
+    const want = [true, true, 3.9, 'Dumbbell Shoulder Press', true, 'Kết Đan · Sơ kỳ', '150 giây|15 rep',
+      'verify', 'Xác chứng mạch Chân', false, 'Nguyên Anh · Trung kỳ', `Xác chứng · Dumbbell Shoulder Press:Hư cảnh>${dsp1.label}`, 1].join(',');
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
     return got === want;
   });

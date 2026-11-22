@@ -55,10 +55,11 @@ function showTests(tests, tested) {
     const unit = test.bodyweight ? 'kg đeo thêm' : test.perHand ? 'kg mỗi tay' : 'kg';
     return `<fieldset class="dao-test" data-test="${h(test.exerciseId)}" data-muscle="${h(test.meridian)}">
       <legend>${h(test.name)} <small>${h(test.meridianName)}</small></legend>
-      <div class="dao-test-fields">
-        <label>${unit}<input type="number" inputmode="decimal" min="0" step="0.1" name="w" value="${h(entry?.w ?? '')}"></label>
+      <div class="dao-test-fields">${test.core
+        ? `<input type="hidden" name="w" value="0"><label>${test.unit === 'giây' ? 'Giữ được (giây)' : 'Số rep'}<input type="number" inputmode="numeric" min="1" step="1" name="r" value="${h(entry?.r ?? '')}"></label>`
+        : `<label>${unit}<input type="number" inputmode="decimal" min="0" step="0.1" name="w" value="${h(entry?.w ?? '')}"></label>
         <span aria-hidden="true">×</span>
-        <label>Rep<input type="number" inputmode="numeric" min="1" step="1" name="r" value="${h(entry?.r ?? '')}"></label>
+        <label>Rep<input type="number" inputmode="numeric" min="1" step="1" name="r" value="${h(entry?.r ?? '')}"></label>`}
       </div>
     </fieldset>`;
   }).join('');
@@ -189,7 +190,7 @@ function collect(el, step, exercises) {
       const f = el.querySelector(`[data-test="${CSS.escape(t.exerciseId)}"]`);
       const w = +f?.querySelector('[name=w]').value || 0, r = Math.round(+f?.querySelector('[name=r]').value || 0);
       return { exerciseId: t.exerciseId, w, r };
-    }).filter((t) => t.r > 0 && t.r <= 30 && (t.w > 0 || tests.find((x) => x.exerciseId === t.exerciseId).bodyweight));
+    }).filter((t) => { const x = tests.find((y) => y.exerciseId === t.exerciseId); return t.r > 0 && t.r <= (x.core ? 600 : 30) && (x.core ? (t.w = 0, true) : t.w > 0 || x.bodyweight); });
   }
   keep();
 }
@@ -256,6 +257,12 @@ export async function render(el, [part] = []) {
       collect(el, step, data.exercises);
       const why = missing(step) || (step === 4 && !G.validatePath(draft.dao.path, data.exercises).ok ? 'Mỗi mạch cần ít nhất 2 bài' : '');
       if (why) return toast(why);
+      if (step === 5) {
+        // Khai lố (từ Nguyên Anh, hoặc > 15 rep) → hỏi lại; tu vi tự khai vẫn chỉ là hư cảnh cho tới khi xác chứng.
+        const sus = G.doubts({ dao: draft.dao, exercises: data.exercises, body: draft.weight > 0 ? [{ date: Date.now(), weight: draft.weight }] : data.body, sex: draft.sex });
+        const list = sus.map((s) => `${s.name}: ${s.label}${s.reps > 15 ? ` (${s.reps} rep)` : ''}`).join('\n');
+        if (sus.length && !confirm(`Đạo hữu chắc chứ?\n${list}\n\nTu vi tự khai chỉ là hư cảnh (tối đa Kết Đan) cho tới khi tập thật đạt 90% mức khai.`)) return;
+      }
       goStep(step === 4 && skipsTest(draft) ? 6 : step + 1);
     } else if (act === 'daoSkip') {
       if (!settings.get().dao) settings.set({ daoSkip: Date.now() });

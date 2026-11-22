@@ -144,8 +144,8 @@ function meridianCard(m) {
       <h3>${h(m.name)}</h3><strong>${h(m.label)}</strong>
     </div>
     ${lifts?.length ? `<ul class="cultivation-lifts">${lifts.map((lift) => `<li class="cultivation-lift">
-      <span><b>${h(lift.name)}</b>${lift.tested ? ' <small class="cultivation-tested">tự khai</small>' : ''}</span>
-      <span>${lift.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(lift.kg)} kg</span>
+      <span><b>${h(lift.name)}</b>${lift.unverified ? ' <small class="cultivation-tested" data-unverified>hư cảnh</small>' : lift.tested ? ' <small class="cultivation-tested">tự khai</small>' : ''}</span>
+      <span>${lift.unit ? `${fmtNum(lift.reps)} ${h(lift.unit)}` : `${lift.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(lift.kg)} kg`}</span>
     </li>`).join('')}</ul>` : `<p class="cultivation-lift">${m.key === 'core' ? `${fmtNum(m.xp)} Linh khí` : 'Chưa có kỷ lục'}</p>`}
     ${m.need > 0 ? `<p class="cultivation-path-warning">Còn thiếu ${m.need} bài để khai mạch.</p>` : ''}
     ${m.canCo != null ? `<p class="cultivation-condition${m.shaky ? ' is-shaky' : ''}">Căn cơ <b>${m.canCo}%</b>${m.shaky ? ' · Lung lay' : ''}</p>` : ''}
@@ -168,7 +168,7 @@ function profileForm({ needsWeight, needsSex }) {
 }
 
 export function breakthroughModal(event, { id = 'breakthrough', demo = false } = {}) {
-  const title = event.tribulation ? 'Độ kiếp' : 'Đột phá';
+  const title = event.tribulation ? 'Độ kiếp' : event.verify ? 'Xác chứng' : 'Đột phá';
   const realm = event.to.split(' · ')[0];
   const index = Math.max(0, REALMS.indexOf(realm));
   const key = h(id);

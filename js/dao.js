@@ -1,6 +1,6 @@
 // Nhập môn (RPG.md mục 5): hàm thuần cho màn khai báo lần đầu, Trắc linh căn, Công pháp, giáo án + lịch tự sinh.
 // Lưu ở settings.dao (xem hợp đồng cuối RPG.md). Không đụng DB — view lo việc ghi.
-import { MERIDIANS, PAIR, LIFTS, liftOf, meridianOf, hero, REALMS } from './hero.js';
+import { MERIDIANS, PAIR, LIFTS, DOUBT_FROM, liftOf, meridianOf, coreTest, hero, REALMS } from './hero.js';
 
 /** Thời gian tu đạo (kinh nghiệm tập). test = có hỏi mức tạ Trắc linh căn không; sets = số set bài chính trong giáo án. */
 export const EXPERIENCE = [
@@ -89,12 +89,28 @@ export function cleanPath(path = {}, exercises = []) {
   return Object.fromEntries(MERIDIANS.map((M) => [M.key, [...new Set(path?.[M.key] || [])].filter((id) => exMap[id] && meridianOf(exMap[id]) === M.key)]));
 }
 
-/** Bài cần hỏi mức tạ ở Trắc linh căn: các bài có quy đổi trong Công pháp (Bụng không hỏi). */
+/**
+ * Bài cần hỏi ở Trắc linh căn: bài có quy đổi trong Công pháp + bài Bụng đo được (core: chỉ 1 ô, unit 'giây'|'rep').
+ * → [{exerciseId, name, meridian, meridianName, bodyweight, perHand, core, unit}]
+ */
 export function testList(path = {}, exercises = []) {
   const exMap = Object.fromEntries(exercises.map((e) => [e.id, e]));
-  return MERIDIANS.filter((M) => M.key !== 'core').flatMap((M) => (path?.[M.key] || [])
-    .map((id) => exMap[id]).filter((e) => e && liftOf(e))
-    .map((e) => ({ exerciseId: e.id, name: e.name, meridian: M.key, meridianName: M.name, bodyweight: liftOf(e).bwf > 0, perHand: liftOf(e).hands === 2 })));
+  return MERIDIANS.flatMap((M) => (path?.[M.key] || []).map((id) => exMap[id]).filter(Boolean).flatMap((e) => {
+    if (M.key === 'core') {
+      const C = coreTest(e);
+      return C ? [{ exerciseId: e.id, name: e.name, meridian: M.key, meridianName: M.name, bodyweight: true, perHand: false, core: true, unit: C.unit }] : [];
+    }
+    const L = liftOf(e);
+    return L ? [{ exerciseId: e.id, name: e.name, meridian: M.key, meridianName: M.name, bodyweight: L.bwf > 0, perHand: L.hands === 2, core: false, unit: 'kg' }] : [];
+  }));
+}
+
+/** Lời khai đáng ngờ (từ Nguyên Anh trở lên, hoặc > 15 rep với bài tạ) → hỏi lại "Đạo hữu chắc chứ?". */
+export function doubts({ dao, exercises = [], body = [], sex, now = Date.now() } = {}) {
+  const p = hero({ exercises, body, sex, dao: { ...dao, at: dao?.at ?? now }, now: Math.max(now, dao?.at ?? now) });
+  const reps = Object.fromEntries((dao?.tested || []).map((t) => [t.exerciseId, +t.r]));
+  return p.claims.filter((c) => c.p >= DOUBT_FROM || (c.meridian !== 'core' && reps[c.exerciseId] > 15))
+    .map((c) => ({ exerciseId: c.exerciseId, name: c.name, label: c.label, reps: reps[c.exerciseId] }));
 }
 
 /**
@@ -144,7 +160,8 @@ export function assess({ dao, exercises = [], body = [], sex, workouts = [], now
   const ranked = p.meridians.filter((m) => m.key !== 'core' && m.p > 0).sort((a, b) => b.p - a.p);
   return {
     tuvi: p.tuvi, profile: p,
-    meridians: p.meridians.map((m) => ({ key: m.key, name: m.name, label: m.label, p: m.p, need: m.need })),
+    meridians: p.meridians.map((m) => ({ key: m.key, name: m.name, label: m.label, p: m.p, need: m.need, unverified: !!m.unverified })),
+    unverified: p.unverified, claims: p.claims, linhKhi: p.linhKhi,
     top: ranked[0] ? { key: ranked[0].key, name: ranked[0].name, label: ranked[0].label } : null,
     verdict: verdict(p.tuvi.realm.i),
   };
