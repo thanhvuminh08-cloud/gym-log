@@ -97,7 +97,7 @@ export function bwAt(body, t) {
 }
 
 const r1 = (x) => Math.round(x * 10) / 10, r2 = (x) => Math.round(x * 100) / 100;
-const ceilHalf = (x) => Math.ceil(x * 2 - 1e-9) / 2;
+const ceilHalf = (x) => Math.ceil(x * 2 - 1e-9) / 2 + 0; // + 0: đổi -0 thành 0
 
 /** Linh khí từ lịch sử: {total, byMeridian:{key: xp}, parts:{sets, sessions, schedule, overload, weekGoal, streak}}. */
 export function linhKhi(done, exMap, { schedule = {}, weekGoal = 3 } = {}) {
@@ -232,7 +232,8 @@ export function breakthroughs(seen, profile) {
   const out = [];
   for (const it of items) {
     const [ri = 0, pi = 0] = seen[it.key] || [];
-    if (step(it) <= ri * 4 + pi) continue;
+    // Phàm nhân không hiện kỳ → không ăn mừng "lên kỳ" bên trong Phàm nhân.
+    if (!it.realm.i || step(it) <= (ri ? ri * 4 + pi : 0)) continue;
     const realm = it.realm.i > ri;
     out.push({ key: it.key, name: it.name, from: ri ? `${REALMS[ri]} · ${PHASES[pi]}` : REALMS[0], to: it.label, realm,
       tribulation: realm && it.realm.i >= TRIB_FROM, real: it.real });

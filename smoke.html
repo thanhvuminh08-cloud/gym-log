@@ -220,6 +220,10 @@ try {
     const want2 = [0, 0, 'legs:true:true/chest:false:false', 'Trúc Cơ · Đại viên mãn', 'Kết Đan · Sơ kỳ', 'Squat 1,67×BW · ~1RM 116,7 kg',
       5, 154.5, 'biceps', 99, 'schedule:null:1/1/overload:shoulders:0/1/canCo:chest:0/1', 1, '2/1/0', 'Bế quan', 'Nghỉ'].join(',');
     if (got2 !== want2) lines.push(`  ${got2}\n  ≠ ${want2}`);
+    // Phàm nhân không hiện kỳ → lên kỳ bên trong Phàm nhân không phải đột phá; lên Luyện Khí thì có.
+    const fake = (i, ph) => ({ tuvi: { realm: { i }, phase: { i: ph }, label: i ? `${H.REALMS[i]} · ${H.PHASES[ph]}` : 'Phàm nhân' }, linhKhi: { level: 2 }, meridians: [] });
+    const got3 = [H.breakthroughs({ tuvi: [0, 0] }, fake(0, 2)).length, H.breakthroughs({ tuvi: [0, 2] }, fake(1, 0)).map((e) => `${e.from}>${e.to}`).join()].join(',');
+    if (got3 !== '0,Phàm nhân>Luyện Khí · Sơ kỳ') { lines.push(`  Phàm nhân: ${got3}`); return false; }
     return got2 === want2;
   });
   await step('Luật huy chương: chuỗi, mốc, tuần', async () => {

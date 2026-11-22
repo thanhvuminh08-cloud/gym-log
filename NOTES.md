@@ -44,8 +44,10 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
+- [cho Codex] Tiêu đề chữ có chân (Georgia) vỡ dấu chồng tiếng Việt: "tuầ n", "Độ kiế p", "cấ p" ở Động phủ/màn Đột phá — đổi sang font serif có đủ tiếng Việt (vd. Noto Serif, RPG.md mục 4) (css/).
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 
 ## Ý tưởng sau khi dùng thực tế
+- Chơi thử vai fan tiên hiệp (22/11): buổi đầu nhảy thẳng Phàm nhân → Kết Đan (Độ kiếp) → nên coi buổi đầu là "Trắc linh căn" (đo cảnh giới, không ăn mừng). Nhiệm vụ "Vượt lần trước" giao cho mạch chưa từng tập → đổi thành "Khai mạch". Set sau không tự điền theo set trước. Microcopy tu tiên nên mời bật ở lần đầu vào Động phủ.
 - (ghi thêm ở đây khi tập)

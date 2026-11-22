@@ -125,11 +125,17 @@ function radar(meridians) {
   </svg>`;
 }
 
+/** "62 kg" / "10 kg đeo thêm" / "20 kg mỗi tay"; bài thân người chưa cần đeo thêm → "không đeo tạ". */
+function loadText(next, kg) {
+  if (next.added && !(kg > 0)) return 'không đeo tạ';
+  return `${fmtNum(kg)} kg${next.added ? ' đeo thêm' : next.perHand ? ' mỗi tay' : ''}`;
+}
+
 function meridianCard(m) {
   const { next, best } = m;
   const progress = Math.round((m.p - m.realm.i) * 100);
   const target = next && ('kg' in next
-    ? `${h(next.name)} ${fmtNum(next.kg)} kg${next.added ? ' đeo thêm' : next.perHand ? ' mỗi tay' : ''} × 1`
+    ? `${h(next.name)} ${loadText(next, next.kg)} × 1`
     : `Còn ${fmtNum(next.left)} Linh khí`);
   return `<li class="card cultivation-meridian" data-muscle="${h(m.key)}">
     <div class="cultivation-meridian-head">
@@ -205,13 +211,12 @@ function questBoard(weekly, sample) {
 function challengeCard(challenge, sample) {
   if (!challenge) return '';
   const { next } = challenge;
-  const unit = next.added ? 'kg đeo thêm' : next.perHand ? 'kg mỗi tay' : 'kg';
   return `<section class="cultivation-challenge" data-muscle="${h(challenge.key)}">
     <header class="cultivation-section-heading"><h2>Thử thách Bình cảnh</h2>${sample ? '<span class="cultivation-data-badge">Số liệu mẫu</span>' : ''}</header>
     <p class="challenge-realm">${h(challenge.name)} · ${h(challenge.label)}</p>
     <div class="challenge-goal">
-      <div><p>${h(next.name)}</p><strong>${fmtNum(next.alt?.kg ?? next.kg)} ${unit} × ${next.alt?.r ?? 1}</strong>
-        ${next.alt ? `<small>Hoặc ${fmtNum(next.kg)} ${unit} × 1</small>` : ''}</div>
+      <div><p>${h(next.name)}</p><strong>${loadText(next, next.alt?.kg ?? next.kg)} × ${next.alt?.r ?? 1}</strong>
+        ${next.alt ? `<small>Hoặc ${loadText(next, next.kg)} × 1</small>` : ''}</div>
       <p class="challenge-next">→ ${h(next.realm)}</p>
     </div>
     <div class="challenge-progress"><progress class="cultivation-meter" value="${challenge.pct}" max="100" aria-label="Tiến độ đến ${h(next.realm)}"></progress><b>${challenge.pct}%</b></div>
