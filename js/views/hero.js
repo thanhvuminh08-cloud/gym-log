@@ -1,39 +1,15 @@
-import { DEFAULT_EXERCISES } from '../exercises.js';
+import { all, put } from '../db.js';
 import { hero } from '../hero.js';
-import { fmtNum, h } from '../util.js';
+import { fmtNum, h, uid, settings, countUp } from '../util.js';
 
-const DAY = 86_400_000;
-const previewDate = Date.UTC(2026, 5, 15, 8);
-const sampleLifts = [
-  ['Bench Press (đòn)', 55, 8],
-  ['Deadlift', 135, 5],
-  ['Overhead Press', 42.5, 5],
-  ['Squat', 112.5, 5],
-  ['Barbell Curl', 28, 5],
-  ['Dips', 12.5, 5],
-  ['Plank', 0, 1],
-];
-
-function sampleWorkout(id, start, load) {
-  return {
-    id, start, end: start + 3_600_000,
-    entries: sampleLifts.map(([name, weight, reps]) => ({
-      exerciseId: DEFAULT_EXERCISES.find((exercise) => exercise.name === name).id,
-      sets: [{ w: weight * load, r: reps, done: true }, { w: weight * load, r: reps, done: true }],
-    })),
-  };
+/** Dữ liệu thật cho Động phủ: hero() từ toàn bộ buổi tập, thư viện bài, cân nặng và cài đặt. */
+export async function loadProfile(now = Date.now()) {
+  const [workouts, exercises, body] = await Promise.all([all('workouts'), all('exercises'), all('body')]);
+  const s = settings.get();
+  return hero({ workouts, exercises, body, sex: s.sex, schedule: s.schedule, weekGoal: s.weekGoal, now });
 }
 
-const PREVIEW = hero({
-  workouts: [
-    sampleWorkout('sample-record', previewDate - 120 * DAY, 1),
-    sampleWorkout('sample-recent', previewDate - 4 * DAY, .88),
-  ],
-  body: [{ date: previewDate - 130 * DAY, weight: 80 }],
-  exercises: DEFAULT_EXERCISES, sex: 'm', now: previewDate,
-});
-
-export function heroCard(tuvi = PREVIEW.tuvi, preview = true) {
+export function heroCard(tuvi, preview = false) {
   return `<a class="card cultivation-link" href="#/hero" data-hero-link>
     <span class="cultivation-seal" aria-hidden="true">${h(tuvi.realm.name)}</span>
     <span class="cultivation-link-copy">
@@ -145,5 +121,19 @@ export function heroView(profile, { preview = false } = {}) {
 }
 
 export async function render(el) {
-  el.innerHTML = heroView(PREVIEW, { preview: true });
+  el.innerHTML = heroView(await loadProfile());
+  el.onclick = el.onchange = null; // bỏ handler của màn trước (main dùng chung)
+  // Lưu cân nặng (bảng body, như Tiến độ › Cơ thể) và giới tính rồi tính lại.
+  el.onsubmit = async (ev) => {
+    const form = ev.target.closest('[data-hero-profile]');
+    if (!form) return;
+    ev.preventDefault();
+    const f = new FormData(form), weight = Number(f.get('weight')), sex = f.get('sex');
+    if (f.has('weight') && !(weight > 0)) return;
+    if (f.has('sex') && sex !== 'm' && sex !== 'f') return;
+    if (f.has('weight')) await put('body', { id: uid(), date: Date.now(), weight, waist: null });
+    if (f.has('sex')) settings.set({ sex });
+    el.innerHTML = heroView(await loadProfile());
+    countUp(el);
+  };
 }

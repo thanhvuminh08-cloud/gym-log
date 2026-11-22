@@ -6,7 +6,7 @@ import { weekPlan } from '../schedule.js';
 import { topLifts, muscleKey, readiness, sessionCounts } from '../insights.js';
 import { sparkline, lineChart } from '../chart.js';
 import { lastBackup, backupDue } from '../safety.js';
-import { heroCard } from './hero.js';
+import { heroCard, loadProfile } from './hero.js';
 
 const icon = (name) => `<svg class="dashboard-icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
@@ -72,7 +72,7 @@ function scheduleReminder(state, days, template, canStart) {
 }
 
 export async function render(el) {
-  const [cur, templates, done, exList] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises')]);
+  const [cur, templates, done, exList, profile] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises'), loadProfile()]);
   const ex = exMap(exList), top = topLifts(done);
   const plan = weekPlan(settings.get().schedule, done);
   const ready = readiness(done), sess = sessionCounts(done), goals = settings.get();
@@ -97,7 +97,7 @@ export async function render(el) {
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
-    ${heroCard()}
+    ${heroCard(profile.tuvi)}
     ${plan.state === 'none' ? `<section class="card schedule-reminder" data-schedule-today data-state="none">
       <div class="row schedule-heading">
         <span class="tile-icon">${icon('calendar')}</span>

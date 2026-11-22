@@ -266,6 +266,21 @@ try {
     $('[data-act=clearErrors]').click(); await wait(200);
     return ok && !$('.error-log') && !sf.errorLog().length;
   });
+  await step('Động phủ: số thật, hỏi cân nặng + giới tính, lưu rồi tính lại', async () => {
+    await go('#/');
+    const card = await until(() => $('[data-hero-link]'));
+    if (!card || card.textContent.includes('Số liệu mẫu')) throw new Error('thẻ Hôm nay chưa dùng số thật');
+    card.click();
+    const form = await until(() => $('[data-hero-profile]'));
+    if (!form || $('.cultivation-sample') || !form.querySelector('[name=weight]') || !form.querySelector('[name=sex]')) throw new Error('thiếu form hỏi thông tin');
+    input(form.querySelector('[name=weight]'), '70'); form.querySelector('[name=sex]').value = 'm';
+    form.querySelector('button').click();
+    const lift = await until(() => !$('[data-hero-profile]') && $('.cultivation-meridian[data-muscle=chest] .cultivation-lift'));
+    const body = await (await mod('db.js')).all('body');
+    const ok = !!lift?.textContent.includes('×BW') && body.length === 1 && body[0].weight === 70 && JSON.parse(w.localStorage.getItem('gym.settings')).sex === 'm';
+    if (!ok) lines.push(`  ${lift?.textContent} | body ${body.length}`);
+    await go('#/'); return ok && !!(await until(() => $('[data-hero-link]')));
+  });
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
