@@ -1,6 +1,6 @@
-import { seed } from './db.js';
+import { seed, activeWorkout } from './db.js';
 import * as timer from './timer.js';
-import { countUp, toast } from './util.js';
+import { countUp, toast, settings } from './util.js';
 import { logError } from './safety.js';
 
 // Bắt mọi lỗi chưa xử lý: ghi nhật ký (xem ở Cài đặt) + báo bằng toast, tối đa 1 toast/5 giây.
@@ -29,6 +29,11 @@ let cleanup;
 
 async function route() {
   const [name = '', ...params] = location.hash.replace(/^#\/?/, '').split('/');
+  // Lần đầu (chưa Nhập môn, chưa bấm "Để sau", không có buổi đang tập): vào thẳng Nhập môn.
+  if (!name) {
+    const s = settings.get();
+    if (!s.dao && !s.daoSkip && !(await activeWorkout())) return location.replace('#/nhap-mon');
+  }
   const load = ROUTES[name] || ROUTES[''];
   cleanup?.();
   cleanup = null;

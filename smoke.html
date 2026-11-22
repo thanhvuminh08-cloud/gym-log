@@ -28,6 +28,17 @@ const check = async (i) => { $$('.set:not(.head) .check')[i].click(); await wait
 const step = async (name, fn) => { try { const r = await fn(); log(r !== false, name); } catch (e) { log(false, `${name} — ${e.message}`); } };
 
 try {
+  await step('Lần đầu mở app → Nhập môn; "Để sau" → Hôm nay, không hỏi lại', async () => {
+    const wiz = await until(() => w.location.hash === '#/nhap-mon' && $('[data-dao-step="1"]'));
+    if (!wiz) throw new Error(`không chuyển tới Nhập môn (${w.location.hash})`);
+    await go('#/nhap-mon/6'); // nhảy cóc khi chưa khai thân thể → về bước 2
+    const back2 = !!(await until(() => $('[data-dao-step="2"]')));
+    await go('#/nhap-mon/1'); await until(() => $('[data-dao-step="1"]'));
+    // "Để sau" chỉ có ở bước 6; giả lập bằng cờ như nút làm, rồi mở lại Hôm nay.
+    const s = JSON.parse(w.localStorage.getItem('gym.settings') || '{}'); w.localStorage.setItem('gym.settings', JSON.stringify({ ...s, daoSkip: Date.now() }));
+    await go('#/');
+    return back2 && w.location.hash === '#/';
+  });
   await step('Trang Hôm nay hiện nút bắt đầu', async () => !!(await until(() => $('[data-act=empty]'))));
   await step('Bắt đầu buổi tập trống', async () => { $('[data-act=empty]').click(); return !!(await until(() => w.location.hash === '#/workout' && $('[data-act=addEx]'))); });
   await step('Chọn bài tập từ picker', async () => {
@@ -342,6 +353,40 @@ try {
     const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
     await go('#/');
     return !!gone && seen.chest[0] + seen.chest[1] > 0;
+  });
+  await step('Nhập môn: khai báo, bỏ Deadlift, Trắc linh căn, Nhận công pháp → giáo án + lịch + mốc', async () => {
+    const S = () => JSON.parse(w.localStorage.getItem('gym.settings'));
+    const at = async (n) => !!(await until(() => $(`[data-dao-step="${n}"]`)));
+    const next = async (n) => { $('[data-act=daoNext]').click(); return at(n); };
+    await go('#/nhap-mon/1'); await at(1);
+    input($('[name=name]'), 'Thanh Vân'); if (!(await next(2))) throw new Error('bước 2');
+    $('[name=sex]').value = 'm'; input($('[name=weight]'), '80'); input($('[name=height]'), '174');
+    if (!(await next(3))) throw new Error('bước 3');
+    $('[name=experience]').value = 'mid'; $('[name=goal]').value = 'strength'; $('[name=days]').value = '4';
+    if (!(await next(4))) throw new Error('bước 4');
+    const box = (id) => $(`input[data-path=back][value="${id}"]`);
+    box('x-deadlift').click(); // bỏ Deadlift → Lưng thiếu 1 bài → không đi tiếp được
+    const blocked = await until(() => $('[data-act=daoNext]')?.disabled && $('[data-muscle=back] .dao-path-warning'));
+    box('x-pull-up').click();
+    const freed = await until(() => !$('[data-act=daoNext]').disabled);
+    if (!blocked || !freed || !(await next(5))) throw new Error(`Công pháp: chặn ${!!blocked}, mở ${!!freed}`);
+    const fill = (id, kg, r) => { const f = $(`[data-test="${id}"]`); input(f.querySelector('[name=w]'), kg); input(f.querySelector('[name=r]'), r); };
+    fill('x-squat', 140, 5); fill('x-front-squat', 110, 3); fill('x-bench-press-on', 100, 5); fill('x-pull-up', 20, 5);
+    if (!(await next(6))) throw new Error('bước 6');
+    const rank = $('.dao-rank strong')?.textContent, days = $$('.dao-schedule li').length;
+    $('[data-act=daoSave]').click();
+    const done = await until(() => w.location.hash === '#/hero' && $('.cultivation-meridian'), 5000);
+    const s = S(), tpl = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp'));
+    const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
+    const got = [!!done, !!rank, days, s.dao.name, s.dao.path.back.join('+'), s.dao.tested.length, tpl.length, Object.keys(s.schedule).join(''), s.weekGoal,
+      s.dao.templateIds.length, !!seen, !!$('dialog.breakthrough-modal[open]'), $('.cultivation-navigation')?.textContent.includes('Sửa Công pháp'),
+      !!$('.cultivation-meridian[data-muscle=legs] .cultivation-tested')].join(',');
+    // Làm lại Nhập môn: ghi đè giáo án cũ, không nhân đôi.
+    await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/hero', 5000);
+    const tpl2 = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp')).length;
+    const want = ['true', 'true', 4, 'Thanh Vân', 'x-barbell-row+x-pull-up', 4, 4, '1245', 4, 4, 'true', 'false', 'true', 'true'].join(',');
+    if (got !== want || tpl2 !== 4) lines.push(`  ${got} | lại ${tpl2}\n  ≠ ${want}`);
+    return got === want && tpl2 === 4;
   });
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));

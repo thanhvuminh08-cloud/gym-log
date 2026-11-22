@@ -232,7 +232,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
   return `<article class="cultivation">
     <div class="cultivation-navigation">
       <a class="cultivation-back small" href="#/">← Hôm nay</a>
-      <a class="cultivation-back small" href="#/nhap-mon">Xem Nhập môn →</a>
+      <a class="cultivation-back small" href="#/nhap-mon">${settings.get().dao ? 'Sửa Công pháp' : 'Nhập môn'} →</a>
     </div>
     <header class="cultivation-cover">
       <span class="cultivation-mist" aria-hidden="true"></span>

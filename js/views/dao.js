@@ -1,6 +1,9 @@
 import * as G from '../dao.js';
 import { DEFAULT_EXERCISES } from '../exercises.js';
-import { h } from '../util.js';
+import { h, settings, uid, toast } from '../util.js';
+import { all, put, del } from '../db.js';
+import { snapshot } from '../hero.js';
+import { loadProfile, SEEN_KEY } from './hero.js';
 
 const STEPS = [
   ['Nhập môn', 'Chọn tên dùng trong Động phủ.'],
@@ -142,16 +145,127 @@ export function daoView(state, { preview = false } = {}) {
   </article>`;
 }
 
-export async function render(el, [part, branch] = []) {
-  const step = Math.min(6, Math.max(1, parseInt(part, 10) || 1));
-  const dao = branch === 'new' ? { ...sampleDao, experience: 'new', tested: [] } : sampleDao;
-  const exercises = DEFAULT_EXERCISES;
-  el.innerHTML = daoView({
-    step, dao, sex: 'm', weight: 75,
-    groups: G.pathOptions(exercises), validation: G.validatePath(dao.path, exercises),
-    tests: G.testList(dao.path, exercises),
-    result: G.assess({ dao, exercises, body: [{ weight: 75, date: dao.at }], sex: 'm', now: dao.at }),
-    plan: G.buildPlan(dao, exercises),
+// ——— Nối dữ liệu thật (Claude) ———
+// Bản nháp sống trong module (và sessionStorage để tải lại trang không mất) cho tới khi "Nhận công pháp".
+const DRAFT_KEY = 'gym.daoDraft';
+let draft = null;
+const keep = () => { try { sessionStorage.setItem(DRAFT_KEY, JSON.stringify(draft)); } catch {} };
+const forget = () => { draft = null; try { sessionStorage.removeItem(DRAFT_KEY); } catch {} };
+const skipsTest = (d) => G.EXPERIENCE.find((x) => x.id === d.dao.experience)?.test === false;
+
+async function load() {
+  const [exercises, body, workouts] = await Promise.all([all('exercises'), all('body'), all('workouts')]);
+  const s = settings.get();
+  if (!draft) { try { draft = JSON.parse(sessionStorage.getItem(DRAFT_KEY)); } catch {} }
+  if (!draft?.dao) {
+    // Sửa Công pháp: bắt đầu từ hồ sơ đã lưu; lần đầu: gợi ý sẵn.
+    const prev = s.dao || {};
+    const latest = [...body].filter((b) => b.weight > 0).sort((a, b) => a.date - b.date).at(-1);
+    draft = {
+      sex: s.sex || '', weight: latest?.weight ?? '',
+      dao: { name: '', height: '', age: '', experience: 'novice', goal: 'muscle', days: Math.min(6, Math.max(2, s.weekGoal || 3)), tested: [],
+        ...prev, path: G.cleanPath(prev.path || G.defaultPath(exercises), exercises) },
+    };
+  }
+  return { exercises, body, workouts, s };
+}
+
+/** Đọc ô nhập của bước đang hiện vào bản nháp. */
+function collect(el, step, exercises) {
+  const v = (n) => el.querySelector(`[name="${n}"]`)?.value ?? '';
+  const num = (x) => (x === '' || !(+x > 0) ? '' : +x);
+  const d = draft.dao;
+  if (step === 1) d.name = v('name').trim().slice(0, 40);
+  if (step === 2) { draft.sex = v('sex'); draft.weight = num(v('weight')); d.height = num(v('height')); d.age = num(v('age')); }
+  if (step === 3) { d.experience = v('experience'); d.goal = v('goal'); d.days = +v('days') || 3; }
+  if (step === 4) {
+    const path = Object.fromEntries(G.pathOptions(exercises).map((g) => [g.key, []]));
+    el.querySelectorAll('input[data-path]:checked').forEach((c) => path[c.dataset.path]?.push(c.value));
+    d.path = path;
+  }
+  if (step === 5) {
+    const tests = G.testList(d.path, exercises);
+    d.tested = tests.map((t) => {
+      const f = el.querySelector(`[data-test="${CSS.escape(t.exerciseId)}"]`);
+      const w = +f?.querySelector('[name=w]').value || 0, r = Math.round(+f?.querySelector('[name=r]').value || 0);
+      return { exerciseId: t.exerciseId, w, r };
+    }).filter((t) => t.r > 0 && t.r <= 30 && (t.w > 0 || tests.find((x) => x.exerciseId === t.exerciseId).bodyweight));
+  }
+  keep();
+}
+
+/** Bước 2 bắt buộc giới tính + cân nặng (để xếp cảnh giới). */
+const missing = (step) => step === 2 && (!['m', 'f'].includes(draft.sex) ? 'Chọn giới tính' : !(draft.weight > 0) ? 'Nhập thân trọng (kg)' : '');
+
+function state(step, { exercises, body, workouts }, now = Date.now()) {
+  const d = draft.dao, dao = { ...d, at: now };
+  const b = draft.weight > 0 ? [...body, { date: now, weight: draft.weight }] : body;
+  return {
+    step, dao: d, sex: draft.sex, weight: draft.weight,
+    groups: G.pathOptions(exercises), validation: G.validatePath(d.path, exercises),
+    tests: G.testList(d.path, exercises),
+    result: step === 6 ? G.assess({ dao, exercises, body: b, sex: draft.sex, workouts, now }) : null,
+    plan: step === 6 ? G.buildPlan(d, exercises) : null,
     exerciseNames: Object.fromEntries(exercises.map(({ id, name }) => [id, name])),
-  }, { preview: true });
+  };
+}
+
+/** Lưu: cân nặng (nếu đổi), giới tính, settings.dao, giáo án Công pháp (ghi đè bộ cũ), lịch, mục tiêu tuần, mốc Đột phá. */
+export async function saveDao(now = Date.now()) {
+  const { exercises, body } = await load();
+  const s = settings.get(), prevIds = s.dao?.templateIds || [];
+  const latest = [...body].filter((x) => x.weight > 0).sort((a, b) => a.date - b.date).at(-1);
+  if (draft.weight > 0 && latest?.weight !== draft.weight) await put('body', { id: uid(), date: now, weight: draft.weight, waist: null });
+  const plan = G.buildPlan({ ...draft.dao, makeId: (i) => prevIds[i] || uid() }, exercises);
+  for (const t of plan.templates) await put('templates', t);
+  for (const id of prevIds.slice(plan.templates.length)) await del('templates', id);
+  const days = G.DAYS[Math.min(6, Math.max(2, +draft.dao.days || 3))].days.length;
+  const dao = { ...draft.dao, at: now, templateIds: plan.templates.map((t) => t.id) };
+  settings.set({ sex: draft.sex, dao, schedule: plan.schedule, weekGoal: days, daoSkip: null });
+  // Cảnh giới khởi đầu là "đo", không phải "đột phá": đặt mốc để không mở màn ăn mừng.
+  const profile = await loadProfile(now);
+  try { localStorage.setItem(SEEN_KEY, JSON.stringify(snapshot(profile))); } catch {}
+  forget();
+  return { dao, plan, profile };
+}
+
+export async function render(el, [part] = []) {
+  const data = await load();
+  let step = Math.min(6, Math.max(1, parseInt(part, 10) || 1));
+  if (step === 5 && skipsTest(draft)) step = 6;
+  // Không cho nhảy cóc qua bước bắt buộc (vd. mở thẳng #/nhap-mon/6 khi chưa có cân nặng).
+  if (step > 2 && missing(2)) step = 2;
+  const show = () => { el.innerHTML = daoView(state(step, data)); };
+  show();
+  const goStep = (n) => { location.hash = `#/nhap-mon/${n}`; };
+  el.onchange = (ev) => {
+    if (step === 4 && ev.target.matches('input[data-path]')) {
+      collect(el, 4, data.exercises);
+      const open = [...el.querySelectorAll('details[open]')].map((x) => x.dataset.muscle);
+      show();
+      el.querySelectorAll('details.dao-branch').forEach((x) => { if (open.includes(x.dataset.muscle)) x.open = true; });
+    }
+  };
+  el.onclick = async (ev) => {
+    const act = ev.target.closest('[data-act]')?.dataset.act;
+    if (!act) return;
+    if (act === 'daoBack') {
+      collect(el, step, data.exercises);
+      goStep(step === 6 && skipsTest(draft) ? 4 : step - 1);
+    } else if (act === 'daoNext') {
+      collect(el, step, data.exercises);
+      const why = missing(step) || (step === 4 && !G.validatePath(draft.dao.path, data.exercises).ok ? 'Mỗi mạch cần ít nhất 2 bài' : '');
+      if (why) return toast(why);
+      goStep(step === 4 && skipsTest(draft) ? 6 : step + 1);
+    } else if (act === 'daoSkip') {
+      if (!settings.get().dao) settings.set({ daoSkip: Date.now() });
+      forget();
+      location.hash = settings.get().dao ? '#/hero' : '#/';
+    } else if (act === 'daoSave') {
+      ev.target.disabled = true;
+      const { profile } = await saveDao();
+      toast(`Nhập môn thành công · ${profile.tuvi.label}`);
+      location.hash = '#/hero';
+    }
+  };
 }
