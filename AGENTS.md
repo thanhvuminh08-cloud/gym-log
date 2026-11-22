@@ -18,7 +18,13 @@ PWA cá nhân ghi buổi tập gym. 1 người dùng, dữ liệu IndexedDB trê
 - Người dùng là người mới: **chủ động báo "nên mở chat mới"** khi xong một việc, khi đổi sang việc không liên quan, hoặc khi hội thoại đã dài. Trước đó commit + ghi việc dở vào `NOTES.md`, và đưa 1 câu mở đầu để dán vào chat mới.
 
 ## Kết thúc mỗi việc
-1. Smoke PASS. 2. Sửa file tĩnh → tăng `VERSION` trong `sw.js` (file mới → thêm vào `FILES`). 3. Commit nhỏ, tiền tố `ui:` (Codex) / `logic:` (Claude).
+1. Smoke PASS. 2. Sửa file tĩnh → **tự** tăng `VERSION` trong `sw.js` (file mới → thêm vào `FILES`), ai sửa người đó tăng, không nhờ bên kia. 3. Commit nhỏ, tiền tố `ui:` (Codex) / `logic:` (Claude). 4. Hỏi người dùng 1 câu "push lên điện thoại?" — nên push sau mỗi việc PASS, không dồn commit.
+
+## Phối hợp hai agent
+- **Mỗi lúc chỉ một agent chạy.** Bắt đầu: `git status` phải sạch; có thay đổi chưa commit của bên kia → dừng, báo người dùng.
+- **Tính năng có giao diện: Codex làm trước** (markup + CSS với số liệu giả, giữ `data-*`/class đặt tên rõ), Claude gắn dữ liệu thật sau. Claude không tự viết style tạm, trừ khi không có giao diện thì không dùng được.
+- Việc nhỏ một dòng trong vùng của bên kia (tăng VERSION, thêm `data-*`) → tự làm, ghi trong commit, không mở "Việc chờ".
+- Ưu tiên phản hồi dùng thật: trước tính năng lớn mới, xem mục "Ý tưởng sau khi dùng thực tế" trong `NOTES.md`.
 
 ## Bản đồ file
 - `js/app.js` router hash (`#/workout`, `#/history/<id>`, `#/templates/<id|new>`), seed, đăng ký SW (tắt trên localhost).
