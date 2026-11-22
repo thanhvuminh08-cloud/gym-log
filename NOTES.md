@@ -29,13 +29,13 @@
 - Nền đầu trang chuyển xanh đậm, thẻ kính có viền mảnh, số lớn và biểu đồ có nhãn; màn Tập nhóm ô nhập theo dạng kg × rep @ RPE.
 - Thẻ Mục tiêu tập đánh dấu tuần/tháng đã đạt và dẫn đến nhóm ô số buổi ở đầu trang Cài đặt.
 - Lịch tập có bảy dòng T2–CN trong Cài đặt và thẻ mời đặt lịch cùng bản xem trước ba trạng thái ở Hôm nay.
+- Màn Tập dùng nút đánh dấu 48 × 48 px, ô nhập cao 48 px và viền xanh chanh cho set chưa xong đầu tiên của mỗi bài; set đã xong mờ nhẹ.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 - [cho Codex] CSS `.schedule-preview`, `.schedule-examples` không còn dùng (đã bỏ bản xem trước ở Hôm nay); thẻ chưa đặt lịch giờ có `data-state="none"`.
 - [cho Codex] Đợt nâng cấp giao diện/UX — làm theo thứ tự, mỗi mục 1 commit `ui:`, giữ `data-*`/class logic, tôn trọng giảm chuyển động. Phần cần logic thì ghi lại "Việc chờ cho Claude":
-  1. Màn Tập (js/views/workout.js): nút `.check` to ≥48px, dễ bấm; làm nổi set đang làm (set chưa xong đầu tiên); hàng `.set.done` mờ nhẹ; ô nhập lớn, dễ đọc khi đang tập.
   2. Đồng hồ nghỉ (`.rest-bar`, js/timer.js): vòng tròn đếm ngược SVG; đổi màu khi còn ≤10 giây (Claude thêm `data-left`/`data-warn` nếu cần).
   3. Tổng kết buổi (js/views/history.js, trang chi tiết ngay sau khi Kết thúc): thẻ to cho set/kg/bài/bài vượt, huy chương xuất hiện có hiệu ứng, số đếm tăng (đã có `data-count`).
   4. Chuyển trang + tải: chuyển cảnh mờ/trượt nhẹ giữa các tab; khung chờ (skeleton) cho Hôm nay/Tiến độ.

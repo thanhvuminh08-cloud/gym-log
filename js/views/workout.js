@@ -55,7 +55,6 @@ export async function render(el) {
         <select class="rpe" data-f="rpe" aria-label="Độ khó (RPE) set ${si + 1}">
           <option value="">–</option>${RPE.map(([v, t]) => `<option value="${v}"${+s.rpe === v ? ' selected' : ''}>${v} · ${h(t)}</option>`).join('')}
         </select>
-        <span class="set-unit" aria-hidden="true">RPE</span>
       </div>
       <button class="check${isPr ? ' pr' : ''}" data-act="check" aria-label="Đánh dấu set ${si + 1} hoàn thành" aria-pressed="${Boolean(s.done)}">${isPr ? 'PR' : '✓'}</button>
     </div>`;
