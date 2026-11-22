@@ -52,11 +52,11 @@
 - Nhập môn có nghi lễ đá linh căn, bảy mạch sáng lần lượt và ấn triện; hiện mốc Xác chứng bên cạnh Hư cảnh. Tiêu đề dùng Noto Serif tiếng Việt ngoại tuyến, theo giấy phép OFL trong `assets/fonts/`.
 - Luyện thể có bảng bậc riêng ở Thất mạch và nghi lễ Thối thể tông đồng; dòng `.pick-lock` có nút Sửa Công pháp dễ chạm.
 - Luyện Thể Ký dùng năm mục từ `NAV`, một trang Động phủ, ba tab Tu luyện ký, ấn phẩm kim/ngọc/đồng và Thạch bi theo mốc tạ thật.
+- Công pháp gộp lịch thành một dòng mỗi ngày và đặt hai ô mục tiêu cạnh nhau. Động phủ giữ tên buổi dở khi tắt Chú giải. Công đức bạ dùng ba dáng ấn và bia khắc kg, ngày trên nền tranh núi có sẵn.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Công pháp: khối lịch bế quan (`[data-schedule]`) và "Mục tiêu bế quan" (`[data-goals]`) vừa chuyển từ Cài đặt sang, đang dùng lại class cũ — chỉnh cho hợp trang; Động phủ: `<p class="gloss">` đang chứa tên buổi dở, Chú giải tắt sẽ ẩn mất tên (js/views/home.js).
-- [cho Codex] Luyện Thể Ký bước 4 (VISION.md): đánh bóng ấn phẩm và tranh Thạch bi, thử trên iPhone.
+- [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 

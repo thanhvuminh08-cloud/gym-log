@@ -89,7 +89,7 @@ export async function render(el) {
     <section class="workout-hero sanctum-training">
       <div class="hero-content">
         <h2>${cur ? 'Buổi tập đang diễn ra' : term('start')}</h2>
-        <p class="gloss">${cur ? h(cur.name) : gloss('start')}</p>
+        ${cur ? `<p>${h(cur.name)}</p>` : `<p class="gloss">${gloss('start')}</p>`}
         ${cur
           ? `<a class="btn primary resume-workout" href="#/workout">${icon('play')}Tiếp tục ${term('start').toLowerCase()}</a>`
           : `<button class="primary" data-act="empty">${icon('plus')}${term('start')}</button>`}

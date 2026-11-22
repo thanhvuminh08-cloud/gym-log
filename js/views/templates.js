@@ -28,26 +28,26 @@ export async function render(el, [id]) {
     <h2>Thất mạch</h2>${pathPreview(dao, Object.values(ex))}
     <a class="btn ghost" href="#/nhap-mon${dao?.at ? '/4' : ''}">${dao?.at ? 'Sửa Công pháp' : 'Nhập môn'}</a>
   </section>
-  <section class="card plan-overview">
-    <h2>Lịch bế quan</h2>
-    <ul class="plan-week">${days.map(([day, name]) => `<li${day in plan ? ' class="scheduled"' : ''}><b>${name}</b>
-      <small>${day in plan ? h(list.find((t) => t.id === plan[day])?.name || 'Tập tự do') : 'Nghỉ'}</small></li>`).join('')}</ul>
-    <div class="schedule-settings" data-schedule>
-      <p class="muted small">Đánh dấu ngày bế quan để xem lời nhắc ở Động phủ.</p>
+  <section class="card plan-overview plan-schedule" aria-labelledby="plan-schedule-title">
+    <h2 id="plan-schedule-title">Lịch bế quan</h2>
+    <p class="muted small">Chọn ngày tập để xem lời nhắc ở Động phủ.</p>
+    <ul class="plan-days" data-schedule>
       ${days.map(([day, name]) => `
-      <div class="schedule-option" data-day="${day}">
-        <label><input type="checkbox" data-f="on" ${day in plan ? 'checked' : ''}> <span>${name}</span></label>
+      <li class="plan-day" data-day="${day}">
+        <label><input type="checkbox" data-f="on" aria-label="Tập ${name}" ${day in plan ? 'checked' : ''}><b>${name}</b></label>
         <select data-f="tpl" aria-label="Giáo án ${name}">
-          <option value="">Tự do</option>
+          <option value="">${day in plan ? 'Tập tự do' : 'Nghỉ · chọn giáo án'}</option>
           ${list.map((t) => `<option value="${h(t.id)}" ${plan[day] === t.id ? 'selected' : ''}>${h(t.name)}</option>`).join('')}
         </select>
-      </div>`).join('')}
-    </div>
+      </li>`).join('')}
+    </ul>
   </section>
-  <section class="card plan-overview settings-options" data-goals>
-    <h2>Mục tiêu bế quan</h2>
-    <label class="row"><span class="grow">Số buổi mỗi tuần</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(weekGoal)}"></label>
-    <label class="row"><span class="grow">Số buổi mỗi tháng</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(monthGoal)}"></label>
+  <section class="card plan-overview plan-goals" data-goals aria-labelledby="plan-goals-title">
+    <h2 id="plan-goals-title">Mục tiêu bế quan</h2>
+    <div class="plan-goal-fields">
+      <label><span>Số buổi mỗi tuần</span><input type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(weekGoal)}"></label>
+      <label><span>Số buổi mỗi tháng</span><input type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(monthGoal)}"></label>
+    </div>
   </section>
   <h2>Giáo án</h2>
   ${list.map((t) => `<div class="card"><div class="row"><b class="grow">${h(t.name)}</b>

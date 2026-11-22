@@ -51,7 +51,7 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 1. **Claude** — `js/lore.js`, `TIER_LABEL`, router 5 mục + chuyển hướng route cũ, smoke kiểm các route mới. Ghi hợp đồng chi tiết cuối file này.
 2. **Codex** — nav 5 mục, tên app, Động phủ gộp (số giả chỗ mới), khung 3 tab Tu luyện ký, giao diện Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi, trang Công pháp và Tàng thư.
 3. ✅ **Claude** (22/11) — nối dữ liệu thật, chuyển lịch tập/Công pháp khỏi Cài đặt, "Chú giải", nhãn "Chí hướng", smoke đủ luồng, tăng `VERSION`.
-4. **Codex** — đánh bóng: hình ấn phẩm, tranh Thạch bi, thử trên iPhone (việc chờ cũ).
+4. **Codex** — đã hoàn thiện hình ấn phẩm và tranh Thạch bi. Còn thử trực tiếp trên iPhone (xem Việc chờ trong NOTES.md).
 
 ## Để sau (từ phản hồi dùng thật)
 - ~~Set sau tự điền theo set trước~~ — đã làm ở bước 3 (chỉ điền ô còn trống của set kế tiếp).

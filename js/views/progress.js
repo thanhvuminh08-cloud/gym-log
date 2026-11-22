@@ -101,8 +101,8 @@ export async function render(el, [tab, exId] = []) {
           <div class="overload"><b data-count="${m.beats}">${m.beats}</b><small>lần vượt</small></div>
           <div class="streak"><b class="streak-multiplier" data-count="${m.streak.cur}">${m.streak.cur}</b><strong>${term('streak')}</strong><small class="gloss">${gloss('streak')} · kỷ lục ${m.streak.best}</small></div>
           <div class="streak"><b data-count="${m.weeks.cur}">${m.weeks.cur}<small> tuần</small></b><strong>${term('weeks')}</strong><small class="gloss">${gloss('weeks')} · kỷ lục ${m.weeks.best}</small></div></div>
-        ${m.milestones.length ? `<h2>${term('milestone')}</h2><p class="gloss">${gloss('milestone')}</p>${m.milestones.map((x) => `<div class="card row milestone">
-          <span class="stone-marker">${x.reached ? `<b>${fmtNum(x.reached.kg)} kg</b><small>${fmtShort(x.reached.t)}</small>` : '<small>Chưa khắc bia</small>'}</span>
+        ${m.milestones.length ? `<h2>${term('milestone')}</h2><p class="gloss">${gloss('milestone')}</p>${m.milestones.map((x) => `<div class="card milestone">
+          <div class="stone-scene"><span class="stone-marker${x.reached ? ' engraved' : ''}">${x.reached ? `<b>${fmtNum(x.reached.kg)} kg</b><small>${fmtShort(x.reached.t)}</small>` : '<small>Chưa khắc bia</small>'}</span></div>
           <span class="grow"><b>${name(x.exerciseId)}</b><br><small class="muted">Nặng nhất ${fmtNum(x.best)} kg${x.next ? ` · mốc kế ${fmtNum(x.next)} kg` : ''}</small></span>
         </div>`).join('')}` : ''}
         ${m.recent.length ? `<h2>Phẩm gần đây</h2>${m.recent.slice(0, 20).map((r) => `<a class="card row medal-row"${isNew(r)} href="#/ky/${h(r.workoutId)}">

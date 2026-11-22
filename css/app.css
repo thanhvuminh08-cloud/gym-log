@@ -126,25 +126,44 @@ label.row { padding: 6px 0; }
 [data-no-gloss] .gloss { display: none; } /* Tàng thư › Cài đặt › Chú giải tắt */
 .pham-seal {
   display: inline-grid; width: 1em; height: 1em; place-items: center; vertical-align: -.15em; flex: none;
-  border-radius: 29%; border: 1px solid var(--tier-line, currentColor);
-  background: linear-gradient(145deg, var(--tier-line, currentColor), var(--tier-bg, var(--bg)));
-  box-shadow: inset 0 0 0 2px var(--tier-bg, var(--bg)); transform: rotate(-8deg);
+  color: var(--tier-text, var(--accent)); border: 1px solid var(--tier-line, currentColor);
+  border-radius: var(--seal-radius, 2px);
+  background: linear-gradient(145deg, var(--tier-line, var(--accent)), var(--tier-bg, var(--bg)) 75%);
+  box-shadow: inset 0 0 0 .07em var(--tier-bg, var(--bg)), 0 .07em .13em #0008;
 }
-.pham-seal::after { content: ""; width: 38%; aspect-ratio: 1; border: 1px solid currentColor; transform: rotate(45deg); }
-.stats.medals .pham-seal { font-size: 1.75rem; margin-bottom: 7px; }
+[data-tier="gold"] .pham-seal { --seal-radius: 30% 30% 15% 15%; }
+[data-tier="silver"] .pham-seal { --seal-radius: 50%; }
+[data-tier="bronze"] .pham-seal { --seal-radius: 16%; }
+.pham-seal::before, .pham-seal::after { content: ""; grid-area: 1 / 1; width: 56%; aspect-ratio: 1; }
+.pham-seal::before { border: 1px solid currentColor; rotate: 45deg; }
+.pham-seal::after { width: 23%; background: currentColor; rotate: 45deg; }
+.stats.medals .pham-seal { font-size: 2.5rem; margin-bottom: 8px; }
 .stats.medals strong { font-size: .86rem; }
 .stats.medals .gloss { margin-top: 4px; font-size: .72rem; }
 .stats.streaks .streak strong { display: block; color: var(--accent); margin-bottom: 5px; }
 .stats.streaks .streak b small { display: inline; color: inherit; }
 .streak-multiplier::before { content: "×"; }
-.stone-marker {
-  display: grid; flex: 0 0 auto; min-width: 70px; align-content: center; justify-items: center; gap: 1px;
-  padding: 8px 6px; border: 1px solid #7c8884; border-radius: 13px 13px 3px 3px;
-  color: #e5ddc5; background: linear-gradient(130deg, #50605b, #242e2d);
-  box-shadow: inset 0 0 0 3px #35423f; text-align: center;
+.card.milestone {
+  display: grid; grid-template-columns: minmax(104px, 32%) minmax(0, 1fr); align-items: center;
+  padding: 0 12px 0 0; overflow: hidden;
 }
-.stone-marker b { font: 700 1rem var(--cultivation-serif); }
-.stone-marker small { font-size: .73rem; }
+.stone-scene {
+  display: grid; justify-items: center; align-items: end; min-height: 108px; padding: 10px 6px 12px;
+  background: linear-gradient(0deg, #081419aa, transparent), #153039 url("../assets/cultivation-mountains.svg") 80% center / cover;
+}
+.stone-marker {
+  position: relative; display: grid; align-content: center; min-width: 76px; min-height: 69px;
+  padding: 8px 6px 5px; border: 1px solid #81918a; border-radius: 40% 40% 3px 3px / 24% 24% 3px 3px;
+  color: #ecdfc8; background: linear-gradient(125deg, #526661, #293735 68%);
+  box-shadow: inset 0 0 0 3px #1b29297a, 3px 3px #182421; text-align: center;
+}
+.stone-marker::after {
+  content: ""; position: absolute; inset: auto -4px -4px; height: 5px;
+  border-radius: 2px; background: #364744; box-shadow: inset 0 1px #829289, 0 3px 5px #0008;
+}
+.stone-marker.engraved { border-color: #aeb29a; }
+.stone-marker b { font: 700 1.02rem var(--cultivation-serif); text-shadow: 0 1px #131c1a; }
+.stone-marker small { font-size: .75rem; }
 .ledger-summary .gloss { display: block; margin-top: 3px; }
 .ledger-summary h3 { margin-bottom: 5px; }
 .ledger-summary ul { margin: 0 0 8px; padding-inline-start: 1.2em; }
@@ -317,15 +336,6 @@ a.backup-reminder:is(:hover, :active) { background: #293a24; }
 .settings-options > label { min-height: 44px; }
 .settings-options > label + label { margin-top: 6px; }
 .settings-options input.tiny { flex: none; }
-.schedule-settings > p { margin: 0 0 8px; }
-.schedule-option {
-  display: grid; grid-template-columns: minmax(98px, .8fr) minmax(0, 1fr);
-  align-items: center; gap: 8px; padding-block: 5px;
-}
-.schedule-option + .schedule-option { border-top: 1px solid var(--line); }
-.schedule-option label { display: flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; }
-.schedule-option input { flex: none; margin: 0; accent-color: var(--accent); }
-.schedule-option select { min-width: 0; padding-inline: 6px; }
 @media (min-width: 560px) {
   .dashboard-summaries { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
@@ -447,11 +457,29 @@ button.chip { min-height: 44px; }
 .sanctum-cultivation .cultivation-cover { align-content: end; min-height: clamp(210px, 64vw, 320px); }
 .sanctum-cultivation .cultivation-cover-heading:empty { display: none; }
 .plan-overview h2, .library-group ul { margin: 0 0 8px; }
-.plan-week, .plan-meridians { list-style: none; margin: 0 0 10px; padding: 0; }
-.plan-week { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 5px; }
-.plan-week li { display: grid; align-content: start; gap: 2px; padding: 6px; border: 1px solid var(--line); border-radius: 8px; color: var(--muted); overflow-wrap: anywhere; }
-.plan-week .scheduled { background: var(--accent-soft); color: var(--text); }
-.plan-week .scheduled b, .plan-meridians b { color: var(--accent); }
+.plan-schedule, .plan-goals {
+  border-color: #3e574f; background: linear-gradient(155deg, #203730, #141f24 78%);
+}
+.plan-schedule h2, .plan-goals h2 { color: #f2d49b; font-family: var(--cultivation-serif); }
+.plan-days, .plan-meridians { list-style: none; padding: 0; }
+.plan-days { display: grid; gap: 5px; margin: 12px 0 0; }
+.plan-day {
+  display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 8px; align-items: center;
+  padding: 3px 5px; border: 1px solid transparent; border-radius: 12px;
+}
+.plan-day:has(input:checked) { background: #293a26; border-color: #50603c; }
+.plan-day label { display: flex; align-items: center; gap: 8px; min-height: 44px; padding-inline-start: 5px; cursor: pointer; }
+.plan-day label b { color: var(--muted); }
+.plan-day input:checked + b { color: var(--accent); }
+.plan-day input { flex: none; margin: 0; }
+.plan-day select { min-width: 0; padding-inline: 8px; }
+.plan-goal-fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.plan-goal-fields label {
+  display: grid; align-content: end; gap: 6px; min-width: 0; padding: 8px;
+  border: 1px solid #3e574f; border-radius: 12px; color: var(--muted); font-size: .85rem;
+}
+.plan-goal-fields input { color: var(--accent); font-size: 1.125rem; font-weight: 700; }
+.plan-meridians { margin: 0 0 10px; }
 .plan-meridians li { display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 7px; padding: 6px 0; border-bottom: 1px solid var(--line); }
 .plan-meridians li b { color: var(--muscle); }
 .plan-meridians span { color: var(--muted); font-size: .875rem; }
