@@ -22,6 +22,8 @@
 - Khoá Công pháp: đã Nhập môn → `pickExercise` (màn Tập, Giáo án) chỉ hiện bài trong `dao.path`, chip theo mạch, không "Tạo bài mới" (`.modal[data-locked=path]`, dòng `.pick-lock` dẫn tới Sửa Công pháp); `startWorkout` từ giáo án/buổi cũ bỏ bài ngoài Công pháp và báo toast (`lockedPath`, `filterByPath` trong js/dao.js).
 - Luyện thể (RPG.md 5c): mạch dùng Bế mạch → Luyện Bì → Luyện Nhục → Luyện Cân → Luyện Cốt → Luyện Tủy · Sơ thành → Viên mãn (`temper()`); Tu vi giữ cảnh giới. Sự kiện `kind: tuvi|temper|verify`, chỉ Tu vi độ kiếp; mạch lên bậc = "Thối thể".
 
+- Hướng mới (22/11): app thành **Luyện Thể Ký**, tu tiên là chủ đề chính; huy chương → Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi; nav 5 mục. Xem `VISION.md` (bước 1 là của Claude).
+
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
 
