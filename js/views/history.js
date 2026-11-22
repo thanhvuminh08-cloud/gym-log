@@ -102,9 +102,10 @@ function recapView(rc) {
       ${pham ? `<div class="tier small recap-pham" data-tier="${h(pham)}">${phamSeal()}<strong>${termLabel(pham)}</strong></div>` : ''}
     </header>
     <div class="recap-linhkhi" data-recap-linhkhi>
-      <div class="recap-gain"><strong>+${fmtNum(linhKhi.gain)}</strong> ${termLabel('linhKhi')}</div>
+      <span class="recap-formation" aria-hidden="true"></span>
+      <div class="recap-gain"><strong>+<span data-count="${linhKhi.gain}">${fmtNum(linhKhi.gain)}</span></strong> ${termLabel('linhKhi')}</div>
       <div class="recap-level"><b>${term('congLuc')} cấp ${linhKhi.level}</b>${linhKhi.levelUp ? '<span class="recap-up">Lên cấp</span>' : ''}</div>
-      <progress class="cultivation-meter" value="${linhKhi.pct}" max="100" aria-label="Tới cấp ${linhKhi.level + 1}"></progress>
+      <div class="recap-progress" style="--recap-progress: ${linhKhi.pct}%"><progress class="cultivation-meter" value="${linhKhi.pct}" max="100" aria-label="Tới cấp ${linhKhi.level + 1}"></progress></div>
       <small class="muted">${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} tới cấp ${linhKhi.level + 1}</small>
     </div>
     ${rc.needsWeight || rc.needsSex ? profileForm(rc)

@@ -267,8 +267,17 @@ function statusCard({ readiness: ready, canCo, shaky, meridians }) {
   return `<details class="card cultivation-panel readiness-detail" data-readiness>
     <summary><span class="status-title">Trạng thái</span>
       <span class="status-metrics">
-        <span>${termLabel('khiHuyet')}<strong><span data-readiness-score>${ready?.score ?? '–'}</span>${ready?.score != null ? '<small> /100</small>' : ''}</strong></span>
-        <span>${termLabel('canCo')}<strong>${canCo != null ? `${canCo}%` : '–'}</strong>${shaky ? '<small class="status-warn">Lung lay</small>' : ''}</span>
+        <span class="status-metric">
+          ${termLabel('khiHuyet')}
+          <span class="status-reading"><strong><span data-readiness-score>${ready?.score ?? '–'}</span>${ready?.score != null ? '<small> /100</small>' : ''}</strong>
+            <span class="status-ring" style="--status-value: ${ready?.score ?? 0}%" aria-hidden="true"></span></span>
+        </span>
+        <span class="status-metric status-metric-condition">
+          ${termLabel('canCo')}
+          <span class="status-reading"><strong>${canCo != null ? `${canCo}%` : '–'}</strong>
+            <span class="status-ring" style="--status-value: ${canCo ?? 0}%" aria-hidden="true"></span></span>
+          ${shaky ? '<small class="status-warn">Lung lay</small>' : ''}
+        </span>
       </span>
     </summary>
     <div class="status-detail">

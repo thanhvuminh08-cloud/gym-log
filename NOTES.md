@@ -63,6 +63,7 @@
 - Khi mở Động phủ lần đầu, tiêu đề “Ghi buổi tập đầu tiên” dẫn mắt tới nút Bế quan. Thẻ Nhập môn tuỳ chọn nằm ngay dưới, với biểu tượng và viền xanh ngọc.
 - Hồn tu tiên: hiên luyện công do ImageGen tạo (tranh mực, sương núi, đèn đồng), nén WebP bằng FFmpeg. Vòng ấn vẽ bằng SVG. Nhạc và âm gốc tổng hợp bằng Node.js, mã hoá bằng FFmpeg, không dùng bản thu bên ngoài.
 - O2–O4: Thu hoạch nằm ngay dưới tên buổi tập, nổi bật Linh khí/Phẩm và gợi ý Buổi sau; dòng hồ sơ và số đo đã lưu có kiểu riêng; Trạng thái trong Thất mạch gom Khí huyết và Căn cơ (kể cả phong độ từng mạch).
+- Thu hoạch có vòng trận, ấn Phẩm và vệt sáng theo màu phẩm; Linh khí đếm tăng. Trạng thái có hai vòng chỉ số, Động phủ lần đầu có ánh đèn trong tranh. Chuyển động chạy một lượt và theo cài đặt giảm chuyển động.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
