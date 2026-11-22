@@ -62,6 +62,23 @@ try {
     await step(`Render ${r}`, async () => { await go(r); return !$('.error') && $('#main').innerText.trim().length > 20; });
   }
   await step('Biểu đồ tiến độ có dữ liệu', async () => { await go('#/progress'); return !!(await until(() => $('svg.chart path'))); });
+  await step('Tab Huy chương: 1 vàng, 1 lần vượt, mốc tạ 70kg', async () => {
+    $('[data-tab=medal]').click();
+    const g = await until(() => $('.medals .tier[data-tier=gold] b'));
+    return g?.textContent === '1' && $('.streaks .overload b')?.textContent === '1' && !!$('.milestone')?.textContent.includes('70 kg')
+      && !!$('.medal-row[href^="#/history/"]');
+  });
+  await step('Luật huy chương: chuỗi, mốc, tuần', async () => {
+    const { medals } = await import('./js/medals.js');
+    const D = 864e5, t0 = new Date(2026, 0, 5).getTime(); // thứ Hai
+    const W = (id, day, w, r) => ({ id, start: t0 + day * D, end: t0 + day * D + 1, entries: [{ exerciseId: 'b', sets: [{ w, r, done: true }] }] });
+    const m = medals([W('1', 0, 55, 8), W('2', 2, 60, 8), W('3', 7, 62.5, 8), W('4', 9, 50, 5), W('5', 21, 50, 6)], t0 + 22 * D);
+    const got = [m.counts.gold, m.counts.silver, m.counts.bronze, m.beats, m.streak.cur, m.streak.best, m.weeks.cur, m.weeks.best,
+      m.milestones[0].best, m.milestones[0].reached.kg, m.milestones[0].next, m.recent[0].workoutId].join(',');
+    const want = [2, 1, 0, 3, 1, 2, 1, 2, 62.5, 60, 70, '5'].join(',');
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Không tràn ngang ở 375px', () => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
