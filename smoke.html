@@ -42,6 +42,11 @@ try {
   });
   await step('Trang Hôm nay hiện nút bắt đầu', async () => !!(await until(() => $('[data-act=empty]'))));
   await step('Bắt đầu buổi tập trống', async () => { $('[data-act=empty]').click(); return !!(await until(() => w.location.hash === '#/workout' && $('[data-act=addEx]'))); });
+  await step('Động phủ: tiếp tục buổi dở từ thẻ lịch hôm nay', async () => {
+    await go('#/'); const resume = await until(() => $('[data-schedule-today] a[href="#/workout"]'));
+    if (!resume || $('[data-act=empty]')) return false;
+    resume.click(); return !!(await until(() => w.location.hash === '#/workout' && $('[data-act=addEx]')));
+  });
   await step('Chọn bài tập từ picker', async () => {
     $('[data-act=addEx]').click(); const s = await until(() => $('.modal input'));
     input(s, 'bench'); (await until(() => $('.pick-list .item'))).click();
@@ -65,7 +70,7 @@ try {
   await step('Kết thúc → trang chi tiết', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/ky/'))); });
   await step('Lưu thành giáo án', async () => { (await until(() => $('[data-act=tpl]'))).click(); await wait(200); await go('#/templates'); return w.document.body.innerText.includes('Smoke A'); });
   await step('Tập lại từ giáo án, hiện số liệu lần trước', async () => {
-    await go('#/'); (await until(() => $('[data-act=tpl]'))).click();
+    await go('#/cong-phap'); (await until(() => $('button[data-id]'))).click();
     await until(() => $$('.set:not(.head)').length);
     return $$('.set:not(.head) .prev')[0]?.textContent.includes('60');
   });
@@ -129,8 +134,8 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
-  await step('Hôm nay: thẻ Sức mạnh có ~1RM + sparkline', async () => {
-    await go('#/'); const c = await until(() => $('.lift-card[data-muscle=chest]'));
+  await step('Tàng thư › Tổng quan: thẻ Sức mạnh có ~1RM + sparkline', async () => {
+    await go('#/tang-thu/overview'); const c = await until(() => $('.lift-card[data-muscle=chest]'));
     return !!c && Number(c.querySelector('b').dataset.count) > 70 && !!c.querySelector('svg.spark path') && c.getAttribute('href').startsWith('#/tang-thu/ex/');
   });
   await step('Tổng quan: lưới năm tô ngày tập + cột khối lượng', async () => {
@@ -158,11 +163,12 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
-  await step('Hôm nay: Sẵn sàng + Mục tiêu tập dùng dữ liệu thật', async () => {
+  await step('Động phủ gọn: Khí huyết, mục tiêu tuần và Liên kích dùng dữ liệu thật', async () => {
     await go('#/'); const s = await until(() => $('[data-readiness-score]'));
     const sc = Number(s?.dataset.count), wk = $('[data-session-goal=week]');
     return sc >= 0 && sc <= 100 && wk.querySelector('[data-session-goal-count]').textContent.startsWith('2 / ')
-      && wk.querySelectorAll('.filled').length === 2 && $('[data-session-count]').dataset.count === '2' && !$('.sample-label');
+      && $('[data-session-count]').dataset.count === '2' && $('.sanctum-stats .streak-multiplier [data-count]').dataset.count === '1'
+      && !$('.lift-card, .cultivation-meridian, .cultivation-challenge');
   });
   await step('Tổng quan: thẻ Tổng ~1RM SBD dùng dữ liệu thật', async () => {
     await go('#/progress/overview'); const v = await until(() => $('[data-strength-total-value]'));
@@ -178,7 +184,7 @@ try {
     sel.value = tpl.value; sel.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
     const saved = JSON.parse(w.localStorage.getItem('gym.settings')).schedule[dow] === tpl.value && row.querySelector('[data-f=on]').checked;
     await go('#/'); const card = await until(() => $('[data-schedule-today][data-state=done]')); // smoke đã tập hôm nay
-    const ok = saved && !!card && $$('[data-week-plan] i').length === 7 && $(`[data-week-plan] i[data-day="${dow}"]`).dataset.state === 'done';
+    const ok = saved && !!card?.textContent.includes('Đã tập hôm nay') && !!card.querySelector('[data-act=empty]');
     await go('#/cong-phap'); const on = (await until(() => $(`[data-schedule] [data-day="${dow}"] [data-f=on]`)));
     on.checked = false; on.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
     await go('#/'); return ok && !!(await until(() => $('[data-schedule-today][data-state=none]'))) && !$('.schedule-preview');
@@ -410,17 +416,20 @@ try {
   });
   await step('Động phủ: số thật, hỏi cân nặng + giới tính, lưu rồi tính lại', async () => {
     await go('#/');
-    const card = await until(() => $('.sanctum-cultivation .cultivation'));
+    const card = await until(() => $('.sanctum-cultivation'));
     if (!card || $('[data-hero-link]') || card.textContent.includes('Số liệu mẫu')) throw new Error('Động phủ chưa gộp hoặc chưa dùng số thật');
     const form = await until(() => $('[data-hero-profile]'));
     if (!form || $('.cultivation-sample') || !form.querySelector('[name=weight]') || !form.querySelector('[name=sex]')) throw new Error('thiếu form hỏi thông tin');
     input(form.querySelector('[name=weight]'), '70'); form.querySelector('[name=sex]').value = 'm';
     form.querySelector('button').click();
-    const lift = await until(() => !$('[data-hero-profile]') && $('.cultivation-meridian[data-muscle=chest] .cultivation-lift'));
+    const strip = await until(() => !$('[data-hero-profile]') && $('.tuvi-strip[href="#/tang-thu/that-mach"]'));
     const body = await (await mod('db.js')).all('body');
-    const ok = !!lift?.textContent.includes('×BW') && body.length === 1 && body[0].weight === 70 && JSON.parse(w.localStorage.getItem('gym.settings')).sex === 'm';
+    if (strip) strip.click();
+    const lift = await until(() => $('.cultivation-meridian[data-muscle=chest] .cultivation-lift'));
+    const ok = !!lift?.textContent.includes('×BW') && !!$('[data-tab=that-mach][aria-current=page]')
+      && body.length === 1 && body[0].weight === 70 && JSON.parse(w.localStorage.getItem('gym.settings')).sex === 'm';
     if (!ok) lines.push(`  ${lift?.textContent} | body ${body.length}`);
-    await go('#/'); return ok && !!(await until(() => $('.sanctum-cultivation .cultivation')));
+    await go('#/'); return ok && !!(await until(() => $('.tuvi-strip')));
   });
   await step('Động phủ đợt 2: nhiệm vụ thật, Đột phá mở + đóng, lưu mốc', async () => {
     const card = await until(() => $('.sanctum-cultivation [data-quests]'));
@@ -458,14 +467,17 @@ try {
     if (!(await next(6))) throw new Error('bước 6');
     const rank = $('.dao-rank strong')?.textContent, days = $$('.dao-schedule li').length;
     $('[data-act=daoSave]').click();
-    const done = await until(() => w.location.hash === '#/' && $('.cultivation-meridian'), 5000);
+    const done = await until(() => w.location.hash === '#/' && $('.tuvi-strip'), 5000);
+    const ceremonyShown = !!$('dialog.breakthrough-modal[open]');
+    if (done) done.click();
+    await until(() => $('.cultivation-meridian'));
     const s = S(), tpl = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp'));
     const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
     const got = [!!done, !!rank, days, s.dao.name, s.dao.path.back.join('+'), s.dao.tested.length, tpl.length, Object.keys(s.schedule).join(''), s.weekGoal,
-      s.dao.templateIds.length, !!seen, !!$('dialog.breakthrough-modal[open]'), $('.cultivation-navigation')?.textContent.includes('Sửa Công pháp'),
+      s.dao.templateIds.length, !!seen, ceremonyShown, $('.cultivation-navigation')?.textContent.includes('Sửa Công pháp'),
       !!$('.cultivation-meridian[data-muscle=legs] .cultivation-tested')].join(',');
     // Làm lại Nhập môn: ghi đè giáo án cũ, không nhân đôi.
-    await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/' && $('.cultivation-meridian'), 5000);
+    await go('#/nhap-mon/6'); await at(6); $('[data-act=daoSave]').click(); await until(() => w.location.hash === '#/' && $('.tuvi-strip'), 5000);
     const tpl2 = (await (await mod('db.js')).all('templates')).filter((t) => t.name.startsWith('Công pháp')).length;
     const want = ['true', 'true', 4, 'Thanh Vân', 'x-barbell-row+x-pull-up', 4, 4, '1245', 4, 4, 'true', 'false', 'true', 'true'].join(',');
     if (got !== want || tpl2 !== 4) lines.push(`  ${got} | lại ${tpl2}\n  ≠ ${want}`);

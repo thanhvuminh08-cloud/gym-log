@@ -2,6 +2,7 @@ import { all, put, DB_NAME } from '../db.js';
 import { hero, REALMS, TEMPERS, MASTERY, snapshot, breakthroughs, quests } from '../hero.js';
 import { fmtNum, h, uid, settings, countUp, tap } from '../util.js';
 import { sfx, music } from '../sfx.js';
+import { archiveHeader } from './sections.js';
 
 /** Dữ liệu thật cho Động phủ: hero() + nhiệm vụ tuần (profile.weekly) từ toàn bộ buổi tập, thư viện bài, cân nặng và cài đặt. */
 export async function loadProfile(now = Date.now()) {
@@ -159,7 +160,7 @@ function meridianCard(m, claims) {
   </li>`;
 }
 
-function profileForm({ needsWeight, needsSex }) {
+export function profileForm({ needsWeight, needsSex }) {
   if (!needsWeight && !needsSex) return '';
   return `<form class="card cultivation-panel cultivation-profile" data-hero-profile>
     <h2>Thông tin tu luyện</h2>
@@ -206,16 +207,27 @@ export function breakthroughModal(event, { id = 'breakthrough', demo = false } =
   </dialog>`;
 }
 
-function questBoard(weekly, sample) {
+export function questBoard(weekly, sample = false, compact = false) {
   if (!weekly) return '';
   return `<section class="cultivation-scroll" data-quests>
     <header class="cultivation-section-heading"><h2>Nhiệm vụ tuần</h2><span><b>${weekly.done}/${weekly.total}</b> hoàn thành</span></header>
-    ${sample ? '<p class="quest-sample">Số liệu mẫu · Thứ hai đến Chủ nhật</p>' : '<p class="quest-sample">Thứ hai đến Chủ nhật</p>'}
+    ${compact ? '' : `<p class="quest-sample">${sample ? 'Số liệu mẫu · ' : ''}Thứ hai đến Chủ nhật</p>`}
     <ul class="quest-list">${weekly.quests.map((q) => `<li data-quest="${h(q.id)}"${q.meridian ? ` data-muscle="${h(q.meridian)}"` : ''}>
       <div><h3>${h(q.title)}</h3><p>${h(q.detail)}</p></div>
       <div class="quest-status"><b>${q.done}/${q.goal}</b>${q.complete ? '<span class="quest-stamp">Đã xong</span>' : ''}</div>
     </li>`).join('')}</ul>
   </section>`;
+}
+
+export function tuviStrip({ tuvi, linhKhi }) {
+  return `<a class="tuvi-strip" href="#/tang-thu/that-mach">
+    ${seal(tuvi.realm.i, tuvi.realm.name)}
+    <span class="tuvi-strip-info"><small>Tu vi</small><strong>${h(tuvi.label)}</strong>
+      <small>Công lực cấp ${linhKhi.level} · ${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} Linh khí</small>
+      <progress class="cultivation-meter" value="${linhKhi.into}" max="${linhKhi.need}" aria-label="Linh khí tới cấp tiếp theo"></progress>
+    </span>
+    <svg class="dashboard-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
+  </a>`;
 }
 
 function challengeCard(challenge, sample) {
@@ -302,13 +314,9 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
   </article>`;
 }
 
-const view = (profile) => heroView(profile, { weekly: profile.weekly, challenge: profile.challenge, demo: false });
+const view = (profile) => archiveHeader('that-mach') + heroView(profile, { weekly: null, challenge: profile.challenge, demo: false });
 
-export async function render(el, profile) {
-  if (!profile?.tuvi) profile = await loadProfile(); // router truyền mảng params, Động phủ truyền hồ sơ sẵn
-  el.innerHTML = view(profile);
-  ceremony(profile).then(({ quests: fresh }) => fresh.forEach((id) => el.querySelector(`[data-quest="${id}"]`)?.classList.add('celebrate')));
-  el.onclick = el.onchange = null; // bỏ handler của màn trước (main dùng chung)
+export function bindProfileForm(el, draw) {
   // Lưu cân nặng (bảng body, như Tiến độ › Cơ thể) và giới tính rồi tính lại.
   el.onsubmit = async (ev) => {
     const form = ev.target.closest('[data-hero-profile]');
@@ -320,9 +328,17 @@ export async function render(el, profile) {
     if (f.has('weight')) await put('body', { id: uid(), date: Date.now(), weight, waist: null });
     if (f.has('sex')) settings.set({ sex });
     const next = await loadProfile();
-    el.innerHTML = view(next);
+    if (!el.contains(form)) return;
+    draw(next);
     countUp(el);
     ceremony(next);
   };
+}
+
+export async function render(el) {
+  const profile = await loadProfile();
+  el.innerHTML = view(profile);
+  bindProfileForm(el, (next) => { el.innerHTML = view(next); });
+  ceremony(profile);
   return music();
 }

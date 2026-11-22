@@ -1,11 +1,11 @@
 import { all, put, del } from '../db.js';
 import { h, uid, fmtDate, fmtShort, fmtNum, exMap, countUp } from '../util.js';
 import { finished, series, records } from '../stats.js';
-import { lineChart, stackedBars, yearGridSvg } from '../chart.js';
+import { lineChart, sparkline, stackedBars, yearGridSvg } from '../chart.js';
 import { medals } from '../medals.js';
 import { PHAM, gloss, term } from '../lore.js';
 import { archiveHeader, journalHeader, phamSeal } from './sections.js';
-import { MUSCLE, yearGrid, years, weeklyVolume, inRange, liftTotal, mainLifts } from '../insights.js';
+import { MUSCLE, yearGrid, years, weeklyVolume, inRange, liftTotal, mainLifts, muscleKey, topLifts } from '../insights.js';
 
 const METRICS = { e1rm: '~1RM', top: 'Mức tạ cao nhất', vol: 'Khối lượng' };
 const RANGES = { 1: '1T', 3: '3T', 6: '6T', 12: '1N', 0: 'Tất cả' };
@@ -14,6 +14,25 @@ const state = { tab: 'overview', exId: '', metric: 'e1rm', range: 6, year: new D
 
 /** Chú thích màu nhóm cơ: [[muscle, text]]. */
 const legend = (items) => `<div class="chips legend">${items.map(([m, t]) => `<span class="chip legend-chip" data-muscle="${MUSCLE[m].key}"><i class="dot" aria-hidden="true"></i> ${h(m)}${t ? ` <b>${t}</b>` : ''}</span>`).join('')}</div>`;
+
+const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
+
+/** Thẻ mức tạ chính (~1RM) + tổng, mũi tên so với 30 ngày trước. */
+function strength({ lifts, total }, ex) {
+  return `<section class="strength">
+      <h2>Sức mạnh</h2>
+      <div class="lift-cards">${lifts.map((l) => `
+        <a class="card lift-card" href="#/tang-thu/ex/${encodeURIComponent(l.exerciseId)}" data-muscle="${muscleKey(ex[l.exerciseId])}">
+          <span class="lift-top"><b data-count="${l.max}">${fmtNum(l.max)}<small> kg</small></b>${trend(l.delta)}</span>
+          <small class="lift-name">${h(ex[l.exerciseId]?.name || 'Bài đã xoá')}</small>
+          ${sparkline(l.spark)}
+        </a>`).join('')}</div>
+      ${lifts.length > 1 ? `<div class="card lift-total">
+        <span class="lift-top"><b data-count="${total.max}">${fmtNum(total.max)}<small> kg</small></b>${trend(total.delta)}<small class="muted">Tổng ~1RM ${lifts.length} bài · so với 30 ngày trước</small></span>
+        ${lineChart(total.series.slice(-40), { unit: ' kg', area: true, labels: true, head: false })}
+      </div>` : ''}
+    </section>`;
+}
 
 export async function render(el, [tab, exId] = []) {
   state.tab = TABS.includes(tab) ? tab : 'overview';
@@ -41,6 +60,7 @@ export async function render(el, [tab, exId] = []) {
       const wv = weeklyVolume(done, ex, 12);
       const main = mainLifts(Object.values(ex)), sbd = liftTotal(done, main);
       const inWeeks = Object.keys(MUSCLE).filter((m) => wv.some((w) => w.byMuscle[m]));
+      const top = topLifts(done);
       body = `<div class="progress-overview"><section class="card year-card">
           <div class="row year-nav"><button class="ghost icon" data-y="${state.year - 1}" ${state.year <= lo ? 'disabled' : ''} aria-label="Năm trước">‹</button>
             <b class="grow">${state.year}</b>
@@ -63,7 +83,8 @@ export async function render(el, [tab, exId] = []) {
           <h2>Khối lượng 12 tuần</h2>
           ${stackedBars(wv)}
           ${legend(inWeeks.map((m) => [m, '']))}
-        </section></div>`;
+        </section></div>
+        ${top.lifts.length ? strength(top, ex) : ''}`;
     } else if (state.tab === 'ex') {
       if (!used.length) body = `<section class="card empty-state">
         <span class="tile-icon empty-illustration"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
