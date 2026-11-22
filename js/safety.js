@@ -1,5 +1,5 @@
 // An toàn dữ liệu: nhắc sao lưu, bản dự phòng trước khi khôi phục, nhật ký lỗi.
-import { DB_NAME, exportAll, importAll } from './db.js';
+import { DB_NAME, STORES, clear, exportAll, importAll } from './db.js';
 
 // Khoá localStorage riêng theo DB (smoke test dùng ?db=gym-smoke không đụng dữ liệu thật).
 const key = (k) => (DB_NAME === 'gym' ? k : `${k}.${DB_NAME}`);
@@ -41,3 +41,13 @@ export function logError(e) {
 }
 export const errorLog = () => read(ERR, []);
 export const clearErrors = () => localStorage.removeItem(ERR);
+
+/** Đặt lại app: xoá mọi store + khoá localStorage/sessionStorage của app (theo DB hiện tại). Không đụng SW cache. */
+export const RESET_WORD = 'XOÁ';
+export async function resetAll() {
+  for (const s of STORES) await clear(s);
+  const local = ['gym.settings', 'gym.restEnd', 'gym.restStart', 'gym.medalSeen'];
+  const perDb = ['gym.lastBackup', 'gym.preRestore', 'gym.errors', 'gym.heroSeen', 'gym.questSeen'].map(key);
+  for (const k of [...local, ...perDb]) localStorage.removeItem(k);
+  try { sessionStorage.removeItem('gym.daoDraft'); } catch {}
+}

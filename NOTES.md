@@ -69,6 +69,7 @@
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
+- [cho Codex] Style "Khu nguy hiểm" + nút Đặt lại app trong Cài đặt (`section.danger-zone`, `[data-act=resetAll]`, js/views/settings.js) — hiện chỉ markup tối thiểu.
 
 
 ## Ý tưởng sau khi dùng thực tế

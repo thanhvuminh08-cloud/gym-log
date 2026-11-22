@@ -609,6 +609,24 @@ try {
   });
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
+  // Chạy cuối: tải lại khung (mất stub confirm/prompt và bộ bắt lỗi).
+  await step('Đặt lại app: sai chữ thì không xoá; đúng chữ → store rỗng (bài tập seed lại), settings mặc định, về #/', async () => {
+    const mod = (p) => w.eval(`import('./js/${p}')`), db = await mod('db.js'), u = await mod('util.js');
+    u.settings.set({ weekGoal: 5 }); w.sessionStorage.setItem('gym.daoDraft', '{}');
+    await db.put('body', { id: 'smoke-b', date: Date.now(), weight: 70 });
+    await go('#/settings'); const btn = await until(() => $('[data-act=resetAll]'));
+    w.prompt = () => 'xoa'; btn.click(); await wait(300);
+    const kept = (await db.all('body')).some((b) => b.id === 'smoke-b');
+    w.prompt = () => 'XOÁ'; const loaded = new Promise((r) => (frame.onload = r));
+    $('[data-act=resetAll]').click(); await loaded;
+    const first = !!(await until(() => $('[data-first-run]')));
+    const db2 = await mod('db.js'), u2 = await mod('util.js'), n = {};
+    for (const s of db2.STORES) n[s] = (await db2.all(s)).length;
+    const got = [kept, n.workouts, n.templates, n.body, n.exercises > 0, u2.settings.get().weekGoal, w.location.hash || '#/', w.sessionStorage.getItem('gym.daoDraft'), first].join(',');
+    const want = ['true', '0', '0', '0', 'true', '3', '#/', '', 'true'].join(',');
+    if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
+    return got === want;
+  });
 } finally {
   w.localStorage.removeItem('gym.restEnd'); w.localStorage.removeItem('gym.restStart'); localStorage.removeItem('gym.restStart');
   for (const k of ['gym.lastBackup', 'gym.preRestore', 'gym.errors', 'gym.heroSeen', 'gym.questSeen']) w.localStorage.removeItem(`${k}.${DB}`);

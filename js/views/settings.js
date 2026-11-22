@@ -1,7 +1,7 @@
 import { all, del, exportAll, importAll, validateBackup } from '../db.js';
 import { h, settings, toast, fmtDate } from '../util.js';
 import { archiveHeader, termLabel } from './sections.js';
-import { lastBackup, markBackup, snapshot, snapshotInfo, undoRestore, errorLog, clearErrors } from '../safety.js';
+import { lastBackup, markBackup, snapshot, snapshotInfo, undoRestore, errorLog, clearErrors, resetAll, RESET_WORD } from '../safety.js';
 
 const LABEL = { workouts: 'buổi tập', templates: 'giáo án', exercises: 'bài tập', body: 'lần cân' };
 
@@ -50,6 +50,11 @@ export async function render(el) {
     </ul>
     <div class="error-log-actions"><button class="ghost danger" data-act="clearErrors">Xoá nhật ký</button></div>
   </section>` : ''}
+  <h2>Khu nguy hiểm</h2>
+  <section class="card danger-zone">
+    <p class="small">Xoá sạch mọi dữ liệu (buổi tập, giáo án, cân nặng, cài đặt), đưa app về như lần đầu mở. Không hoàn tác được.</p>
+    <button class="ghost danger" data-act="resetAll">Đặt lại app</button>
+  </section>
   <h2>Bài tập tự tạo</h2>
   ${custom.map((e) => `<div class="card row"><span class="grow">${h(e.name)} <small class="muted">${h(e.muscle)}</small></span><button class="ghost icon danger" data-del="${h(e.id)}">✕</button></div>`).join('') || '<p class="muted small">Chưa có. Tạo bài mới khi chọn bài tập trong buổi tập.</p>'}`;
 
@@ -94,6 +99,13 @@ export async function render(el) {
       render(el);
     }
     if (b.dataset.act === 'clearErrors') { clearErrors(); render(el); }
+    if (b.dataset.act === 'resetAll') {
+      if (!confirm('Đặt lại app sẽ XOÁ SẠCH mọi dữ liệu trên máy này.\nNên bấm "Sao lưu (xuất JSON)" trước. Đã sao lưu và muốn tiếp tục?')) return;
+      const word = prompt(`Gõ chữ ${RESET_WORD} để xác nhận xoá sạch:`);
+      if ((word || '').trim().toUpperCase() !== RESET_WORD) { if (word !== null) toast('Chữ xác nhận không đúng, chưa xoá gì'); return; }
+      try { await resetAll(); } catch (e) { toast('Lỗi: ' + e.message, 4000); return; }
+      location.hash = '#/'; location.reload();
+    }
     if (b.dataset.del && confirm('Xoá bài tập này? (Lịch sử cũ sẽ hiện "?")')) { await del('exercises', b.dataset.del); render(el); }
   };
 }
