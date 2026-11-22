@@ -12,6 +12,7 @@
 - Tổng quan (js/insights.js, hàm thuần): `MUSCLE` nhóm cơ → `key` (data-muscle: chest/back/shoulders/legs/biceps/triceps/core/other) + màu dự phòng; `yearGrid` 12 tháng × 31 ngày, màu = nhóm cơ nhiều set nhất trong ngày; `topLifts` 3 bài tập nhiều nhất, ~1RM + delta so với 30 ngày trước + tổng; `weeklyVolume` 12 tuần theo nhóm cơ. chart.js: `sparkline`, `stackedBars`, `yearGridSvg`, `lineChart({area, labels, head})`. Tiến độ có tab `#/progress/overview` (mặc định) và `#/progress/ex/<id>` (khoảng 1T/3T/6T/1N/Tất cả, ô Max). SVG có style inline dự phòng (width 100%, fill) vì `.dashboard svg` ép 20px.
 - An toàn dữ liệu (js/safety.js): Hôm nay có thẻ `.backup-reminder` khi có buổi tập xong mới hơn lần sao lưu cuối và đã quá 7 ngày (`BACKUP_DAYS`). Khôi phục chạy `validateBackup` (db.js), hiện số bản ghi để xác nhận, lưu bản dự phòng vào localStorage `gym.preRestore` (nút "Hoàn tác khôi phục"), rồi `importAll` ghi nguyên khối trong 1 transaction. Lỗi chưa xử lý → toast + 10 lỗi gần nhất trong `gym.errors` (Cài đặt › Nhật ký lỗi, `.error-log`). Khoá localStorage thêm hậu tố `.<db>` khi `?db=` khác `gym`.
 - Thẻ thật (js/insights.js): `liftTotal(ws, ids)` tổng ~1RM tích luỹ (Tiến độ › thẻ Tổng = `mainLifts` Squat/Bench Press/Deadlift theo tên). `readinessAt/readiness` điểm 0–100 = 100 − nghỉ (<24h 20, <48h 8) − tải 7 ngày/TB tuần 28 ngày (>1,5 25, >1,3 12) − RPE TB buổi gần nhất trong 72h (≥9,5 15, ≥8,5 10, ≥7,5 5); delta so với hôm qua. `sessionCounts` buổi tuần (từ T2)/tháng, mục tiêu `settings.weekGoal` (3) / `monthGoal` (12). Smoke đọc `data-count` thay vì chữ (countUp dừng ở 0 khi khung ẩn).
+- Lịch tập (js/schedule.js): `settings.schedule = {getDay(): templateId | ""}` (có khoá = ngày tập, "" = tự do). `weekPlan` → state none/done/due/rest cho Hôm nay + 7 ô T2–CN done/today/missed/planned/rest. Chọn giáo án ở Cài đặt tự bật ngày đó; giáo án đã xoá → coi như tự do; nút tập tắt khi đang có buổi dở. Smoke sao lưu/khôi phục `gym.settings`.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -32,8 +33,7 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Claude] Nối dữ liệu và lưu lịch T2–CN ở `section[data-schedule]` qua `[data-day][data-f]` (trường `data-f` nằm trong từng hàng `data-day`), dùng danh sách giáo án thật và giữ option Tự do. Ở Hôm nay thay `.schedule-preview` bằng lời nhắc thật `[data-schedule-today]` với dải `[data-week-plan]`, bật nút tập thích hợp khi có lịch và chưa có buổi đang tập, giữ thẻ mời khi chưa đặt lịch. Xoá dữ liệu mẫu và bổ sung smoke (js/views/home.js, js/views/settings.js, smoke.html).
+- [cho Codex] CSS `.schedule-preview`, `.schedule-examples` không còn dùng (đã bỏ bản xem trước ở Hôm nay); thẻ chưa đặt lịch giờ có `data-state="none"`.
 
 ## Ý tưởng sau khi dùng thực tế
-- Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).
 - (ghi thêm ở đây khi tập)

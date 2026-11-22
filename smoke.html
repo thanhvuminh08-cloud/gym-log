@@ -15,6 +15,7 @@ const until = async (fn, ms = 3000) => { for (let t = 0; t < ms; t += 50) { cons
 await new Promise((r) => { const q = indexedDB.deleteDatabase(DB); q.onsuccess = q.onerror = q.onblocked = r; });
 localStorage.removeItem('gym.restEnd');
 const seenBak = localStorage.getItem('gym.medalSeen'); localStorage.removeItem('gym.medalSeen');
+const setBak = localStorage.getItem('gym.settings'); localStorage.removeItem('gym.settings');
 frame.src = `index.html?db=${DB}#/`;
 await new Promise((r) => (frame.onload = r));
 const w = frame.contentWindow, $ = (s) => w.document.querySelector(s), $$ = (s) => [...w.document.querySelectorAll(s)];
@@ -117,6 +118,33 @@ try {
     const ok = Number(v?.dataset.count) > 70 && $('[data-strength-total]').textContent.includes('Bench') && !$('.sample-label');
     await go('#/history'); return ok;
   });
+  await step('Lịch tập: đặt ở Cài đặt → Hôm nay nhắc, bỏ → mời đặt lịch', async () => {
+    await go('#/'); if (!(await until(() => $('[data-schedule-today][data-state=none] a[href="#/settings"]')))) return false;
+    const dow = String(new Date().getDay());
+    await go('#/settings'); const row = await until(() => $(`[data-schedule] [data-day="${dow}"]`));
+    const sel = row.querySelector('[data-f=tpl]'), tpl = [...sel.options].find((o) => o.textContent === 'Smoke A');
+    if (!tpl) return false;
+    sel.value = tpl.value; sel.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    const saved = JSON.parse(w.localStorage.getItem('gym.settings')).schedule[dow] === tpl.value && row.querySelector('[data-f=on]').checked;
+    await go('#/'); const card = await until(() => $('[data-schedule-today][data-state=done]')); // smoke đã tập hôm nay
+    const ok = saved && !!card && $$('[data-week-plan] i').length === 7 && $(`[data-week-plan] i[data-day="${dow}"]`).dataset.state === 'done';
+    await go('#/settings'); const on = (await until(() => $(`[data-schedule] [data-day="${dow}"] [data-f=on]`)));
+    on.checked = false; on.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    await go('#/'); return ok && !!(await until(() => $('[data-schedule-today][data-state=none]'))) && !$('.schedule-preview');
+  });
+  await step('Luật lịch tập tuần', async () => {
+    const { weekPlan } = await import('./js/schedule.js');
+    const D = 864e5, mon = new Date(2026, 0, 5, 18).getTime(); // thứ Hai
+    const W = (day) => ({ start: mon + day * D, end: mon + day * D + 36e5, entries: [] });
+    const sch = { 1: 'a', 3: '', 5: 'b' };
+    const p1 = weekPlan(sch, [W(0)], mon + 2 * D - 3 * 36e5); // thứ Tư 15h, đã tập thứ Hai
+    const p2 = weekPlan(sch, [W(0), W(2)], mon + 2 * D + 2 * 36e5); // thứ Tư, đã tập
+    const p3 = weekPlan(sch, [], mon + 3 * D); // thứ Năm, chưa tập gì
+    const got = [p1.state, p1.templateId, p1.days.join(' '), p2.state, p3.state, p3.templateId, p3.days.join(' '), weekPlan({}, [], mon).state, weekPlan({ 1: 'x' }, [], mon).state].join('|');
+    const want = ['due', '', 'done rest today rest planned rest rest', 'done', 'rest', null, 'missed rest missed rest planned rest rest', 'none', 'due'].join('|');
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Luật Tổng SBD, Sẵn sàng, đếm buổi', async () => {
     const { liftTotal, mainLifts, readinessAt, readiness, sessionCounts } = await import('./js/insights.js');
     const D = 864e5, H = 36e5, t0 = new Date(2026, 0, 5, 18).getTime(); // thứ Hai
@@ -206,6 +234,7 @@ try {
   w.localStorage.removeItem('gym.restEnd');
   for (const k of ['gym.lastBackup', 'gym.preRestore', 'gym.errors']) w.localStorage.removeItem(`${k}.${DB}`);
   if (seenBak === null) w.localStorage.removeItem('gym.medalSeen'); else w.localStorage.setItem('gym.medalSeen', seenBak);
+  if (setBak === null) w.localStorage.removeItem('gym.settings'); else w.localStorage.setItem('gym.settings', setBak);
   frame.src = 'about:blank'; await wait(100);
   indexedDB.deleteDatabase(DB);
   log(true, '(đã xoá DB smoke)');

@@ -2,6 +2,7 @@ import { all, activeWorkout } from '../db.js';
 import { h, fmtDate, fmtDur, fmtNum, exMap, settings } from '../util.js';
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
+import { weekPlan } from '../schedule.js';
 import { topLifts, muscleKey, readiness, sessionCounts } from '../insights.js';
 import { sparkline, lineChart } from '../chart.js';
 import { lastBackup, backupDue } from '../safety.js';
@@ -46,7 +47,7 @@ const weekStatus = {
 };
 const reminderTitles = { due: 'Hôm nay có lịch tập', done: 'Đã tập hôm nay', rest: 'Hôm nay nghỉ' };
 
-function scheduleReminder(state, days, template) {
+function scheduleReminder(state, days, template, canStart) {
   return `<section class="card schedule-reminder" data-schedule-today data-state="${state}">
     <div class="row schedule-heading">
       <span class="tile-icon">${icon('calendar')}</span>
@@ -63,7 +64,7 @@ function scheduleReminder(state, days, template) {
         </li>`;
       }).join('')}
     </ul>
-    ${state === 'due' ? `<button type="button" class="primary schedule-start" ${template ? `data-act="tpl" data-id="${h(template.id)}"` : 'data-act="empty"'} disabled>
+    ${state === 'due' ? `<button type="button" class="primary schedule-start" ${template ? `data-act="tpl" data-id="${h(template.id)}"` : 'data-act="empty"'}${canStart ? '' : ' disabled'}>
       ${template ? 'Tập theo giáo án' : 'Tập tự do'}
     </button>` : ''}
   </section>`;
@@ -72,6 +73,7 @@ function scheduleReminder(state, days, template) {
 export async function render(el) {
   const [cur, templates, done, exList] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises')]);
   const ex = exMap(exList), top = topLifts(done);
+  const plan = weekPlan(settings.get().schedule, done);
   const ready = readiness(done), sess = sessionCounts(done), goals = settings.get();
   const last = lastBackup(), remind = backupDue(last, done);
   const weekAgo = Date.now() - 7 * 864e5;
@@ -94,13 +96,13 @@ export async function render(el) {
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
-    <section class="card schedule-reminder" data-schedule-today>
+    ${plan.state === 'none' ? `<section class="card schedule-reminder" data-schedule-today data-state="none">
       <div class="row schedule-heading">
         <span class="tile-icon">${icon('calendar')}</span>
         <div class="grow"><h2>Chưa đặt lịch tập</h2><p class="muted small">Chọn ngày tập để xem lời nhắc ở đây.</p></div>
         <a class="btn" href="#/settings">Đặt lịch</a>
       </div>
-    </section>
+    </section>` : scheduleReminder(plan.state, plan.days, plan.templateId ? templates.find((t) => t.id === plan.templateId) : null, !cur)}
     ${remind ? `<a class="card row backup-reminder" href="#/settings">
       <span class="tile-icon">${icon('backup')}</span>
       <span class="grow"><b>Nên sao lưu dữ liệu</b><small class="muted">${last ? `Lần cuối ${fmtDate(last)}` : 'Chưa sao lưu lần nào'} · dữ liệu chỉ nằm trên máy này</small></span>
@@ -161,14 +163,6 @@ export async function render(el) {
           </div>`}
       </section>
     </div>
-    <details class="schedule-preview">
-      <summary>Xem trước lời nhắc lịch tập</summary>
-      <div class="schedule-examples">
-        ${scheduleReminder('due', ['done', 'rest', 'missed', 'rest', 'today', 'planned', 'rest'], { id: 'sample-upper', name: 'Tập thân trên' })}
-        ${scheduleReminder('done', ['done', 'rest', 'missed', 'rest', 'done', 'planned', 'rest'], { id: 'sample-upper', name: 'Tập thân trên' })}
-        ${scheduleReminder('rest', ['done', 'rest', 'missed', 'rest', 'today', 'planned', 'rest'])}
-      </div>
-    </details>
   </div>`;
 
   el.onclick = (ev) => {

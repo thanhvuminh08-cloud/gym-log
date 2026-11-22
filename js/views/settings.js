@@ -1,12 +1,14 @@
 import { all, del, exportAll, importAll, validateBackup } from '../db.js';
 import { h, settings, toast, fmtDate } from '../util.js';
+import { cleanSchedule } from '../schedule.js';
 import { lastBackup, markBackup, snapshot, snapshotInfo, undoRestore, errorLog, clearErrors } from '../safety.js';
 
 const LABEL = { workouts: 'buổi tập', templates: 'giáo án', exercises: 'bài tập', body: 'lần cân' };
 const scheduleDays = [[1, 'Thứ hai'], [2, 'Thứ ba'], [3, 'Thứ tư'], [4, 'Thứ năm'], [5, 'Thứ sáu'], [6, 'Thứ bảy'], [0, 'Chủ nhật']];
 
 export async function render(el) {
-  const s = settings.get();
+  const s = settings.get(), sched = cleanSchedule(s.schedule);
+  const templates = (await all('templates')).sort((a, b) => a.name.localeCompare(b.name));
   const custom = (await all('exercises')).filter((e) => e.custom);
   const last = lastBackup(), snap = snapshotInfo(), errs = errorLog();
   const persisted = (await navigator.storage?.persisted?.()) ?? false;
@@ -19,14 +21,13 @@ export async function render(el) {
   </section>
   <h2 id="workout-schedule">Lịch tập hằng tuần</h2>
   <section class="card schedule-settings" data-schedule aria-labelledby="workout-schedule">
-    <p class="muted small">Bản xem trước · Lựa chọn chưa được lưu.</p>
+    <p class="muted small">Đánh dấu ngày tập; lời nhắc hiện ở trang Hôm nay.</p>
     ${scheduleDays.map(([day, label]) => `
       <div class="schedule-option" data-day="${day}">
-        <label><input type="checkbox" data-f="on" ${day === 1 || day === 5 ? 'checked' : ''}> <span>${label}</span></label>
+        <label><input type="checkbox" data-f="on" ${day in sched ? 'checked' : ''}> <span>${label}</span></label>
         <select data-f="tpl" aria-label="Giáo án ${label.toLowerCase()}">
           <option value="">Tự do</option>
-          <option value="sample-upper" ${day === 1 ? 'selected' : ''}>Tập thân trên</option>
-          <option value="sample-legs" ${day === 5 ? 'selected' : ''}>Tập chân</option>
+          ${templates.map((t) => `<option value="${h(t.id)}" ${sched[day] === t.id ? 'selected' : ''}>${h(t.name)}</option>`).join('')}
         </select>
       </div>`).join('')}
   </section>
@@ -60,7 +61,16 @@ export async function render(el) {
   ${custom.map((e) => `<div class="card row"><span class="grow">${h(e.name)} <small class="muted">${h(e.muscle)}</small></span><button class="ghost icon danger" data-del="${h(e.id)}">✕</button></div>`).join('') || '<p class="muted small">Chưa có. Tạo bài mới khi chọn bài tập trong buổi tập.</p>'}`;
 
   el.onchange = async (ev) => {
-    const t = ev.target;
+    const t = ev.target, row = t.closest('[data-schedule] [data-day]');
+    if (row) {
+      const on = row.querySelector('[data-f=on]');
+      if (t.dataset.f === 'tpl') on.checked = true; // chọn giáo án = bật ngày đó
+      const next = cleanSchedule(settings.get().schedule);
+      if (on.checked) next[row.dataset.day] = row.querySelector('[data-f=tpl]').value; else delete next[row.dataset.day];
+      settings.set({ schedule: next });
+      toast('Đã lưu lịch tập');
+      return;
+    }
     if (t.dataset.k) {
       settings.set({ [t.dataset.k]: t.type === 'checkbox' ? t.checked : Number(t.value) || 0 });
       toast('Đã lưu');
