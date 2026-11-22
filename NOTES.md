@@ -12,10 +12,11 @@
 - Dùng nền xanh đen, điểm nhấn xanh chanh. Đặt nút bắt đầu hoặc tiếp tục tập ở đầu trang Hôm nay và lưu ảnh tạ trong cache offline.
 - Tab Huy chương dùng màu theo hạng, nhấn xanh chanh cho chuỗi và mức tạ, giữ ba cột thống kê trên điện thoại.
 - Ba nút trong Tiến độ dùng ba cột bằng nhau để nằm cùng một hàng ở 375px.
+- Nền xanh đen theo lớp, biểu đồ xanh lam và nút chính xanh chanh. Set vượt có ánh sáng theo hạng, huy chương mới có nhãn “Mới”, hiệu ứng tôn trọng chế độ giảm chuyển động.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Hiệu ứng (css/app.css, nhớ `prefers-reduced-motion`): `.set.celebrate[data-celebrate=gold|silver|bronze]` (hàng set vừa vượt/PR, class tự gỡ sau 1,2s — nảy/lấp lánh theo cấp); `[data-new]` trên `.medals .tier` và `a.medal-row` (huy chương mới từ lần xem trước — chấm/nhãn "Mới", glow). Số `[data-count]` đã tự đếm tăng bằng JS. Thêm hiệu ứng chuyển trang/modal, phản hồi khi bấm `.check`, bố cục bớt đơn điệu tuỳ bạn. Không đổi class/data-*.
+- [cho Claude] Tăng `VERSION` trong `sw.js` để thiết bị nhận giao diện và hiệu ứng mới.
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)

@@ -48,9 +48,9 @@ export async function render(el, [tab] = []) {
         <h2>Chưa có huy chương</h2>
         <p class="muted">Tập lại một bài và vượt lần trước để nhận huy chương đầu tiên.</p>
       </section>` : `<div class="stats medals">
-          <div class="tier" data-tier="gold"${newTier('gold')}><b data-count="${m.counts.gold}">${m.counts.gold}</b><small>🥇 Vàng</small></div>
-          <div class="tier" data-tier="silver"${newTier('silver')}><b data-count="${m.counts.silver}">${m.counts.silver}</b><small>🥈 Bạc</small></div>
-          <div class="tier" data-tier="bronze"${newTier('bronze')}><b data-count="${m.counts.bronze}">${m.counts.bronze}</b><small>🥉 Đồng</small></div></div>
+          <div class="tier" data-tier="gold"${newTier('gold')}><b data-count="${m.counts.gold}">${m.counts.gold}</b><small>🥇 Vàng</small><small class="medal-fresh">Mới</small></div>
+          <div class="tier" data-tier="silver"${newTier('silver')}><b data-count="${m.counts.silver}">${m.counts.silver}</b><small>🥈 Bạc</small><small class="medal-fresh">Mới</small></div>
+          <div class="tier" data-tier="bronze"${newTier('bronze')}><b data-count="${m.counts.bronze}">${m.counts.bronze}</b><small>🥉 Đồng</small><small class="medal-fresh">Mới</small></div></div>
         <div class="stats streaks">
           <div class="overload"><b data-count="${m.beats}">${m.beats}</b><small>lần vượt</small></div>
           <div class="streak"><b data-count="${m.streak.cur}">${m.streak.cur}</b><small>buổi vượt liên tiếp · kỷ lục ${m.streak.best}</small></div>
@@ -60,7 +60,7 @@ export async function render(el, [tab] = []) {
           <b>${fmtNum(x.best)} kg</b></div>`).join('')}` : ''}
         ${m.recent.length ? `<h2>Huy chương gần đây</h2>${m.recent.slice(0, 20).map((r) => `<a class="card row medal-row"${isNew(r)} href="#/history/${h(r.workoutId)}">
           <span class="grow"><b>${name(r.exerciseId)}</b><span class="tier small" data-tier="${r.tier}">${TIER_LABEL[r.tier]} · ${h(r.msg)}</span></span>
-          <small class="muted">${fmtShort(r.t)}</small></a>`).join('')}` : ''}`;
+          <span class="medal-meta"><small class="muted">${fmtShort(r.t)}</small><small class="medal-fresh">Mới</small></span></a>`).join('')}` : ''}`;
     } else {
       const b = (await all('body')).sort((a, b) => a.date - b.date);
       body = `<form class="card row wrap" data-form="body">
