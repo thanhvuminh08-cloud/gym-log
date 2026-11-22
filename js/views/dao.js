@@ -128,7 +128,7 @@ function stepContent({ step, dao, sex, weight, groups, validation, tests, result
     case 3:
       return `<div class="dao-fields">
         ${choiceCards('experience', 'Thời gian tu đạo', G.EXPERIENCE, dao.experience)}
-        ${choiceCards('goal', 'Đạo tâm', G.GOALS, dao.goal)}
+        ${choiceCards('goal', 'Chí hướng', G.GOALS, dao.goal)}
         ${choiceCards('days', 'Số buổi bế quan mỗi tuần', Object.entries(G.DAYS).map(([id, plan]) => ({
           id, label: `${id} buổi`, real: plan.days.map((day) => day ? `T${day + 1}` : 'CN').join(' · '),
         })), dao.days)}
@@ -149,7 +149,7 @@ function stepActions({ step, dao, validation, editing }, preview) {
   return `<div class="dao-actions">
     ${step === 1 && !editing ? button('daoSkip', 'Để sau', 'ghost', '#/') : ''}
     ${step > 1 ? button('daoBack', 'Quay lại', 'ghost', route(step === 6 && novice ? 4 : step - 1)) : ''}
-    ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/hero') + button('daoSave', 'Nhận công pháp', 'primary', '#/hero')
+    ${step === 6 ? button('daoSkip', 'Để sau', 'ghost', '#/') + button('daoSave', 'Nhận công pháp', 'primary', '#/')
       : button('daoNext', 'Tiếp tục', 'primary dao-next', route(step === 4 && novice ? 6 : step + 1, step !== 3 && novice), step === 4 && validation?.ok === false)}
     ${preview && step === 3 ? button('daoNext', 'Tiếp tục', 'primary dao-next-new', route(4, true)) : ''}
     ${preview && step === 4 && validation?.ok ? button('daoNext', 'Tiếp tục', 'primary dao-next-blocked', '', true) : ''}
@@ -159,7 +159,7 @@ function stepActions({ step, dao, validation, editing }, preview) {
 export function daoView(state, { preview = false } = {}) {
   const [title, intro] = STEPS[state.step - 1];
   return `<article class="dao-wizard cultivation${preview ? ' dao-preview' : ''}">
-    ${state.editing || preview ? '<a class="cultivation-back small" href="#/hero">← Động phủ</a>' : ''}
+    ${state.editing || preview ? '<a class="cultivation-back small" href="#/">← Động phủ</a>' : ''}
     <header class="dao-cover">
       <div class="dao-cover-top"><span>Bước ${state.step} / ${STEPS.length}</span>${preview ? '<span class="cultivation-data-badge">Số liệu mẫu</span>' : ''}</div>
       <h1>${title}</h1>
@@ -300,12 +300,12 @@ export async function render(el, [part] = []) {
     } else if (act === 'daoSkip') {
       if (!settings.get().dao) settings.set({ daoSkip: Date.now() });
       forget();
-      location.hash = settings.get().dao ? '#/hero' : '#/';
+      location.hash = '#/';
     } else if (act === 'daoSave') {
       ev.target.disabled = true;
       await saveDao();
       window.scrollTo(0, 0);
-      location.hash = '#/hero';
+      location.hash = '#/';
     }
   };
 }

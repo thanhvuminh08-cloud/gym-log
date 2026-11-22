@@ -1,6 +1,7 @@
 import { all, del, exportAll, importAll, validateBackup } from '../db.js';
 import { h, settings, toast, fmtDate } from '../util.js';
 import { cleanSchedule } from '../schedule.js';
+import { archiveHeader } from './sections.js';
 import { lastBackup, markBackup, snapshot, snapshotInfo, undoRestore, errorLog, clearErrors } from '../safety.js';
 
 const LABEL = { workouts: 'buổi tập', templates: 'giáo án', exercises: 'bài tập', body: 'lần cân' };
@@ -13,7 +14,7 @@ export async function render(el) {
   const last = lastBackup(), snap = snapshotInfo(), errs = errorLog();
   const persisted = (await navigator.storage?.persisted?.()) ?? false;
 
-  el.innerHTML = `<h1>Cài đặt</h1>
+  el.innerHTML = `${archiveHeader('settings')}
   <h2 id="training-goals">Mục tiêu tập</h2>
   <section class="card settings-options" aria-labelledby="training-goals">
     <label class="row"><span class="grow">Số buổi mỗi tuần</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(s.weekGoal)}"></label>
@@ -21,7 +22,7 @@ export async function render(el) {
   </section>
   <h2 id="workout-schedule">Lịch tập hằng tuần</h2>
   <section class="card schedule-settings" data-schedule aria-labelledby="workout-schedule">
-    <p class="muted small">Đánh dấu ngày tập; lời nhắc hiện ở trang Hôm nay.</p>
+    <p class="muted small">Đánh dấu ngày tập để xem lời nhắc ở Động phủ.</p>
     ${scheduleDays.map(([day, label]) => `
       <div class="schedule-option" data-day="${day}">
         <label><input type="checkbox" data-f="on" ${day in sched ? 'checked' : ''}> <span>${label}</span></label>
@@ -39,7 +40,6 @@ export async function render(el) {
   </section>
   <h2 id="cultivation-settings">Con Đường Tu Luyện</h2>
   <section class="card settings-options cultivation-settings" aria-labelledby="cultivation-settings">
-    <label class="row"><span class="grow">Lời tu tiên</span><input type="checkbox" data-k="lore" ${s.lore ? 'checked' : ''}></label>
     <label class="row"><span class="grow">Giới tính</span><select data-k="sex">
       <option value="" disabled ${!s.sex ? 'selected' : ''}>Chưa chọn</option>
       <option value="m" ${s.sex === 'm' ? 'selected' : ''}>Nam</option>

@@ -85,18 +85,6 @@ const SAMPLE_BREAKTHROUGHS = [
 const realmArt = (index, className) => `<svg class="${className}" viewBox="0 0 220 210" aria-hidden="true" focusable="false"><use href="assets/cultivation-realms.svg#realm-${index}"/></svg>`;
 const seal = (index, name) => `<span class="cultivation-seal" data-realm="${index}" aria-hidden="true">${h(name)}</span>`;
 
-export function heroCard(tuvi, preview = false, weekly = SAMPLE_QUESTS) {
-  return `<a class="card cultivation-link" href="#/hero" data-hero-link>
-    ${seal(tuvi.realm.i, tuvi.realm.name)}
-    <span class="cultivation-link-copy">
-      <strong>Động phủ</strong>
-      <small>${h(tuvi.label)}${preview ? ' · Số liệu mẫu' : ''}</small>
-      ${weekly ? `<small class="cultivation-link-quests">Nhiệm vụ ${weekly === SAMPLE_QUESTS ? 'mẫu ' : ''}<b>${weekly.done}/${weekly.total}</b></small>` : ''}
-    </span>
-    <svg class="dashboard-icon" aria-hidden="true"><use href="#i-chevron"/></svg>
-  </a>`;
-}
-
 function radar(meridians) {
   const point = (i, radius) => {
     const angle = i * 2 * Math.PI / meridians.length;
@@ -249,14 +237,12 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
   const { tuvi, canCo, shaky, linhKhi, meridians, bw } = profile;
   return `<article class="cultivation">
     <div class="cultivation-navigation">
-      <a class="cultivation-back small" href="#/">← Hôm nay</a>
       <a class="cultivation-back small" href="#/nhap-mon">${settings.get().dao ? 'Sửa Công pháp' : 'Nhập môn'} →</a>
     </div>
     <header class="cultivation-cover">
       <span class="cultivation-mist" aria-hidden="true"></span>
       ${realmArt(tuvi.realm.i, 'cultivation-guardian')}
       <div class="cultivation-cover-heading">
-        <h1>Động phủ</h1>
         ${preview ? '<span class="cultivation-sample">Số liệu mẫu</span>' : ''}
       </div>
       <div class="cultivation-rank">
@@ -318,8 +304,8 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
 
 const view = (profile) => heroView(profile, { weekly: profile.weekly, challenge: profile.challenge, demo: false });
 
-export async function render(el) {
-  const profile = await loadProfile();
+export async function render(el, profile) {
+  profile ??= await loadProfile();
   el.innerHTML = view(profile);
   ceremony(profile).then(({ quests: fresh }) => fresh.forEach((id) => el.querySelector(`[data-quest="${id}"]`)?.classList.add('celebrate')));
   el.onclick = el.onchange = null; // bỏ handler của màn trước (main dùng chung)

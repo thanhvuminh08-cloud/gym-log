@@ -3,19 +3,20 @@ import { h, uid, fmtDate, fmtShort, fmtNum, exMap, countUp } from '../util.js';
 import { finished, series, records } from '../stats.js';
 import { lineChart, stackedBars, yearGridSvg } from '../chart.js';
 import { medals } from '../medals.js';
-import { TIER_LABEL } from '../overload.js';
+import { PHAM, gloss, term } from '../lore.js';
+import { archiveHeader, journalHeader, phamSeal } from './sections.js';
 import { MUSCLE, yearGrid, years, weeklyVolume, inRange, liftTotal, mainLifts } from '../insights.js';
 
 const METRICS = { e1rm: '~1RM', top: 'Mức tạ cao nhất', vol: 'Khối lượng' };
 const RANGES = { 1: '1T', 3: '3T', 6: '6T', 12: '1N', 0: 'Tất cả' };
-const TABS = { overview: 'Tổng quan', ex: 'Bài tập', body: 'Cơ thể', medal: 'Huy chương' };
+const TABS = ['overview', 'ex', 'body', 'library', 'medal'];
 const state = { tab: 'overview', exId: '', metric: 'e1rm', range: 6, year: new Date().getFullYear() };
 
 /** Chú thích màu nhóm cơ: [[muscle, text]]. */
 const legend = (items) => `<div class="chips legend">${items.map(([m, t]) => `<span class="chip legend-chip" data-muscle="${MUSCLE[m].key}"><i class="dot" aria-hidden="true"></i> ${h(m)}${t ? ` <b>${t}</b>` : ''}</span>`).join('')}</div>`;
 
 export async function render(el, [tab, exId] = []) {
-  if (TABS[tab]) state.tab = tab;
+  state.tab = TABS.includes(tab) ? tab : 'overview';
   if (exId) state.exId = exId;
   const ex = exMap(await all('exercises'));
   const done = await finished();
@@ -32,7 +33,7 @@ export async function render(el, [tab, exId] = []) {
         <span class="tile-icon empty-illustration"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
         <h2>Chưa có buổi tập để theo dõi</h2>
         <p class="muted">Hoàn thành buổi đầu tiên để xem ngày tập và khối lượng theo tuần.</p>
-        <a class="btn primary" href="#/">Về Hôm nay</a>
+        <a class="btn primary" href="#/">Về Động phủ</a>
       </section>`;
     } else if (state.tab === 'overview') {
       const ys = years(done), lo = Math.min(...ys), hi = Math.max(...ys);
@@ -92,24 +93,28 @@ export async function render(el, [tab, exId] = []) {
       }
       const fresh = m.recent.filter((r) => r.end > seen), isNew = (r) => (fresh.includes(r) ? ' data-new' : '');
       const newTier = (t) => (fresh.some((r) => r.tier === t) ? ' data-new' : '');
-      body = !m.compared && !m.milestones.length ? `<section class="card empty-state">
-        <span class="tile-icon empty-illustration is-medal"><svg aria-hidden="true"><use href="#i-medal"/></svg></span>
-        <h2>Chưa có huy chương</h2>
-        <p class="muted">Tập lại một bài và vượt lần trước để nhận huy chương đầu tiên.</p>
-      </section>` : `<div class="stats medals">
-          <div class="tier" data-tier="gold"${newTier('gold')}><b data-count="${m.counts.gold}">${m.counts.gold}</b><small>🥇 Vàng</small><small class="medal-fresh">Mới</small></div>
-          <div class="tier" data-tier="silver"${newTier('silver')}><b data-count="${m.counts.silver}">${m.counts.silver}</b><small>🥈 Bạc</small><small class="medal-fresh">Mới</small></div>
-          <div class="tier" data-tier="bronze"${newTier('bronze')}><b data-count="${m.counts.bronze}">${m.counts.bronze}</b><small>🥉 Đồng</small><small class="medal-fresh">Mới</small></div></div>
+      body = `<p class="gloss">${gloss('ledger')}</p>
+        <div class="stats medals">${Object.entries(PHAM).map(([tier, label]) => `<div class="tier" data-tier="${tier}"${newTier(tier)}>
+          ${phamSeal()}<b data-count="${m.counts[tier]}">${m.counts[tier]}</b><strong>${label}</strong>
+          <small class="gloss">${gloss(tier)}</small><small class="medal-fresh">Mới</small></div>`).join('')}</div>
         <div class="stats streaks">
           <div class="overload"><b data-count="${m.beats}">${m.beats}</b><small>lần vượt</small></div>
-          <div class="streak"><b data-count="${m.streak.cur}">${m.streak.cur}</b><small>buổi vượt liên tiếp · kỷ lục ${m.streak.best}</small></div>
-          <div class="streak"><b data-count="${m.weeks.cur}">${m.weeks.cur}</b><small>tuần tập liên tiếp · kỷ lục ${m.weeks.best}</small></div></div>
-        ${m.milestones.length ? `<h2>Mốc tạ</h2>${m.milestones.map((x) => `<div class="card row milestone">
-          <span class="grow"><b>${name(x.exerciseId)}</b><br><small class="muted">${x.reached ? `Mốc ${fmtNum(x.reached.kg)} kg · ${fmtShort(x.reached.t)}` : 'Chưa đạt mốc'}${x.next ? ` · tiếp: ${fmtNum(x.next)} kg (còn ${fmtNum(x.next - x.best)})` : ''}</small></span>
-          <b>${fmtNum(x.best)} kg</b></div>`).join('')}` : ''}
-        ${m.recent.length ? `<h2>Huy chương gần đây</h2>${m.recent.slice(0, 20).map((r) => `<a class="card row medal-row"${isNew(r)} href="#/history/${h(r.workoutId)}">
-          <span class="grow"><b>${name(r.exerciseId)}</b><span class="tier small" data-tier="${r.tier}">${TIER_LABEL[r.tier]} · ${h(r.msg)}</span></span>
+          <div class="streak"><b class="streak-multiplier" data-count="${m.streak.cur}">${m.streak.cur}</b><strong>${term('streak')}</strong><small class="gloss">${gloss('streak')} · kỷ lục ${m.streak.best}</small></div>
+          <div class="streak"><b data-count="${m.weeks.cur}">${m.weeks.cur}<small> tuần</small></b><strong>${term('weeks')}</strong><small class="gloss">${gloss('weeks')} · kỷ lục ${m.weeks.best}</small></div></div>
+        ${m.milestones.length ? `<h2>${term('milestone')}</h2><p class="gloss">${gloss('milestone')}</p>${m.milestones.map((x) => `<div class="card row milestone">
+          <span class="stone-marker">${x.reached ? `<b>${fmtNum(x.reached.kg)} kg</b><small>${fmtShort(x.reached.t)}</small>` : '<small>Chưa khắc bia</small>'}</span>
+          <span class="grow"><b>${name(x.exerciseId)}</b><br><small class="muted">Nặng nhất ${fmtNum(x.best)} kg${x.next ? ` · mốc kế ${fmtNum(x.next)} kg` : ''}</small></span>
+        </div>`).join('')}` : ''}
+        ${m.recent.length ? `<h2>Phẩm gần đây</h2>${m.recent.slice(0, 20).map((r) => `<a class="card row medal-row"${isNew(r)} href="#/ky/${h(r.workoutId)}">
+          <span class="grow"><b>${name(r.exerciseId)}</b><span class="tier small" data-tier="${r.tier}">${phamSeal()} ${PHAM[r.tier]} · ${h(r.msg)}</span></span>
           <span class="medal-meta"><small class="muted">${fmtShort(r.t)}</small><small class="medal-fresh">Mới</small></span></a>`).join('')}` : ''}`;
+      if (!m.recent.length && !m.milestones.length) body += `<section class="card empty-state">
+        <h2>Chưa có phẩm hay Thạch bi</h2><p class="muted">Tập lại một bài và vượt lần trước để ghi phẩm đầu tiên.</p></section>`;
+    } else if (state.tab === 'library') {
+      const list = Object.values(ex).sort((a, b) => a.name.localeCompare(b.name, 'vi'));
+      body = `<h2>Thư viện bài tập</h2>${[...new Set(list.map((exercise) => exercise.muscle))].map((muscle) => `<details class="card library-group">
+        <summary>${h(muscle)}</summary><ul>${list.filter((exercise) => exercise.muscle === muscle).map((exercise) => `<li>${h(exercise.name)}${exercise.custom ? ' <small class="muted">Tự tạo</small>' : ''}</li>`).join('')}</ul>
+      </details>`).join('')}`;
     } else {
       const b = (await all('body')).sort((a, b) => a.date - b.date);
       body = `<form class="card row wrap" data-form="body">
@@ -119,8 +124,7 @@ export async function render(el, [tab, exId] = []) {
         <section class="card">${lineChart(b.map((x) => ({ t: x.date, v: x.weight })), { unit: ' kg' })}</section>
         ${b.slice().reverse().map((x) => `<div class="card row"><span class="grow">${fmtDate(x.date)}</span><b>${fmtNum(x.weight)} kg</b>${x.waist ? `<span class="muted">${fmtNum(x.waist)} cm</span>` : ''}<button class="ghost icon danger" data-del="${h(x.id)}">✕</button></div>`).join('')}`;
     }
-    el.innerHTML = `<h1>Tiến độ</h1>
-      <div class="tabs">${Object.entries(TABS).map(([k, v]) => `<button class="${state.tab === k ? 'on' : ''}" data-tab="${k}">${v}</button>`).join('')}</div>${body}`;
+    el.innerHTML = (state.tab === 'medal' ? journalHeader('medal') : archiveHeader(state.tab)) + body;
     countUp(el);
   };
 
@@ -128,8 +132,7 @@ export async function render(el, [tab, exId] = []) {
   el.onclick = async (ev) => {
     const b = ev.target.closest('button');
     if (!b) return;
-    if (b.dataset.tab) state.tab = b.dataset.tab;
-    else if (b.dataset.m) state.metric = b.dataset.m;
+    if (b.dataset.m) state.metric = b.dataset.m;
     else if (b.dataset.range) state.range = Number(b.dataset.range);
     else if (b.dataset.y) state.year = Number(b.dataset.y);
     else if (b.dataset.del) { if (!confirm('Xoá số đo này?')) return; await del('body', b.dataset.del); }

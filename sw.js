@@ -1,10 +1,11 @@
 // Tăng VERSION mỗi khi sửa file tĩnh để điện thoại tải bản mới.
-const VERSION = 'v47';
+const VERSION = 'v48';
 const FILES = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',
   'js/app.js', 'js/db.js', 'js/util.js', 'js/stats.js', 'js/exercises.js', 'js/timer.js', 'js/chart.js', 'js/picker.js', 'js/overload.js', 'js/medals.js', 'js/report.js', 'js/insights.js', 'js/safety.js', 'js/schedule.js', 'js/hero.js', 'js/dao.js', 'js/lore.js',
   'js/views/home.js', 'js/views/workout.js', 'js/views/history.js', 'js/views/templates.js', 'js/views/progress.js', 'js/views/settings.js', 'js/views/report.js', 'js/views/hero.js',
   'js/views/dao.js',
+  'js/views/sections.js',
   'icons/icon.svg', 'icons/icon-192.png', 'icons/icon-512.png', 'assets/workout-hero.jpg', 'assets/cultivation-mountains.svg',
   'assets/cultivation-mist.svg', 'assets/cultivation-realms.svg',
   'assets/fonts/noto-serif-vi-bold.woff2',

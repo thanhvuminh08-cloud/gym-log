@@ -1,5 +1,6 @@
 import { all, put, del, activeWorkout } from '../db.js';
 import { h, uid, e1rm, toast, settings, exMap, fmtNum, celebrate, tap } from '../util.js';
+import { gloss, term } from '../lore.js';
 import { lastSets, records, doneSets } from '../stats.js';
 import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
@@ -72,12 +73,12 @@ export async function render(el) {
       <input class="title-input" data-f="name" aria-label="Tên buổi tập" value="${h(w.name)}">
       <div class="row"><span class="muted" id="elapsed"></span><span class="grow"></span>
         <button class="ghost danger" data-act="discard">Huỷ</button>
-        <button class="primary" data-act="finish">Kết thúc</button></div>
+        <button class="primary" data-act="finish" title="${gloss('finish')}">${term('finish')}</button></div>
     </header>
     ${w.entries.map((e, ei) => `
       <section class="card entry" data-muscle="${muscleKey(ex[e.exerciseId])}">
         <div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b>
-          <label class="muted small">Nghỉ <input type="number" inputmode="numeric" class="tiny" data-ei="${ei}" data-f="rest" value="${e.rest}">s</label>
+          <label class="muted small" title="${gloss('rest')}">${term('rest')} <input type="number" inputmode="numeric" class="tiny" data-ei="${ei}" data-f="rest" value="${e.rest}">s</label>
           <button class="ghost icon" data-act="up" data-ei="${ei}" ${ei ? '' : 'disabled'}>↑</button>
           <button class="ghost icon danger" data-act="rmEntry" data-ei="${ei}">✕</button></div>
         ${prev[e.exerciseId].length ? `<div class="target small">${h(target(prev[e.exerciseId]))}</div>` : ''}
@@ -139,7 +140,7 @@ export async function render(el) {
         timer.start(e.rest);
         const res = result(e), lvl = TIERS[res?.tier] || 0;
         if (lvl > (shown.get(e) || 0)) {
-          shown.set(e, lvl); toast(res.msg, 3000);
+          shown.set(e, lvl); toast(`${term(res.tier)} · ${res.msg}`, 3000);
           celebrate(el.querySelector(`.set[data-ei="${ei}"][data-si="${si}"]`), res.tier);
         } else tap();
       }
@@ -164,12 +165,12 @@ export async function render(el) {
       const entries = w.entries.map((e) => ({ ...e, sets: doneSets(e) })).filter((e) => e.sets.length);
       if (!entries.length) return toast('Chưa có set nào được đánh dấu xong');
       const skipped = w.entries.reduce((a, e) => a + e.sets.length, 0) - entries.reduce((a, e) => a + e.sets.length, 0);
-      if (!confirm(`Kết thúc buổi tập?${skipped ? `\n${skipped} set chưa đánh dấu sẽ bị bỏ.` : ''}`)) return;
+      if (!confirm(`${term('finish')} và lưu buổi tập?${skipped ? `\n${skipped} set chưa đánh dấu sẽ bị bỏ.` : ''}`)) return;
       Object.assign(w, { entries, end: Date.now() });
       await save(); timer.stop();
       const up = entries.filter((e) => result(e)).length, cmp = entries.filter((e) => prev[e.exerciseId].length).length;
       if (cmp) toast(up ? `💪 Vượt lần trước ${up}/${cmp} bài!` : 'Buổi sau cố vượt lần trước nhé 💪', 3500);
-      location.hash = '#/history/' + w.id;
+      location.hash = '#/ky/' + w.id;
       import('./hero.js').then(async (m) => m.ceremony(await m.loadProfile())); // Đột phá / nhiệm vụ vừa xong
       return;
     }

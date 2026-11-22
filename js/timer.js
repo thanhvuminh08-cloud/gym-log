@@ -1,4 +1,5 @@
 import { settings } from './util.js';
+import { term } from './lore.js';
 
 // Đồng hồ nghỉ: thanh cố định phía trên nav. Lưu thời điểm kết thúc để sống qua việc chuyển màn hình.
 // gym.restStart giữ mốc bắt đầu để vòng nghỉ tính đúng tỉ lệ sau ±15 và khi mở lại app.
@@ -66,7 +67,7 @@ function update() {
   const start = Number(localStorage.getItem(START)) || getEnd() - left * 1000;
   bar.style.setProperty('--rest-progress', restProgress(start, getEnd()));
   if (left <= WARN_S) bar.dataset.warn = 'true'; else delete bar.dataset.warn;
-  bar.querySelector('.rest-time').textContent = `Nghỉ ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+  bar.querySelector('.rest-time').textContent = `${term('rest')} ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
 }
 
 export function start(seconds) {

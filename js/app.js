@@ -2,6 +2,7 @@ import { seed, activeWorkout } from './db.js';
 import * as timer from './timer.js';
 import { countUp, toast, settings } from './util.js';
 import { logError } from './safety.js';
+import { NAV } from './lore.js';
 
 // Bắt mọi lỗi chưa xử lý: ghi nhật ký (xem ở Cài đặt) + báo bằng toast, tối đa 1 toast/5 giây.
 let lastToast = 0;
@@ -14,7 +15,6 @@ addEventListener('unhandledrejection', (e) => onError(e.reason));
 
 const VIEWS = {
   home: () => import('./views/home.js'),
-  hero: () => import('./views/hero.js'),
   workout: () => import('./views/workout.js'),
   history: () => import('./views/history.js'),
   templates: () => import('./views/templates.js'),
@@ -27,13 +27,13 @@ const VIEWS = {
 // 5 mục (NAV trong lore.js) + Nhập môn. Mỗi route nhận các đoạn hash sau tên, trả danh sách [view, params]
 // render nối tiếp trong #main. Tạm gắn view cũ làm tab con; gộp/viết giao diện mới ở đợt 2–3 (VISION.md).
 const ROUTES = {
-  '': () => [['home'], ['hero']], // Động phủ = Hôm nay + Động phủ cũ (tạm xếp chồng)
+  '': () => [['home']], // Động phủ
   workout: () => [['workout']], // Bế quan
   'cong-phap': ([id]) => [['templates', id ? [id] : []]], // Công pháp: #/cong-phap/<id|new>
   // Tu luyện ký: Nhật ký #/ky[/<id>] · Tuần ký #/ky/tuan[/<offset>] · Công đức bạ #/ky/cong-duc
   ky: ([a, ...p]) => (a === 'tuan' ? [['report', p]] : a === 'cong-duc' ? [['progress', ['medal']]] : [['history', a ? [a] : []]]),
   // Tàng thư: Tiến độ #/tang-thu[/<tab>[/<exId>]] · Cài đặt #/tang-thu/cai-dat
-  'tang-thu': ([a, ...p]) => (a === 'cai-dat' ? [['settings']] : [['progress', a ? [a, ...p] : []]]),
+  'tang-thu': ([a, ...p]) => (a === 'cai-dat' ? [['settings']] : [['progress', [a || 'overview', ...p]]]),
   'nhap-mon': (p) => [['dao', p]],
 };
 
@@ -51,6 +51,8 @@ const ALIASES = {
 const navKey = (r = '') => (ALIASES[r] ? ALIASES[r]([]).replace(/^#\/?/, '').split('/')[0] : r);
 
 const main = document.getElementById('main');
+document.querySelector('.site-nav').innerHTML = NAV.map(({ route, r, icon, label }) =>
+  `<a href="${route}" data-r="${r}"><span><svg aria-hidden="true"><use href="#${icon}"/></svg></span>${label}</a>`).join('');
 let cleanup;
 
 async function route() {

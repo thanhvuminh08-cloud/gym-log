@@ -7,8 +7,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Gym">
-  <title>Gym Log</title>
+  <meta name="apple-mobile-web-app-title" content="Luyện Thể">
+  <title>Luyện Thể Ký</title>
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
@@ -31,21 +31,21 @@
   </svg>
   <header class="site-header">
     <div class="site-bar">
-      <a class="brand" href="#/"><span class="brand-mark"><svg aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Gym Log</a>
+      <a class="brand" href="#/"><span class="brand-mark"><svg aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Luyện Thể Ký</a>
     </div>
   </header>
   <main id="main"></main>
   <template id="loading-home">
     <div class="loading-view" role="status">
-      <span class="loading-label">Đang tải trang Hôm nay</span>
+      <span class="loading-label">Đang tải Động phủ</span>
       <div class="loading-line" aria-hidden="true"></div>
       <div class="loading-block loading-hero" aria-hidden="true"></div>
       <div class="loading-grid" aria-hidden="true"><div class="loading-block"></div><div class="loading-block"></div></div>
     </div>
   </template>
-  <template id="loading-progress">
+  <template id="loading-tang-thu">
     <div class="loading-view" role="status">
-      <span class="loading-label">Đang tải trang Tiến độ</span>
+      <span class="loading-label">Đang tải Tàng thư</span>
       <div class="loading-line" aria-hidden="true"></div>
       <div class="loading-grid loading-tabs" aria-hidden="true">
         <div class="loading-block"></div><div class="loading-block"></div><div class="loading-block"></div><div class="loading-block"></div>
@@ -53,13 +53,7 @@
       <div class="loading-block loading-hero" aria-hidden="true"></div>
     </div>
   </template>
-  <nav aria-label="Điều hướng chính">
-    <a href="#/" data-r=""><span><svg aria-hidden="true"><use href="#i-home"/></svg></span>Hôm nay</a>
-    <a href="#/workout" data-r="workout"><span><svg aria-hidden="true"><use href="#i-dumbbell"/></svg></span>Tập</a>
-    <a href="#/history" data-r="history"><span><svg aria-hidden="true"><use href="#i-calendar"/></svg></span>Lịch sử</a>
-    <a href="#/progress" data-r="progress"><span><svg aria-hidden="true"><use href="#i-trend"/></svg></span>Tiến độ</a>
-    <a href="#/settings" data-r="settings"><span><svg aria-hidden="true"><use href="#i-settings"/></svg></span>Cài đặt</a>
-  </nav>
+  <nav class="site-nav" aria-label="Điều hướng chính"></nav>
   <script type="module" src="js/app.js"></script>
 </body>
 </html>

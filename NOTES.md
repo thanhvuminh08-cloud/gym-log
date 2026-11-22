@@ -50,10 +50,12 @@
 - Âm thanh tự tổng hợp bằng Node.js và mã hoá bằng FFmpeg, không dùng bản thu hay mẫu âm thanh bên ngoài. Tệp trong `assets/audio/`: `dong-phu.mp3`, `loi-kiep.mp3`, `dot-pha.mp3`, `nhiem-vu.mp3`.
 - Nhập môn có nghi lễ đá linh căn, bảy mạch sáng lần lượt và ấn triện; hiện mốc Xác chứng bên cạnh Hư cảnh. Tiêu đề dùng Noto Serif tiếng Việt ngoại tuyến, theo giấy phép OFL trong `assets/fonts/`.
 - Luyện thể có bảng bậc riêng ở Thất mạch và nghi lễ Thối thể tông đồng; dòng `.pick-lock` có nút Sửa Công pháp dễ chạm.
+- Luyện Thể Ký dùng năm mục từ `NAV`, một trang Động phủ, ba tab Tu luyện ký, ấn phẩm kim/ngọc/đồng và Thạch bi theo mốc tạ thật.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Luyện Thể Ký bước 2: nav 5 mục từ `NAV` (lore.js), tên app, gộp Động phủ, khung 3 tab Tu luyện ký, giao diện phẩm/Công đức bạ, đổi link sang route mới — xem "Hợp đồng chi tiết" cuối VISION.md.
+- [cho Claude] Luyện Thể Ký bước 3 (VISION.md): chuyển quyền sửa lịch/mục tiêu sang Công pháp, nối tuỳ chọn Chú giải cho `.gloss` (mặc định bật) và dùng tên phẩm trong nội dung chia sẻ Tuần ký.
+- [cho Codex] Luyện Thể Ký bước 4 (VISION.md): đánh bóng ấn phẩm và tranh Thạch bi, thử trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 
