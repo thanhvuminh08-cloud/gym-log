@@ -15,6 +15,7 @@ PWA cá nhân ghi buổi tập gym. 1 người dùng, dữ liệu IndexedDB trê
 - Không tạo lại ảnh đã có. Ảnh ≤ 200KB.
 - Trả lời người dùng ngắn; quyết định ghi 1 dòng vào `NOTES.md`.
 - Thêm luồng mới quan trọng → Claude bổ sung bước vào `smoke.html`.
+- Người dùng là người mới: **chủ động báo "nên mở chat mới"** khi xong một việc, khi đổi sang việc không liên quan, hoặc khi hội thoại đã dài. Trước đó commit + ghi việc dở vào `NOTES.md`, và đưa 1 câu mở đầu để dán vào chat mới.
 
 ## Kết thúc mỗi việc
 1. Smoke PASS. 2. Sửa file tĩnh → tăng `VERSION` trong `sw.js` (file mới → thêm vào `FILES`). 3. Commit nhỏ, tiền tố `ui:` (Codex) / `logic:` (Claude).
