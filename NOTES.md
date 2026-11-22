@@ -56,10 +56,10 @@
 - Luyện thể có bảng bậc riêng ở Thất mạch và nghi lễ Thối thể tông đồng; dòng `.pick-lock` có nút Sửa Công pháp dễ chạm.
 - Luyện Thể Ký dùng năm mục từ `NAV`, một trang Động phủ, ba tab Tu luyện ký, ấn phẩm kim/ngọc/đồng và Thạch bi theo mốc tạ thật.
 - Công pháp gộp lịch thành một dòng mỗi ngày và đặt hai ô mục tiêu cạnh nhau. Động phủ giữ tên buổi dở khi tắt Chú giải. Công đức bạ dùng ba dáng ấn và bia khắc kg, ngày trên nền tranh núi có sẵn.
+- Khi mở Động phủ lần đầu, tiêu đề “Ghi buổi tập đầu tiên” dẫn mắt tới nút Bế quan. Thẻ Nhập môn tuỳ chọn nằm ngay dưới, với biểu tượng và viền xanh ngọc.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Dễ dùng: style thẻ mời Nhập môn `a.card.row.dao-invite` (Động phủ, dưới thẻ tập; ẩn khi đã Nhập môn hoặc bấm "Để sau") và tiêu đề lần đầu `[data-schedule-today][data-first-run]` ("Ghi buổi tập đầu tiên") trong `js/views/home.js`.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 

@@ -250,6 +250,25 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .sanctum-training[data-state="due"] { border-inline-start: 3px solid var(--accent); }
 .training-actions { margin-top: 8px; }
 .training-actions .ghost { background: #101a24df; }
+.sanctum-training[data-first-run] h2 {
+  max-width: 18ch; margin: 4px 0 6px; color: #fff3dc;
+  font: 700 clamp(1.5rem, 6.4vw, 2.25rem)/1.14 var(--cultivation-serif);
+  text-wrap: balance; text-shadow: 0 2px 10px #08121c;
+}
+.sanctum-training[data-first-run] .training-actions { margin-top: 12px; }
+a.card.dao-invite {
+  gap: 10px; padding: 10px 12px; margin: 10px 0 0;
+  border-color: #3e574f; background: linear-gradient(108deg, #1c302d, #141f25 82%);
+  overflow-wrap: anywhere;
+}
+a.card.dao-invite:is(:hover, :active) { background: #223734; border-color: #69897a; }
+.dao-invite > svg:first-child {
+  width: 38px; height: 38px; padding: 9px; border-radius: 11px;
+  background: #294239; color: #b2e6cc;
+}
+.dao-invite > svg:last-child { width: 16px; height: 16px; color: #b2e6cc; }
+.dao-invite b { color: #f2d49b; }
+.dao-invite > .grow > small { display: block; margin-top: 2px; font-size: .8rem; line-height: 1.35; }
 a.backup-reminder {
   gap: 12px;
   padding: 12px;
