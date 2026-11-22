@@ -40,7 +40,7 @@ async function detail(el, id, ex) {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));
     return `<section class="card"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>
       ${tierRow(ov[ei])}
-      <div class="small">${e.sets.map((s, i) => `<span class="pill">${i + 1}: ${fmtNum(s.w)}×${s.r}</span>`).join('')}</div></section>`;
+      <div class="small">${e.sets.map((s, i) => `<span class="pill">${i + 1}: ${fmtNum(s.w)}×${s.r}${s.rpe ? ` @${s.rpe}` : ''}</span>`).join('')}</div></section>`;
   }).join('')}
   ${w.note ? `<section class="card"><b>Ghi chú</b><p>${h(w.note)}</p></section>` : ''}
   <div class="row wrap">

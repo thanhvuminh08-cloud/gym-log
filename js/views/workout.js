@@ -3,7 +3,7 @@ import { h, uid, e1rm, toast, settings, exMap, fmtNum, celebrate } from '../util
 import { lastSets, records, doneSets } from '../stats.js';
 import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
-import { compare, target, TIERS } from '../overload.js';
+import { compare, target, TIERS, RPE } from '../overload.js';
 
 async function newEntry(exerciseId, nSets, reps, rest) {
   const prev = await lastSets(exerciseId);
@@ -48,6 +48,9 @@ export async function render(el) {
       <span class="prev muted">${p ? `${fmtNum(p.w)}×${p.r}` : '—'}</span>
       <input type="number" inputmode="decimal" step="0.5" data-f="w" aria-label="Mức tạ set ${si + 1} (kg)" value="${h(s.w)}" placeholder="${p ? h(p.w) : 'kg'}">
       <input type="number" inputmode="numeric" data-f="r" aria-label="Số rep set ${si + 1}" value="${h(s.r)}" placeholder="${p ? h(p.r) : 'rep'}">
+      <select class="rpe" data-f="rpe" aria-label="Độ khó (RPE) set ${si + 1}">
+        <option value="">–</option>${RPE.map(([v, t]) => `<option value="${v}"${+s.rpe === v ? ' selected' : ''}>${v} · ${h(t)}</option>`).join('')}
+      </select>
       <button class="check${isPr ? ' pr' : ''}" data-act="check" aria-label="Đánh dấu set ${si + 1} hoàn thành" aria-pressed="${Boolean(s.done)}">${isPr ? 'PR' : '✓'}</button>
     </div>`;
   };
@@ -67,7 +70,7 @@ export async function render(el) {
           <button class="ghost icon" data-act="up" data-ei="${ei}" ${ei ? '' : 'disabled'}>↑</button>
           <button class="ghost icon danger" data-act="rmEntry" data-ei="${ei}">✕</button></div>
         ${prev[e.exerciseId].length ? `<div class="target small">${h(target(prev[e.exerciseId]))}</div>` : ''}
-        <div class="set head muted small"><span>Set</span><span>Lần trước</span><span>kg</span><span>Rep</span><span></span></div>
+        <div class="set head muted small"><span>Set</span><span>Lần trước</span><span>kg</span><span>Rep</span><span>RPE</span><span></span></div>
         ${e.sets.map((s, si) => setRow(e, ei, s, si)).join('')}
         <div class="row"><button class="ghost grow" data-act="addSet" data-ei="${ei}">+ Thêm set</button>
           <button class="ghost" data-act="rmSet" data-ei="${ei}" ${e.sets.length ? '' : 'disabled'}>− Set</button></div>
@@ -97,7 +100,9 @@ export async function render(el) {
     else if (f === 'rest') w.entries[t.dataset.ei].rest = Number(t.value) || 0;
     else {
       const row = t.closest('.set');
-      w.entries[row.dataset.ei].sets[row.dataset.si][f] = t.value === '' ? '' : Number(t.value);
+      const s = w.entries[row.dataset.ei].sets[row.dataset.si];
+      s[f] = t.value === '' ? '' : Number(t.value);
+      if (f === 'rpe' && s.rpe === '') delete s.rpe;
     }
     save();
   };

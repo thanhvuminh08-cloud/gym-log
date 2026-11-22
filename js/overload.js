@@ -49,13 +49,28 @@ export function compare(curSets, prevSets, recE1 = 0) {
   return null;
 }
 
-/** Gợi ý mục tiêu buổi này từ lần trước. */
+/** Thang RPE (độ khó cảm nhận) cho từng set: [giá trị, mô tả số rep còn dư]. */
+export const RPE = [[6, 'dư 4'], [7, 'dư 3'], [8, 'dư 2'], [9, 'dư 1'], [10, 'hết sức']];
+
+/** RPE nặng nhất ở mức tạ cao nhất lần trước (0 nếu không ghi). */
+export function topRpe(prevSets) {
+  const p = summary(prevSets || []);
+  if (!p) return 0;
+  return Math.max(0, ...(prevSets || []).filter((s) => s.done !== false && +s.r > 0 && (+s.w || 0) >= p.top.w).map((s) => +s.rpe || 0));
+}
+
+/** Gợi ý mục tiêu buổi này từ lần trước; có RPE thì chỉnh theo độ khó. */
 export function target(prevSets) {
   const p = summary(prevSets || []);
   if (!p) return '';
-  const { w, r } = p.top;
-  if (!w) return `Mục tiêu: > ${r} rep`;
-  return `Mục tiêu: ${fmtNum(w)}kg × ${r + 1} hoặc ${fmtNum(w + STEP)}kg × ${r}`;
+  const { w, r } = p.top, rpe = topRpe(prevSets), kg = (x) => `${fmtNum(x)}kg`;
+  if (!w) return rpe >= 10 ? `Mục tiêu: giữ ${r} rep, làm chắc hơn` : `Mục tiêu: > ${r} rep`;
+  if (!rpe) return `Mục tiêu: ${kg(w)} × ${r + 1} hoặc ${kg(w + STEP)} × ${r}`;
+  if (rpe <= 6) return `Lần trước nhẹ (RPE ${rpe}) → ${kg(w + 2 * STEP)} × ${r}`;
+  if (rpe <= 7) return `Lần trước nhẹ (RPE ${rpe}) → ${kg(w + STEP)} × ${r}`;
+  if (rpe <= 8) return `Mục tiêu: ${kg(w)} × ${r + 1} hoặc ${kg(w + STEP)} × ${r}`;
+  if (rpe <= 9) return `Lần trước nặng (RPE ${rpe}) → ${kg(w)} × ${r + 1}`;
+  return `Lần trước hết sức (RPE ${rpe}) → giữ ${kg(w)} × ${r}, làm chắc hơn`;
 }
 
 /**

@@ -43,6 +43,19 @@ try {
     return $$('.set:not(.head) .prev')[0]?.textContent.includes('60');
   });
   await step('Hiện mục tiêu quá tải từ lần trước', () => !!$('.target')?.textContent.includes('65kg × 9'));
+  await step('Ghi RPE cho set (lưu vào DB)', async () => {
+    const sel = $$('.set:not(.head) select.rpe')[0]; sel.value = '7'; sel.dispatchEvent(new w.Event('input', { bubbles: true })); await wait(150);
+    const { activeWorkout } = await w.eval("import('./js/db.js')"); // import trong iframe → đúng DB smoke
+    return (await activeWorkout())?.entries[0].sets[0].rpe === 7;
+  });
+  await step('Luật gợi ý theo RPE', async () => {
+    const { target } = await import('./js/overload.js');
+    const S = (rpe) => [{ w: 60, r: 8, done: true, rpe }];
+    const got = [target(S()), target(S(6)), target(S(7)), target(S(8)), target(S(9)), target(S(10))].map((t) => t.match(/[\d.,]+kg × \d+/g).join('|')).join(';');
+    const want = '60kg × 9|62,5kg × 8;65kg × 8;62,5kg × 8;60kg × 9|62,5kg × 8;60kg × 9;60kg × 8';
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Phát hiện PR', async () => { fillSets([60, 75]); await check(0); await check(1); return $$('.set:not(.head) .check')[1].textContent.includes('PR'); });
   await step('Ăn mừng: hàng set PR có .celebrate[data-celebrate=gold]', () => !!$('.set.celebrate[data-celebrate=gold]'));
   await step('Toast cổ vũ khi vượt', () => $$('.toast').some((t) => t.textContent.includes('PR mới')));
