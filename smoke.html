@@ -1,0 +1,60 @@
+<!doctype html>
+<!-- Smoke test: mở http://localhost:8080/smoke.html, đọc dòng cuối "SMOKE: PASS/FAIL".
+     Chạy app trong iframe với DB riêng (gym-smoke), không đụng dữ liệu thật. Không cần chụp màn hình. -->
+<html lang="vi"><head><meta charset="utf-8"><title>Smoke</title>
+<style>body{font:14px monospace;background:#111;color:#ddd;margin:12px}iframe{width:375px;height:700px;border:1px solid #444;float:right}.f{color:#f66}.p{color:#6f6}</style>
+</head><body>
+<iframe id="f"></iframe><pre id="out"></pre>
+<script type="module">
+const DB = 'gym-smoke', out = document.getElementById('out'), frame = document.getElementById('f');
+const lines = []; let fail = 0;
+const log = (ok, msg) => { if (!ok) fail++; lines.push(`${ok ? 'PASS' : 'FAIL'} ${msg}`); out.textContent = lines.join('\n'); };
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const until = async (fn, ms = 3000) => { for (let t = 0; t < ms; t += 50) { const v = fn(); if (v) return v; await wait(50); } return null; };
+
+await new Promise((r) => { const q = indexedDB.deleteDatabase(DB); q.onsuccess = q.onerror = q.onblocked = r; });
+localStorage.removeItem('gym.restEnd');
+frame.src = `index.html?db=${DB}#/`;
+await new Promise((r) => (frame.onload = r));
+const w = frame.contentWindow, $ = (s) => w.document.querySelector(s), $$ = (s) => [...w.document.querySelectorAll(s)];
+w.confirm = () => true; w.prompt = () => 'Smoke A';
+const errors = []; w.addEventListener('error', (e) => errors.push(e.message)); w.addEventListener('unhandledrejection', (e) => errors.push(String(e.reason)));
+const go = async (hash) => { w.location.hash = hash; await wait(300); };
+const input = (el, v) => { el.value = v; el.dispatchEvent(new w.Event('input', { bubbles: true })); };
+const fillSets = (vals) => $$('.set:not(.head)').forEach((r, i) => { const [a, b] = r.querySelectorAll('input'); input(a, vals[i] ?? vals.at(-1)); input(b, 8); });
+const check = async (i) => { $$('.set:not(.head) .check')[i].click(); await wait(150); };
+const step = async (name, fn) => { try { const r = await fn(); log(r !== false, name); } catch (e) { log(false, `${name} — ${e.message}`); } };
+
+try {
+  await step('Trang Hôm nay hiện nút bắt đầu', async () => !!(await until(() => $('[data-act=empty]'))));
+  await step('Bắt đầu buổi tập trống', async () => { $('[data-act=empty]').click(); return !!(await until(() => w.location.hash === '#/workout' && $('[data-act=addEx]'))); });
+  await step('Chọn bài tập từ picker', async () => {
+    $('[data-act=addEx]').click(); const s = await until(() => $('.modal input'));
+    input(s, 'bench'); (await until(() => $('.pick-list .item'))).click();
+    return !!(await until(() => $$('.set:not(.head)').length >= 3));
+  });
+  await step('Ghi set + đồng hồ nghỉ chạy', async () => { fillSets([60, 65]); await check(0); await check(1); return $$('.set.done').length === 2 && !!$('.rest-bar.show'); });
+  await step('Kết thúc → trang chi tiết', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/history/'))); });
+  await step('Lưu thành giáo án', async () => { (await until(() => $('[data-act=tpl]'))).click(); await wait(200); await go('#/templates'); return w.document.body.innerText.includes('Smoke A'); });
+  await step('Tập lại từ giáo án, hiện số liệu lần trước', async () => {
+    await go('#/'); (await until(() => $('[data-act=tpl]'))).click();
+    await until(() => $$('.set:not(.head)').length);
+    return $$('.set:not(.head) .prev')[0]?.textContent.includes('60');
+  });
+  await step('Phát hiện PR', async () => { fillSets([60, 75]); await check(0); await check(1); return $$('.set:not(.head) .check')[1].textContent.includes('PR'); });
+  await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/history/'))); });
+  for (const r of ['#/', '#/history', '#/progress', '#/templates', '#/settings']) {
+    await step(`Render ${r}`, async () => { await go(r); return !$('.error') && $('#main').innerText.trim().length > 20; });
+  }
+  await step('Biểu đồ tiến độ có dữ liệu', async () => { await go('#/progress'); return !!(await until(() => $('svg.chart path'))); });
+  await step('Không tràn ngang ở 375px', () => w.document.documentElement.scrollWidth <= 376);
+  await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
+} finally {
+  w.localStorage.removeItem('gym.restEnd');
+  frame.src = 'about:blank'; await wait(100);
+  indexedDB.deleteDatabase(DB);
+  log(true, '(đã xoá DB smoke)');
+  lines.push(`SMOKE: ${fail ? `FAIL (${fail})` : 'PASS'}`); out.textContent = lines.join('\n');
+}
+</script>
+</body></html>

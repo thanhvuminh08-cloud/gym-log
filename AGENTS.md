@@ -1,63 +1,34 @@
-# Gym app — agent guide (Codex + Claude Code dùng chung file này)
+# Gym Log — hướng dẫn chung cho Codex + Claude Code
 
-App PWA cá nhân để ghi buổi tập gym. Một người dùng, dữ liệu chỉ nằm trên điện thoại (IndexedDB). UI tiếng Việt.
+PWA cá nhân ghi buổi tập gym. 1 người dùng, dữ liệu IndexedDB trên điện thoại, UI tiếng Việt. Vanilla JS ES modules: không framework, không npm, không build.
 
-## Nguyên tắc tiết kiệm token
-- KHÔNG đọc toàn bộ repo. Dùng bản đồ file dưới đây, chỉ mở file liên quan.
-- Mỗi màn hình là một file trong `js/views/`. Sửa tính năng nào thì chỉ mở view đó + `js/db.js`/`js/util.js` nếu cần.
-- Không thêm framework, bundler, npm. Vanilla JS ES modules, không có bước build.
-- Thay đổi nhỏ, tập trung; không refactor ngoài phạm vi yêu cầu.
-- Ghi quyết định/ý tưởng mới vào `NOTES.md` (ngắn gọn) thay vì giải thích dài trong chat.
+## Hai agent, người dùng điều phối
+- **Codex = giao diện**: `css/`, `index.html`, `assets/`, `icons/`, `manifest.webmanifest`, markup HTML trong `js/views/*`.
+- **Claude Code = logic**: các file còn lại trong `js/`, `sw.js`, `smoke.html`, xử lý sự kiện/dữ liệu trong `js/views/*`.
+- Thay đổi không phải của bạn là của agent kia: không hoàn tác/viết lại. Cần bên kia làm gì → 1 dòng vào "Việc chờ" trong `NOTES.md`.
+- `js/views/*` là vùng chung: thấy `git status` có thay đổi chưa commit không phải của bạn → dừng, báo người dùng.
+- Markup phải giữ nguyên `data-*` (act, f, ei, si, id, i, tab, m, del, k) và class `.set .check .rest-bar .modal .pick-list` — logic dựa vào chúng.
 
-## Hai agent cùng làm repo này
-Dự án được xây song song bởi **hai AI agent**, người dùng điều phối và chuyển lời giữa hai bên (hai agent không nói chuyện trực tiếp):
-- **Codex (ChatGPT)** — nếu bạn đang đọc file này trong Codex, bạn là bên **giao diện**.
-- **Claude Code (Anthropic)** — đọc file này qua `CLAUDE.md`, là bên **logic**. Claude đã viết nền tảng v1 (dữ liệu, ghi buổi tập, đồng hồ, PR, biểu đồ, sao lưu).
-Thay đổi bạn thấy trong repo mà không phải do bạn làm là của agent kia — **không hoàn tác, không viết lại**; nếu thấy lỗi thì ghi vào "Việc chờ" trong `NOTES.md` hoặc báo người dùng.
+## Tiết kiệm token (bắt buộc)
+- Bắt đầu: `git log --oneline -5` + `git diff HEAD~1 --stat`. Không đọc lại cả repo; mở đúng file, ưu tiên grep/đoạn dòng.
+- Kiểm tra bằng **smoke test**, không chụp màn hình hàng loạt: `powershell -File serve.ps1`, mở `http://localhost:8080/smoke.html`, đọc dòng `SMOKE: PASS/FAIL` (dùng DB riêng, không đụng dữ liệu thật). Chỉ chụp 1 ảnh khi cần xem thẩm mỹ.
+- Không tạo lại ảnh đã có. Ảnh ≤ 200KB.
+- Trả lời người dùng ngắn; quyết định ghi 1 dòng vào `NOTES.md`.
+- Thêm luồng mới quan trọng → Claude bổ sung bước vào `smoke.html`.
 
-## Phân công (bắt buộc — không giẫm chân nhau)
-| | Codex (giao diện) | Claude Code (logic) |
-|---|---|---|
-| Sở hữu | `css/app.css`, `index.html`, `assets/`, `icons/`, `manifest.webmanifest`, phần **markup HTML** trong `js/views/*.js` | `js/db.js`, `stats.js`, `timer.js`, `picker.js`(logic), `chart.js`, `util.js`, `exercises.js`, `app.js`, `sw.js`, phần **xử lý sự kiện/dữ liệu** trong `js/views/*.js` |
-| Được làm | màu, bố cục, icon, ảnh, chữ hiển thị, khả năng truy cập | tính năng mới, sửa lỗi, schema/migration, thống kê, offline |
-
-- Không sửa file của bên kia. Cần thay đổi ở phía bên kia → ghi yêu cầu vào mục "Việc chờ" trong `NOTES.md`, người dùng sẽ chuyển.
-- File view là vùng chung: **chỉ một agent sửa tại một thời điểm**. Trước khi sửa, chạy `git status`; nếu có thay đổi chưa commit của bên kia thì dừng và báo người dùng.
-- Codex đổi markup phải **giữ nguyên** các thuộc tính `data-act`, `data-f`, `data-ei`, `data-si`, `data-id`, `data-i`, `data-tab`, `data-m`, `data-del`, `data-k` và class `.set`, `.check`, `.rest-bar`, `.modal`, `.pick-list` — logic dựa vào chúng.
-- Claude thêm markup mới thì dùng class có sẵn trong `app.css`; cần style mới → ghi vào "Việc chờ" cho Codex.
-
-## Quy trình mỗi lần làm (tiết kiệm token)
-1. `git status` + `git log --oneline -5` để biết bên kia vừa làm gì; xem `git diff HEAD~1 --stat` thay vì đọc lại file.
-2. Làm việc trong phạm vi của mình.
-3. Kiểm tra: chạy `serve.ps1`, ở màn hình ~375px: bắt đầu buổi tập → thêm bài → nhập kg/rep → ✓ (đồng hồ nghỉ hiện) → Kết thúc → mở Tiến độ. Không có lỗi console.
-4. Sửa file tĩnh → tăng `VERSION` trong `sw.js` (file mới thì thêm vào `FILES`). Ảnh nén ≤ 200KB.
-5. Commit ngay, tiền tố theo agent: `ui: ...` (Codex) hoặc `logic: ...` (Claude). Commit nhỏ, một việc một commit.
+## Kết thúc mỗi việc
+1. Smoke PASS. 2. Sửa file tĩnh → tăng `VERSION` trong `sw.js` (file mới → thêm vào `FILES`). 3. Commit nhỏ, tiền tố `ui:` (Codex) / `logic:` (Claude).
 
 ## Bản đồ file
-- `index.html` — khung app, thanh điều hướng dưới.
-- `css/app.css` — toàn bộ style (biến màu ở `:root`, giao diện tối).
-- `js/app.js` — router theo hash (`#/workout`, `#/history/<id>`...), đăng ký service worker.
-- `js/db.js` — IndexedDB: `all/get/put/del/clear(store)`, `exportAll/importAll`. Stores: `exercises`, `templates`, `workouts`, `body`.
-- `js/util.js` — `h` (escape), `uid`, định dạng ngày, `e1rm`, `toast`, `settings`.
-- `js/stats.js` — tính PR, lần tập trước, chuỗi dữ liệu cho biểu đồ.
-- `js/exercises.js` — thư viện bài tập mặc định (seed lần đầu).
-- `js/timer.js` — đồng hồ nghỉ giữa set.
-- `js/chart.js` — biểu đồ đường SVG tự viết.
-- `js/picker.js` — modal chọn/tạo bài tập (dùng chung cho buổi tập và giáo án).
-- `assets/` — ảnh giao diện (vd `workout-hero.jpg`).
-- `js/views/home.js | workout.js | history.js | templates.js | progress.js | settings.js`.
-- `sw.js` — cache offline. **Mỗi lần sửa file tĩnh, tăng `VERSION` trong `sw.js`** để điện thoại nhận bản mới.
+- `js/app.js` router hash (`#/workout`, `#/history/<id>`, `#/templates/<id|new>`), seed, đăng ký SW (tắt trên localhost).
+- `js/db.js` IndexedDB `all/get/put/del/clear`, `exportAll/importAll`, `activeWorkout`. `?db=<tên>` đổi DB.
+- `js/util.js` `h()` escape, `uid`, format ngày/số, `e1rm`, `toast`, `settings` (localStorage).
+- `js/stats.js` PR, lần tập trước, series biểu đồ. `js/chart.js` biểu đồ SVG. `js/timer.js` đồng hồ nghỉ.
+- `js/picker.js` modal chọn/tạo bài. `js/exercises.js` thư viện bài mặc định.
+- `js/views/` home, workout, history, templates, progress, settings — mỗi file export `async render(el, params)`, event delegation trên `el`, luôn escape bằng `h()`.
 
-## Mô hình dữ liệu
-- exercise `{id, name, muscle, custom?}`
-- template `{id, name, items:[{exerciseId, sets, reps, rest}]}`
-- workout `{id, name, start, end|null, templateId?, note, entries:[{exerciseId, rest, sets:[{w, r, done}]}]}` — `end:null` = buổi đang tập (tối đa 1).
-- body `{id, date, weight, waist?, note?}`
-- Thời gian là timestamp ms. Khối lượng là kg.
-- Đổi schema: tăng `DB_VERSION` trong `db.js`, viết migration trong `onupgradeneeded`, không làm mất dữ liệu cũ.
-
-## View contract
-Mỗi view export `async function render(el, params)`: ghi `el.innerHTML`, gắn event (ưu tiên event delegation trên `el`). Luôn escape text người dùng bằng `h()`.
-
-## Chạy thử
-`powershell -File serve.ps1` (máy không có Python/Node) rồi mở http://localhost:8080. Service worker tắt trên localhost để tránh cache khi dev. Không có test tự động; kiểm tra thủ công trên màn hình hẹp (~375px).
+## Dữ liệu
+- exercise `{id, name, muscle, custom?}` · template `{id, name, items:[{exerciseId, sets, reps, rest}]}`
+- workout `{id, name, start, end|null, templateId?, note, entries:[{exerciseId, rest, sets:[{w, r, done}]}]}` (`end:null` = đang tập, tối đa 1)
+- body `{id, date, weight, waist?}` · thời gian ms, khối lượng kg.
+- Đổi schema: tăng `DB_VERSION`, migration trong `onupgradeneeded`, không mất dữ liệu cũ.

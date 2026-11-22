@@ -1,6 +1,7 @@
 import { DEFAULT_EXERCISES } from './exercises.js';
 
-const DB_NAME = 'gym';
+// ?db=<name> dùng DB riêng (smoke test không đụng dữ liệu thật)
+const DB_NAME = new URLSearchParams(location.search).get('db') || 'gym';
 const DB_VERSION = 1;
 export const STORES = ['exercises', 'templates', 'workouts', 'body'];
 
