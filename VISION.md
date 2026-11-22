@@ -137,3 +137,44 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 Ảnh hiên trong `assets/training-pavilion.webp` dùng ImageGen tích hợp với prompt:
 
 > Use case: illustration-story. Asset type: wide landscape background for Vietnamese cultivation workout PWA, text added separately over left side. Paint an original quiet mountainside training pavilion at blue hour in an elegant ink-wash and carefully textured digital gouache style, atmospheric and believable, with distant karst mountains and bands of mist. Place a warm bronze lantern and stone training terrace under a curved timber roof at the right-center; an understated circular design engraved in the paving, a few mossy jade stones and a pine branch. Keep the entire left third very dark blue-green with quiet low-contrast mist and no prominent objects for light text. Main subject must remain visible in center-right crop on mobile. Ink blacks, muted teal-jade, a few restrained warm copper highlights, no saturated cyan. 3:2 wide composition. No person, no gym equipment, no lettering, no runes, no logo, no watermark, no existing franchise.
+
+## Đánh giá người mới (23/11) — chờ người dùng duyệt
+**Cách làm:** Claude đóng vai người rành tu tiên + tập lâu năm (nam 75 kg, Squat 100×5, Bench 80×8), mở app lần đầu ở DB trống, màn 375 px, không đọc hướng dẫn. Làm 3 việc, rồi đi hết 5 mục và Nhập môn.
+
+**3 việc:** ghi buổi ✓ dễ (2 chạm tới ô set, đồng hồ nghỉ tự chạy) · xem buổi trước ✓ dễ (Tu luyện ký › Nhật ký) · tìm tiến bộ ⚠ có số nhưng tự mâu thuẫn, và phần tu tiên không phản ánh gì.
+
+### Phát hiện (nặng → nhẹ)
+1. **Tầng tu tiên "chết" khi chưa Nhập môn — lỗi xương sống.** Squat 100×5 xong: vẫn *Phàm nhân*, Thất mạch ghi Chân "Bế mạch · Chưa có kỷ lục · còn thiếu 2 bài". Lại còn Nhập môn là "tuỳ chọn". Tu vi có chú "Cấp sức mạnh" nhưng thực tế đo *độ phủ* (đủ 7 mạch × 2 bài) → người khoẻ mà tập ít bài mãi là Phàm nhân. Người mê tu tiên thấy bị xử ép, còn người tập thì thấy vô nghĩa.
+2. **Tập xong không biết mình được gì.** Trang tổng kết không nhắc Linh khí, Công lực, nhiệm vụ hay mạch. Phải quay về Động phủ mới thấy Công lực lên cấp 2, mà cũng không ai giải thích vì sao. Vòng "tập → thấy tiến → biết buổi sau" bị đứt.
+3. **Nhập cùng một thứ ở nhiều nơi.** Cân nặng: 4 nơi (form Động phủ, form Thất mạch, Thân trọng, Nhập môn). Giới tính: 4 nơi (Động phủ, Thất mạch, Cài đặt, Nhập môn). Trắc linh căn bắt gõ lại tạ dù lịch sử đã có Squat/Bench.
+4. **Số trùng:** nhiệm vụ "Tập đủ 3 buổi" = ô "Buổi tuần này 1/3" ngay bên dưới. Tổng ~1RM hiện 2 lần trong Tổng quan. Linh khí có 2 cách ghi ("130 Linh khí" và "30 / 283 tới cấp 3"). Thạch bi (mốc tạ) gần trùng với kỷ lục bài.
+5. **Chức năng thừa hoặc chết:**
+   - Mục tiêu tháng được lưu nhưng không dùng ở đâu (`monthGoal`).
+   - Lịch tập khi chưa có giáo án hiện 7 dòng "Nghỉ · chọn giáo án" mà không có gì để chọn.
+   - Khí huyết 55/100 và Căn cơ 100% không dẫn tới hành động nào.
+   - Có 3 thứ cùng là "chuỗi": Liên kích, Đạo tâm, và streak trong nhiệm vụ.
+   - Hư cảnh/Xác chứng/Bình cảnh: người mới không gặp, nhưng vẫn đang chiếm chữ.
+6. **Đòi việc khi chưa đủ điều kiện:** nhiệm vụ "Khai mạch Lưng · Luyện Deadlift" chỉ định bài khi người dùng chưa chọn gì. Nhắc sao lưu ngay sau buổi đầu tiên. Phẩm ở buổi đầu hiện "—".
+7. **Chữ gây hiểu sai:**
+   - Tổng quan ghi "Ngực 0 ngày" dù đã Bench, vì lưới chỉ tô theo nhóm cơ chính của ngày.
+   - "Tập Squat, Bench Press hoặc Deadlift để xem biểu đồ" trong khi đã tập 2 bài (cần ≥2 buổi).
+   - "set tốt nhất (kg×rep) 500" hiện tích số thay vì 100×5.
+   - Trang Bế quan ghi "Buổi tập 23/11/2026 · Thứ 2, 23/11/2026" (ngày lặp lại).
+   - Thẻ lần đầu nói một ý 3 lần ("Ghi buổi tập đầu tiên / Bắt đầu buổi tập / Bế quan · Bắt đầu tập").
+
+**Bản đồ:** đang có ~16 hệ số (Tu vi, Công lực, Linh khí, Căn cơ, Khí huyết, Luyện thể/mạch, Bình cảnh, Lôi kiếp, Hư cảnh, Xác chứng, Phẩm, Liên kích, Đạo tâm, Thạch bi, Nhiệm vụ tuần, Tổng SBD). Chỉ Linh khí/Công lực, Phẩm, Thạch bi và số buổi tuần chạy được mà không cần Nhập môn + cân nặng. Chỉ có Nhiệm vụ tuần là chỉ cho người dùng *việc cần làm*.
+
+### Đề xuất tối ưu (một vòng lặp: Tập → Xuất quan thấy mình tiến → biết buổi sau tập gì; hệ nào không góp vào vòng này thì gộp hoặc giấu)
+- **O1 (Claude, lớn):** tu tiên chạy không cần Nhập môn. Mạch tự khai từ bài đã tập. Tu vi tính theo các mạch đã khai và ghi rõ "x/7 mạch". Cân nặng + giới tính hỏi **một lần** ngay trên trang tổng kết buổi đầu. Nhập môn chỉ còn là "tạo kế hoạch tập"; Trắc linh căn điền sẵn từ lịch sử hoặc bỏ qua được.
+- **O2 (Claude dữ liệu → Codex giao diện):** trang tổng kết = khoảnh khắc chính: Phẩm, +Linh khí, Công lực, mạch nào tiến, nhiệm vụ xong, Đột phá. Cuối trang là "Buổi sau: …" (theo lịch, giáo án hoặc mạch lâu chưa tập).
+- **O3:** một nơi cho thân thể: Thân trọng (Tàng thư) + lời hỏi một lần; giới tính ở Cài đặt. Bỏ form khỏi Động phủ và Thất mạch.
+- **O4 (gộp/bỏ):**
+  - Bỏ Mục tiêu tháng.
+  - Bỏ nhiệm vụ "đủ buổi tuần" (đã có ô Buổi tuần).
+  - Gộp Khí huyết + Căn cơ thành một "Trạng thái", chỉ ở Thất mạch.
+  - Thạch bi chỉ ở Công đức bạ.
+  - Hư cảnh/Xác chứng chỉ hiện khi xảy ra.
+  - Nhiệm vụ chỉ nhắc bài người dùng đã tập hoặc đã chọn.
+- **O5 (sửa nhỏ):** các chữ ở mục 7; Lịch tập khi chưa có giáo án → 1 dòng "Tạo giáo án hoặc Nhập môn để đặt lịch"; nhắc sao lưu sau ≥3 buổi.
+
+**Thứ tự đề xuất:** O5 + bỏ gọn ở O4 (nhanh) → O1 → O2 → O3. Cần người dùng chốt: Tu vi nên đo *sức mạnh các mạch đã tập* (đề xuất) hay giữ *đủ 7 mạch*?
