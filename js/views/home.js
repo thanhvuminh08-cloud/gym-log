@@ -21,7 +21,7 @@ function strength({ lifts, total }, ex) {
         </a>`).join('')}</div>
       ${lifts.length > 1 ? `<a class="card lift-total" href="#/progress/overview">
         <span class="lift-top"><b data-count="${total.max}">${fmtNum(total.max)}<small> kg</small></b>${trend(total.delta)}<small class="muted">Tổng ~1RM ${lifts.length} bài · so với 30 ngày trước</small></span>
-        ${lineChart(total.series.slice(-40), { unit: ' kg', area: true, head: false })}
+        ${lineChart(total.series.slice(-40), { unit: ' kg', area: true, labels: true, head: false })}
       </a>` : ''}
     </section>`;
 }
@@ -64,6 +64,36 @@ export async function render(el) {
       </div>
     </section>
     ${top.lifts.length ? strength(top, ex) : ''}
+    <div class="dashboard-summaries">
+      <section class="card summary-card" data-readiness>
+        <h2>Sẵn sàng <small class="sample-label">Dữ liệu mẫu</small></h2>
+        <div class="lift-top"><b><span data-readiness-score>82</span><small> /100</small></b>
+          <span class="trend up" data-readiness-delta>↑ 6 điểm</span></div>
+        <p class="muted small">So với lần trước</p>
+        <div class="readiness-chart" data-readiness-chart>
+          ${sparkline([69, 73, 71, 78, 74, 76, 82], 260, 44)}
+        </div>
+        <small class="muted">7 ngày gần nhất</small>
+      </section>
+      <section class="card summary-card" data-session-goals>
+        <h2>Mục tiêu tập <small class="sample-label">Dữ liệu mẫu</small></h2>
+        <div class="lift-top"><b><span data-session-count>8</span><small> buổi đã tập</small></b></div>
+        <div class="session-goal" data-session-goal="week">
+          <div class="row"><span class="grow">Tuần này</span><b data-session-goal-count>3 / 4 buổi</b></div>
+          <div class="goal-dots" data-session-goal-dots aria-hidden="true">
+            <i class="filled"></i><i class="filled"></i><i class="filled"></i><i></i>
+          </div>
+        </div>
+        <div class="session-goal" data-session-goal="month">
+          <div class="row"><span class="grow">Tháng này</span><b data-session-goal-count>8 / 12 buổi</b></div>
+          <div class="goal-dots" data-session-goal-dots aria-hidden="true">
+            <i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i>
+            <i class="filled"></i><i class="filled"></i><i class="filled"></i><i class="filled"></i>
+            <i></i><i></i><i></i><i></i>
+          </div>
+        </div>
+      </section>
+    </div>
     <div class="dashboard-lists">
       <section>
         <h2 class="section-heading">Giáo án <a href="#/templates">Quản lý</a></h2>

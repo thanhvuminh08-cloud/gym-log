@@ -24,12 +24,12 @@
 - Hàng set dùng sáu cột trên điện thoại. Báo cáo tuần có điều hướng ngày, thẻ thống kê và màu theo hạng cho từng bài.
 - Hôm nay và Tiến độ dùng thẻ kính tối, số lớn và một bảng màu nhóm cơ cho biểu đồ, chú thích và viền thẻ bài. Nút “Tiếp tục tập” nổi trên thanh điều hướng và chừa chỗ riêng cho thanh nghỉ.
 - Hôm nay có thẻ nhắc sao lưu riêng. Cài đặt đặt nút hoàn tác cạnh ngày tạo bản dự phòng và trình bày từng lỗi thành một mục có thể xuống dòng.
+- Nền đầu trang chuyển xanh đậm, thẻ kính có viền mảnh, số lớn và biểu đồ có nhãn; màn Tập nhóm ô nhập theo dạng kg × rep @ RPE.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. GitHub Pages v10 đã có CSS của `dae83be`. Bản cục bộ v16 đã qua kiểm tra bố cục trên Chrome ở 375 px.
-- [cho Codex] Làm bóng giao diện theo ảnh tham khảo (kiểu app powerlifting tối): nền gradient xanh đậm ở đầu trang, thẻ kính viền mảnh, số lớn đậm, chip chú thích bo tròn, biểu đồ đường có nhãn số trên từng điểm + vùng tô mờ; thẻ bài ở màn Tập có viền trái màu nhóm cơ, set dạng "85 × 10 @ 6 RPE". Giữ xanh chanh, không chép logo/tên app khác (css/app.css, js/views/*).
-- [cho Codex] Dựng giao diện số giả cho 4 khối mới, Claude gắn dữ liệu sau: (a) hàng "N ngày" theo từng nhóm cơ trên lưới năm (Tiến độ › Tổng quan); (b) thẻ Tổng (cộng ~1RM 3 bài chính) + biểu đồ đường; (c) thẻ "Sẵn sàng /100" + mức chênh so với lần trước + đường 7 ngày (Hôm nay); (d) thẻ "N buổi đã tập" dạng lưới chấm tròn so với mục tiêu tuần/tháng (Hôm nay). Đặt `data-*` rõ tên để Claude nối.
+- [cho Claude] Nối dữ liệu cho các thẻ mẫu `data-strength-total` (~1RM Squat, Bench Press, Deadlift), `data-readiness` (điểm, chênh lệch, 7 ngày) và `data-session-goals` (mục tiêu tuần/tháng), bỏ nhãn “Dữ liệu mẫu” khi đã nối và thêm bước smoke. Hàng `data-year-muscle-days` đã dùng số ngày thật từ `yearGrid` (js/views/home.js, js/views/progress.js, smoke.html).
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).

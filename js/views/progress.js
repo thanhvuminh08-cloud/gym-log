@@ -37,8 +37,24 @@ export async function render(el, [tab, exId] = []) {
             <b class="grow">${state.year}</b>
             <button class="ghost icon" data-y="${state.year + 1}" ${state.year >= hi ? 'disabled' : ''} aria-label="Năm sau">›</button></div>
           <div class="year-total"><b data-count="${g.total}">${g.total}</b><small> ngày tập</small></div>
+          <div class="year-muscle-days" data-year-muscle-days>
+            ${legend(Object.keys(MUSCLE).map((m) => [m, `${g.counts[m] || 0} ngày`]))}
+          </div>
           ${yearGridSvg(g)}
-          ${legend(Object.keys(MUSCLE).filter((m) => g.counts[m]).map((m) => [m, `${g.counts[m]} ngày`]))}
+        </section>
+        <section class="card summary-card strength-total" data-strength-total>
+          <h2>Tổng <small class="sample-label">Dữ liệu mẫu</small></h2>
+          <div class="lift-top"><b><span data-strength-total-value>397,5</span><small> kg</small></b></div>
+          <p class="muted small">Tổng ~1RM của 3 bài chính · Squat, Bench Press, Deadlift</p>
+          <div data-strength-total-chart>
+            ${lineChart([
+              { t: new Date(2026, 9, 25).getTime(), v: 365 },
+              { t: new Date(2026, 10, 1).getTime(), v: 375 },
+              { t: new Date(2026, 10, 8).getTime(), v: 372.5 },
+              { t: new Date(2026, 10, 15).getTime(), v: 390 },
+              { t: new Date(2026, 10, 22).getTime(), v: 397.5 },
+            ], { unit: ' kg', area: true, labels: true, head: false })}
+          </div>
         </section>
         <section class="card volume-card">
           <h2>Khối lượng 12 tuần</h2>

@@ -47,11 +47,16 @@ export async function render(el) {
     return `<div class="set${s.done ? ' done' : ''}" data-ei="${ei}" data-si="${si}">
       <span class="n">${si + 1}</span>
       <span class="prev muted">${p ? `${fmtNum(p.w)}×${p.r}` : '—'}</span>
-      <input type="number" inputmode="decimal" step="0.5" data-f="w" aria-label="Mức tạ set ${si + 1} (kg)" value="${h(s.w)}" placeholder="${p ? h(p.w) : 'kg'}">
-      <input type="number" inputmode="numeric" data-f="r" aria-label="Số rep set ${si + 1}" value="${h(s.r)}" placeholder="${p ? h(p.r) : 'rep'}">
-      <select class="rpe" data-f="rpe" aria-label="Độ khó (RPE) set ${si + 1}">
-        <option value="">–</option>${RPE.map(([v, t]) => `<option value="${v}"${+s.rpe === v ? ' selected' : ''}>${v} · ${h(t)}</option>`).join('')}
-      </select>
+      <div class="set-values">
+        <input type="number" inputmode="decimal" step="0.5" data-f="w" aria-label="Mức tạ set ${si + 1} (kg)" value="${h(s.w)}" placeholder="${p ? h(p.w) : 'kg'}">
+        <span class="set-operator" aria-hidden="true">×</span>
+        <input type="number" inputmode="numeric" data-f="r" aria-label="Số rep set ${si + 1}" value="${h(s.r)}" placeholder="${p ? h(p.r) : 'rep'}">
+        <span class="set-operator" aria-hidden="true">@</span>
+        <select class="rpe" data-f="rpe" aria-label="Độ khó (RPE) set ${si + 1}">
+          <option value="">–</option>${RPE.map(([v, t]) => `<option value="${v}"${+s.rpe === v ? ' selected' : ''}>${v} · ${h(t)}</option>`).join('')}
+        </select>
+        <span class="set-unit" aria-hidden="true">RPE</span>
+      </div>
       <button class="check${isPr ? ' pr' : ''}" data-act="check" aria-label="Đánh dấu set ${si + 1} hoàn thành" aria-pressed="${Boolean(s.done)}">${isPr ? 'PR' : '✓'}</button>
     </div>`;
   };
@@ -71,7 +76,7 @@ export async function render(el) {
           <button class="ghost icon" data-act="up" data-ei="${ei}" ${ei ? '' : 'disabled'}>↑</button>
           <button class="ghost icon danger" data-act="rmEntry" data-ei="${ei}">✕</button></div>
         ${prev[e.exerciseId].length ? `<div class="target small">${h(target(prev[e.exerciseId]))}</div>` : ''}
-        <div class="set head muted small"><span>Set</span><span>Lần trước</span><span>kg</span><span>Rep</span><span>RPE</span><span></span></div>
+        <div class="set head muted small"><span>Set</span><span>Lần trước</span><span class="set-inputs-label">Kg × Rep @ RPE</span><span></span></div>
         ${e.sets.map((s, si) => setRow(e, ei, s, si)).join('')}
         <div class="row"><button class="ghost grow" data-act="addSet" data-ei="${ei}">+ Thêm set</button>
           <button class="ghost" data-act="rmSet" data-ei="${ei}" ${e.sets.length ? '' : 'disabled'}>− Set</button></div>
