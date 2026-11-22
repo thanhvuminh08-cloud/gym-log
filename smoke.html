@@ -99,7 +99,23 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
-  await step('Không tràn ngang ở 375px', () => w.document.documentElement.scrollWidth <= 376);
+  await step('Báo cáo tuần: 2 buổi, 1 vượt, có nút chia sẻ', async () => {
+    await go('#/report');
+    const b = await until(() => $('.report-stats b'));
+    return b?.dataset.count === '2' && $('.report-summary')?.textContent.includes('1/1') && !!$('.report-ex[data-tier=gold]') && !!$('[data-act=share]');
+  });
+  await step('Luật báo cáo tuần', async () => {
+    const { weekReport, weekStart, reportText } = await import('./js/report.js');
+    const t0 = new Date(2026, 0, 5, 18).getTime(), D = 864e5; // thứ Hai
+    const W = (id, day, w, r, rpe) => ({ id, name: 'B' + id, start: t0 + day * D, end: t0 + day * D + 36e5, entries: [{ exerciseId: 'b', sets: [{ w, r, done: true, rpe }] }] });
+    const ws = [W('1', -5, 50, 8), W('2', 0, 55, 8, 8), W('3', 3, 60, 8, 9), W('4', 7, 70, 8), { ...W('5', 1, 99, 9), end: null }];
+    const r = weekReport(ws, [{ date: t0 - 6 * D, weight: 70 }, { date: t0 + 2 * D, weight: 69.5 }], { b: { name: 'Bench' } }, weekStart(t0 + 4 * D));
+    const got = [r.cur.sessions, r.cur.sets, r.cur.vol, r.prev.sessions, r.beats, r.compared, r.rpe, r.weight.kg, r.weight.delta, r.days.map((d) => d.day).join(''), r.exercises[0].top.w].join(',');
+    const want = [2, 2, 920, 1, 2, 2, 8.5, 69.5, -0.5, 'T2T5', 60].join(',');
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want && reportText(r).includes('Bench: 2 set');
+  });
+  await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
   w.localStorage.removeItem('gym.restEnd');

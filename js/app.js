@@ -9,6 +9,7 @@ const ROUTES = {
   templates: () => import('./views/templates.js'),
   progress: () => import('./views/progress.js'),
   settings: () => import('./views/settings.js'),
+  report: () => import('./views/report.js'),
 };
 
 const main = document.getElementById('main');

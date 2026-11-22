@@ -28,7 +28,7 @@ export async function render(el) {
       </div>
     </section>
     <section>
-      <h2 class="section-heading">7 ngày qua</h2>
+      <h2 class="section-heading">7 ngày qua <a href="#/report">Báo cáo tuần</a></h2>
       <div class="stats week-stats">
         <div><span class="tile-icon">${icon('calendar')}</span><b data-count="${week.length}">${week.length}</b><small>Buổi tập</small></div>
         <div><span class="tile-icon">${icon('layers')}</span><b data-count="${week.reduce((a, w) => a + setCount(w), 0)}">${week.reduce((a, w) => a + setCount(w), 0)}</b><small>Set hoàn thành</small></div>
