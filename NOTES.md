@@ -14,6 +14,7 @@
 - Thẻ thật (js/insights.js): `liftTotal(ws, ids)` tổng ~1RM tích luỹ (Tiến độ › thẻ Tổng = `mainLifts` Squat/Bench Press/Deadlift theo tên). `readinessAt/readiness` điểm 0–100 = 100 − nghỉ (<24h 20, <48h 8) − tải 7 ngày/TB tuần 28 ngày (>1,5 25, >1,3 12) − RPE TB buổi gần nhất trong 72h (≥9,5 15, ≥8,5 10, ≥7,5 5); delta so với hôm qua. `sessionCounts` buổi tuần (từ T2)/tháng, mục tiêu `settings.weekGoal` (3) / `monthGoal` (12). Smoke đọc `data-count` thay vì chữ (countUp dừng ở 0 khi khung ẩn).
 - Lịch tập (js/schedule.js): `settings.schedule = {getDay(): templateId | ""}` (có khoá = ngày tập, "" = tự do). `weekPlan` → state none/done/due/rest cho Hôm nay + 7 ô T2–CN done/today/missed/planned/rest. Chọn giáo án ở Cài đặt tự bật ngày đó; giáo án đã xoá → coi như tự do; nút tập tắt khi đang có buổi dở. Smoke sao lưu/khôi phục `gym.settings`.
 - Vòng nghỉ (js/timer.js): `--rest-progress` = % thời gian còn lại theo `gym.restStart`→`gym.restEnd` (±15 đổi cả tổng), `data-warn="true"` khi ≤10s.
+- Tu luyện (js/hero.js, hàm thuần): `hero()` → Tu vi, Thất mạch (cảnh giới theo ~1RM/cân nặng lúc tập, kỷ lục không rớt), Căn cơ 90 ngày, Bình cảnh (kg cần theo cân nặng hiện tại), Linh khí/Công lực. Hợp đồng ở cuối RPG.md.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -43,7 +44,8 @@ Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nh
   5. Trạng thái trống: minh hoạ + 1 câu hướng dẫn cho người mới ở Lịch sử, Giáo án, Tiến độ, Huy chương.
   6. Phản hồi chạm: trạng thái nhấn (`:active`) cho mọi nút/thẻ bấm được; vùng chạm ≥44px. Rung nhẹ khi xong set là logic → Claude.
 
-- [cho Claude] Con Đường Tu Luyện (nhập vai tu tiên, số thật) — thiết kế ở `RPG.md`. Bước 1: `js/hero.js` hàm thuần + luật smoke + hợp đồng dữ liệu cho Codex. Làm sau khi Codex xong đợt UX (một agent mỗi lúc).
+- [cho Codex] Con Đường Tu Luyện bước 2: trang Động phủ `#/hero` + thẻ trên Hôm nay, số liệu giả theo "Hợp đồng dữ liệu" cuối `RPG.md` (giữ `data-muscle` = key mạch). Làm sau đợt UX.
+- [cho Claude] Con Đường Tu Luyện bước 3 (sau khi Codex xong bước 2): nối `hero()` vào Động phủ, hỏi cân nặng/giới tính (`settings.sex`), smoke luồng.
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)

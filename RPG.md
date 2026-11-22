@@ -91,3 +91,27 @@ Bụng: cảnh giới theo Linh khí mạch — ngưỡng Luyện Khí/Trúc Cơ
 2. **Codex**: trang Động phủ + thẻ trên Hôm nay với số liệu giả theo hợp đồng.
 3. **Claude**: nối dữ liệu, hỏi cân nặng/giới tính, smoke luồng.
 4. Đợt 2: màn Đột phá/Độ kiếp, nhiệm vụ tuần, Bình cảnh, microcopy tu tiên.
+
+## Hợp đồng dữ liệu (bước 1 xong — `js/hero.js`)
+`hero({workouts, exercises, body, sex, schedule, weekGoal, now})` trả về (Codex dựng giao diện với số giả đúng dạng này):
+```js
+{
+  needsWeight: false, needsSex: false,   // true → Động phủ hiện ô hỏi cân nặng / giới tính (Claude nối ở bước 3)
+  bw: 80, sex: 'm',                      // kg hiện tại
+  tuvi: { p: 2.079, lv: 21, realm: { i: 2, name: 'Trúc Cơ' }, phase: { i: 0, name: 'Sơ kỳ' }, label: 'Trúc Cơ · Sơ kỳ', tribulation: false },
+  canCo: 23, shaky: true,                // % phong độ (null = chưa có dữ liệu); shaky = < 85%
+  linhKhi: { level: 3, xp: 470, into: 87, need: 520, pct: 16,   // Công lực = level; thanh = into/need
+             parts: { sets, sessions, schedule, overload, weekGoal, streak } },
+  meridians: [   // luôn 7 phần tử, thứ tự: chest back shoulders legs biceps triceps core (= data-muscle)
+    { key: 'legs', name: 'Chân', p: 3.222, lv: 33, realm: {i, name}, phase: {i, name}, label: 'Kết Đan · Sơ kỳ', tribulation: true,
+      ratio: 1.67,                       // ×BW kỷ lục (null nếu chưa có)
+      best: { exerciseId, name: 'Squat', w: 100, r: 5, kg: 116.7, eq: 116.7, ratio: 1.67, bw: 70, t, workoutId } | null,
+      canCo: 90, shaky: false, xp: 20,   // Linh khí của mạch
+      next: { realm: 'Nguyên Anh', ratio: 2.25, exerciseId, name: 'Squat', kg: 180, added: false, perHand: false } | null },
+    // Bụng: ratio/best/canCo = null, next = { realm, xp, left } (theo Linh khí mạch)
+  ],
+}
+```
+- Dòng số thật gợi ý: `Squat 1,67×BW · ~1RM 116,7 kg`; Bình cảnh: `Squat 180 kg × 1 → Nguyên Anh` (`added` = kg đeo thêm cho Pull-up/Dips; `perHand` = kg mỗi quả tạ đơn).
+- Phàm nhân chưa có dữ liệu: `label: 'Phàm nhân'`, `lv: 1`, `p: 0`. Radar Thất mạch dùng `p` (0–6).
+- Quy ước tính: ~1RM chỉ lấy tối đa 12 rep/set; bài tự tạo / cô lập chỉ cho Linh khí; Công lực: từ cấp L lên L+1 cần `100 × L^1,5`; "buổi đúng lịch" so với lịch hiện tại, 1 lần/ngày.
