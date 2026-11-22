@@ -181,4 +181,23 @@ export function verdict(i) {
 
 /** Đã Nhập môn chưa (settings.dao có at). */
 export const entered = (s) => !!s?.dao?.at;
+
+/**
+ * Khoá theo Công pháp: đã Nhập môn → ngoài Động phủ chỉ được tập/xếp các bài trong Công pháp.
+ * → Map exerciseId → mạch (thứ tự theo MERIDIANS rồi theo thứ tự chọn), hoặc null nếu chưa Nhập môn.
+ */
+export function lockedPath(s) {
+  if (!entered(s) || !s.dao.path) return null;
+  const map = new Map();
+  for (const M of MERIDIANS) for (const id of s.dao.path[M.key] || []) if (!map.has(id)) map.set(id, M.key);
+  return map.size ? map : null;
+}
+
+/** Lọc danh sách item {exerciseId} theo Công pháp → {kept, dropped}. Chưa khoá → giữ hết. */
+export function filterByPath(items = [], lock) {
+  if (!lock) return { kept: [...items], dropped: [] };
+  const kept = [], dropped = [];
+  for (const it of items) (lock.has(it.exerciseId) ? kept : dropped).push(it);
+  return { kept, dropped };
+}
 export { REALMS };

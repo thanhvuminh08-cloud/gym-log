@@ -5,6 +5,7 @@ import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
 import { compare, target, TIERS, RPE } from '../overload.js';
 import { muscleKey } from '../insights.js';
+import { lockedPath, filterByPath } from '../dao.js';
 
 async function newEntry(exerciseId, nSets, reps, rest) {
   const prev = await lastSets(exerciseId);
@@ -21,8 +22,13 @@ export async function startWorkout({ template, from } = {}) {
   const cur = await activeWorkout();
   if (cur) { location.hash = '#/workout'; return toast('Đang có buổi tập dở — tiếp tục buổi đó'); }
   const entries = [];
-  if (template) for (const it of template.items) entries.push(await newEntry(it.exerciseId, it.sets, it.reps, it.rest));
-  if (from) for (const e of from.entries) entries.push(await newEntry(e.exerciseId, doneSets(e).length, 0, e.rest));
+  // Đã Nhập môn: chỉ tập bài trong Công pháp — giáo án/buổi cũ có bài ngoài thì bỏ và báo.
+  const lock = lockedPath(settings.get());
+  const items = filterByPath(template?.items || [], lock), olds = filterByPath(from?.entries || [], lock);
+  for (const it of items.kept) entries.push(await newEntry(it.exerciseId, it.sets, it.reps, it.rest));
+  for (const e of olds.kept) entries.push(await newEntry(e.exerciseId, doneSets(e).length, 0, e.rest));
+  const dropped = items.dropped.length + olds.dropped.length;
+  if (dropped) toast(`Bỏ ${dropped} bài ngoài Công pháp`);
   const name = template?.name || from?.name || 'Buổi tập ' + new Date().toLocaleDateString('vi-VN');
   await put('workouts', { id: uid(), name, start: Date.now(), end: null, templateId: template?.id || null, note: '', entries });
   location.hash = '#/workout';

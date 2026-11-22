@@ -413,6 +413,24 @@ try {
     if (got !== want || tpl2 !== 4) lines.push(`  ${got} | lại ${tpl2}\n  ≠ ${want}`);
     return got === want && tpl2 === 4;
   });
+  await step('Khoá Công pháp: picker chỉ còn bài đã chọn, giáo án có Deadlift bị bỏ bài', async () => {
+    const S = JSON.parse(w.localStorage.getItem('gym.settings')), path = Object.values(S.dao.path).flat();
+    const { startWorkout } = await mod('views/workout.js'), db = await mod('db.js');
+    await startWorkout({ template: { id: 't-lock', name: 'Khoá', items: [{ exerciseId: 'x-deadlift', sets: 3, reps: 5, rest: 120 }, { exerciseId: 'x-squat', sets: 3, reps: 5, rest: 120 }] } });
+    const cur = await db.activeWorkout();
+    await until(() => $('[data-act=addEx]'));
+    $('[data-act=addEx]').click();
+    const modal = await until(() => $('.modal[data-locked=path] .pick-list .item'));
+    const items = $$('.modal .pick-list .item').map((b) => b.dataset.id);
+    const chips = $$('.modal .chip').map((c) => c.textContent).join('|');
+    const got = [!!modal, items.length === path.length && items.every((id) => path.includes(id)), !items.includes('x-deadlift'), !$('.modal [data-new]'),
+      chips.startsWith('Tất cả|Ngực|Lưng'), cur.entries.map((e) => e.exerciseId).join('+')].join(',');
+    $('.modal [data-close]').click();
+    $('[data-act=discard]')?.click(); await until(() => w.location.hash !== '#/workout');
+    const want = ['true', 'true', 'true', 'true', 'true', 'x-squat'].join(',');
+    if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
+    return got === want;
+  });
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
