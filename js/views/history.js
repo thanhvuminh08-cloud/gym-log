@@ -18,9 +18,9 @@ export async function render(el, [id]) {
       <div class="muted small">${fmtDate(w.start)} · ${fmtDur(w.end - w.start)} · ${setCount(w)} set · ${fmtNum(volume(w))} kg</div>
       <div class="small">${w.entries.map((e) => h(ex[e.exerciseId]?.name || '?')).join(', ')}</div></a>`;
   }).join('') || `<section class="card empty-state">
-    <span class="tile-icon"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span>
+    <span class="tile-icon empty-illustration"><svg aria-hidden="true"><use href="#i-calendar"/></svg></span>
     <h2>Chưa có buổi tập hoàn thành</h2>
-    <p class="muted">Các buổi tập đã lưu sẽ hiện ở đây.</p>
+    <p class="muted">Bắt đầu ở Hôm nay và hoàn thành buổi đầu tiên để lưu vào lịch sử.</p>
     <a class="btn primary" href="#/">Về Hôm nay</a>
   </section>`);
 }

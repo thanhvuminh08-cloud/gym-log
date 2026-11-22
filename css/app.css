@@ -148,6 +148,16 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .brand-mark { color: var(--accent-ink); background: var(--accent); }
 .empty-state { display: grid; justify-items: center; gap: 8px; padding: 28px 16px; text-align: center; }
 .empty-state .tile-icon { width: 44px; height: 44px; }
+.empty-state .empty-illustration {
+  --illustration-color: var(--cool);
+  width: 68px; height: 68px; margin-bottom: 6px; border: 1px solid var(--line); border-radius: 24px;
+  color: var(--illustration-color);
+  background: radial-gradient(circle, color-mix(in srgb, var(--illustration-color) 20%, transparent), transparent 75%), var(--card);
+  box-shadow: inset 0 0 0 5px var(--bg);
+}
+.empty-illustration svg { width: 30px; height: 30px; stroke-width: 1.5; }
+.empty-state .empty-illustration.is-template { --illustration-color: var(--accent); }
+.empty-state .empty-illustration.is-medal { --illustration-color: var(--pr); }
 .empty-state h2, .empty-state p { margin: 0; }
 .empty-state .btn, .empty-state button { margin-top: 6px; }
 .card .row.small:has(input.tiny) { flex-wrap: wrap; }

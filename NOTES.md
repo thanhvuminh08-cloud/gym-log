@@ -35,13 +35,13 @@
 - Thanh nghỉ có vòng SVG cạnh số giây và kiểu cảnh báo vàng cho 10 giây cuối.
 - Tổng kết buổi có bốn thẻ số lớn và hiệu ứng xuất hiện cho huy chương, theo cài đặt giảm chuyển động.
 - Hôm nay và Tiến độ có khung chờ khi tải; nội dung khi đổi trang xuất hiện nhẹ nếu cho phép chuyển động.
+- Lịch sử, Giáo án, Tiến độ và Huy chương có minh hoạ và hướng dẫn khi chưa có dữ liệu.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 - [cho Codex] CSS `.schedule-preview`, `.schedule-examples` không còn dùng (đã bỏ bản xem trước ở Hôm nay); thẻ chưa đặt lịch giờ có `data-state="none"`.
 - [cho Codex] Đợt nâng cấp giao diện/UX — làm theo thứ tự, mỗi mục 1 commit `ui:`, giữ `data-*`/class logic, tôn trọng giảm chuyển động. Phần cần logic thì ghi lại "Việc chờ cho Claude":
-  5. Trạng thái trống: minh hoạ + 1 câu hướng dẫn cho người mới ở Lịch sử, Giáo án, Tiến độ, Huy chương.
   6. Phản hồi chạm: trạng thái nhấn (`:active`) cho mọi nút/thẻ bấm được; vùng chạm ≥44px. Rung nhẹ khi xong set là logic → Claude.
 
 - [cho Codex] Con Đường Tu Luyện bước 2: trang Động phủ `#/hero` + thẻ trên Hôm nay, số liệu giả theo "Hợp đồng dữ liệu" cuối `RPG.md` (giữ `data-muscle` = key mạch). Làm sau đợt UX.

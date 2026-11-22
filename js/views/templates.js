@@ -11,8 +11,13 @@ export async function render(el, [id]) {
   ${list.map((t) => `<div class="card"><div class="row"><b class="grow">${h(t.name)}</b>
       <a class="btn ghost" href="#/templates/${h(t.id)}">Sửa</a><button data-id="${h(t.id)}">Tập</button></div>
       <div class="small muted">${t.items.map((i) => `${h(ex[i.exerciseId]?.name || '?')} ${i.sets}×${i.reps}`).join(' · ')}</div></div>`).join('')
-    || '<p class="muted">Chưa có giáo án nào.</p>'}
-  <a class="btn primary wide" href="#/templates/new">+ Tạo giáo án</a>`;
+    || `<section class="card empty-state">
+      <span class="tile-icon empty-illustration is-template"><svg aria-hidden="true"><use href="#i-layers"/></svg></span>
+      <h2>Chưa có giáo án</h2>
+      <p class="muted">Tạo giáo án để lưu bài tập và số set cho các buổi sau.</p>
+      <a class="btn primary" href="#/templates/new">+ Tạo giáo án</a>
+    </section>`}
+  ${list.length ? '<a class="btn primary wide" href="#/templates/new">+ Tạo giáo án</a>' : ''}`;
   el.onclick = (ev) => {
     const b = ev.target.closest('button[data-id]');
     if (b) startWorkout({ template: list.find((t) => t.id === b.dataset.id) });

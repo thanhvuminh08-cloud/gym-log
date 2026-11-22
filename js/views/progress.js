@@ -27,7 +27,14 @@ export async function render(el, [tab, exId] = []) {
   let seen; // mốc "đã xem huy chương", đọc 1 lần mỗi lần vào trang để đổi tab qua lại không mất dấu "mới"
   const draw = async () => {
     let body = '';
-    if (state.tab === 'overview') {
+    if (state.tab === 'overview' && !done.length) {
+      body = `<section class="card empty-state">
+        <span class="tile-icon empty-illustration"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
+        <h2>Chưa có buổi tập để theo dõi</h2>
+        <p class="muted">Hoàn thành buổi đầu tiên để xem ngày tập và khối lượng theo tuần.</p>
+        <a class="btn primary" href="#/">Về Hôm nay</a>
+      </section>`;
+    } else if (state.tab === 'overview') {
       const ys = years(done), lo = Math.min(...ys), hi = Math.max(...ys);
       const g = yearGrid(done, ex, state.year);
       const wv = weeklyVolume(done, ex, 12);
@@ -58,7 +65,7 @@ export async function render(el, [tab, exId] = []) {
         </section></div>`;
     } else if (state.tab === 'ex') {
       if (!used.length) body = `<section class="card empty-state">
-        <span class="tile-icon"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
+        <span class="tile-icon empty-illustration"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
         <h2>Chưa có dữ liệu bài tập</h2>
         <p class="muted">Hoàn thành buổi tập để xem tiến độ theo từng bài.</p>
       </section>`;
@@ -86,7 +93,7 @@ export async function render(el, [tab, exId] = []) {
       const fresh = m.recent.filter((r) => r.end > seen), isNew = (r) => (fresh.includes(r) ? ' data-new' : '');
       const newTier = (t) => (fresh.some((r) => r.tier === t) ? ' data-new' : '');
       body = !m.compared && !m.milestones.length ? `<section class="card empty-state">
-        <span class="tile-icon"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
+        <span class="tile-icon empty-illustration is-medal"><svg aria-hidden="true"><use href="#i-medal"/></svg></span>
         <h2>Chưa có huy chương</h2>
         <p class="muted">Tập lại một bài và vượt lần trước để nhận huy chương đầu tiên.</p>
       </section>` : `<div class="stats medals">
