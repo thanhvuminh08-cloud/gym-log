@@ -69,6 +69,25 @@ label.row { padding: 6px 0; }
 .tier[data-tier="bronze"] { --tier-text: #ffc9a5; --tier-line: #b87956; --tier-bg: #33241f; }
 .tier[data-tier="first"] { --tier-text: #b5c9e1; --tier-line: #617c9d; --tier-bg: #1e2936; }
 
+/* Huy chương */
+.stats.medals .tier[data-tier] {
+  margin: 0;
+  padding: 12px 6px;
+  border: 1px solid var(--tier-line);
+  border-block-start-width: 3px;
+  border-radius: var(--r);
+}
+.stats.medals b { font-size: clamp(1.55rem, 5vw, 2rem); line-height: 1.2; }
+.stats.medals small { color: inherit; }
+.stats.streaks:has(.overload) { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.stats.streaks > div { padding: 10px 6px; }
+.stats.streaks small { display: block; line-height: 1.3; }
+.stats.streaks .streak b { color: var(--accent); }
+.card.milestone, a.card.medal-row { gap: 12px; overflow-wrap: anywhere; }
+.card.milestone > b { color: var(--accent); font-variant-numeric: tabular-nums; white-space: nowrap; }
+a.card.medal-row .tier.small { display: table; margin: 4px 0 0; padding: 3px 7px; }
+a.card.medal-row > small { align-self: flex-start; white-space: nowrap; }
+
 /* Khung ứng dụng */
 .icon-library { position: absolute; width: 0; height: 0; overflow: hidden; pointer-events: none; }
 .brand svg, nav svg, .dashboard svg, .tile-icon svg { display: block; width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; flex: none; }

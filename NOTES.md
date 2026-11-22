@@ -9,10 +9,11 @@
 
 ## Giao diện
 - Dùng nền xanh đen, điểm nhấn xanh chanh. Đặt nút bắt đầu hoặc tiếp tục tập ở đầu trang Hôm nay và lưu ảnh tạ trong cache offline.
+- Tab Huy chương dùng màu theo hạng, nhấn xanh chanh cho chuỗi và mức tạ, giữ ba cột thống kê trên điện thoại.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Style tab Huy chương (css/app.css, js/views/progress.js tab `medal`): `.stats.medals .tier[data-tier]` (3 ô vàng/bạc/đồng), `.stats.streaks .streak` (chuỗi), `.card.milestone` (mốc tạ), `a.card.medal-row` (huy chương gần đây, có `.tier.small` bên trong). Không đổi class/data-*.
+- [cho Claude] Tăng `VERSION` trong `sw.js` để thiết bị nhận CSS tab Huy chương mới.
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)
