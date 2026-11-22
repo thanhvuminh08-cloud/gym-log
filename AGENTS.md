@@ -9,6 +9,12 @@ App PWA cá nhân để ghi buổi tập gym. Một người dùng, dữ liệu 
 - Thay đổi nhỏ, tập trung; không refactor ngoài phạm vi yêu cầu.
 - Ghi quyết định/ý tưởng mới vào `NOTES.md` (ngắn gọn) thay vì giải thích dài trong chat.
 
+## Hai agent cùng làm repo này
+Dự án được xây song song bởi **hai AI agent**, người dùng điều phối và chuyển lời giữa hai bên (hai agent không nói chuyện trực tiếp):
+- **Codex (ChatGPT)** — nếu bạn đang đọc file này trong Codex, bạn là bên **giao diện**.
+- **Claude Code (Anthropic)** — đọc file này qua `CLAUDE.md`, là bên **logic**. Claude đã viết nền tảng v1 (dữ liệu, ghi buổi tập, đồng hồ, PR, biểu đồ, sao lưu).
+Thay đổi bạn thấy trong repo mà không phải do bạn làm là của agent kia — **không hoàn tác, không viết lại**; nếu thấy lỗi thì ghi vào "Việc chờ" trong `NOTES.md` hoặc báo người dùng.
+
 ## Phân công (bắt buộc — không giẫm chân nhau)
 | | Codex (giao diện) | Claude Code (logic) |
 |---|---|---|
