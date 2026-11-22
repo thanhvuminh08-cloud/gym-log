@@ -39,6 +39,36 @@ function goal(key, label, n, target) {
         </div>`;
 }
 
+const weekDays = [[1, 'T2'], [2, 'T3'], [3, 'T4'], [4, 'T5'], [5, 'T6'], [6, 'T7'], [0, 'CN']];
+const weekStatus = {
+  done: ['✓', 'Đã tập'], planned: ['•', 'Có lịch'], missed: ['!', 'Lỡ buổi'],
+  rest: ['–', 'Nghỉ'], today: ['•', 'Hôm nay'],
+};
+const reminderTitles = { due: 'Hôm nay có lịch tập', done: 'Đã tập hôm nay', rest: 'Hôm nay nghỉ' };
+
+function scheduleReminder(state, days, template) {
+  return `<section class="card schedule-reminder" data-schedule-today data-state="${state}">
+    <div class="row schedule-heading">
+      <span class="tile-icon">${icon('calendar')}</span>
+      <div class="grow">
+        <h2>${reminderTitles[state]}</h2>
+        ${state !== 'rest' ? `<p class="muted small">${template ? h(template.name) : 'Tập tự do'}</p>` : ''}
+      </div>
+    </div>
+    <ul class="schedule-week" data-week-plan aria-label="Lịch tập tuần này">
+      ${weekDays.map(([day, label], index) => {
+        const status = days[index], [mark, description] = weekStatus[status];
+        return `<li aria-label="${label}, ${description}" title="${description}">
+          <span aria-hidden="true">${label}</span><i data-day="${day}" data-state="${status}" aria-hidden="true">${mark}</i>
+        </li>`;
+      }).join('')}
+    </ul>
+    ${state === 'due' ? `<button type="button" class="primary schedule-start" ${template ? `data-act="tpl" data-id="${h(template.id)}"` : 'data-act="empty"'} disabled>
+      ${template ? 'Tập theo giáo án' : 'Tập tự do'}
+    </button>` : ''}
+  </section>`;
+}
+
 export async function render(el) {
   const [cur, templates, done, exList] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises')]);
   const ex = exMap(exList), top = topLifts(done);
@@ -62,6 +92,13 @@ export async function render(el) {
         ${cur
           ? `<a class="btn primary resume-workout" href="#/workout">${icon('play')}Tiếp tục tập</a>`
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
+      </div>
+    </section>
+    <section class="card schedule-reminder" data-schedule-today>
+      <div class="row schedule-heading">
+        <span class="tile-icon">${icon('calendar')}</span>
+        <div class="grow"><h2>Chưa đặt lịch tập</h2><p class="muted small">Chọn ngày tập để xem lời nhắc ở đây.</p></div>
+        <a class="btn" href="#/settings">Đặt lịch</a>
       </div>
     </section>
     ${remind ? `<a class="card row backup-reminder" href="#/settings">
@@ -124,6 +161,14 @@ export async function render(el) {
           </div>`}
       </section>
     </div>
+    <details class="schedule-preview">
+      <summary>Xem trước lời nhắc lịch tập</summary>
+      <div class="schedule-examples">
+        ${scheduleReminder('due', ['done', 'rest', 'missed', 'rest', 'today', 'planned', 'rest'], { id: 'sample-upper', name: 'Tập thân trên' })}
+        ${scheduleReminder('done', ['done', 'rest', 'missed', 'rest', 'done', 'planned', 'rest'], { id: 'sample-upper', name: 'Tập thân trên' })}
+        ${scheduleReminder('rest', ['done', 'rest', 'missed', 'rest', 'today', 'planned', 'rest'])}
+      </div>
+    </details>
   </div>`;
 
   el.onclick = (ev) => {

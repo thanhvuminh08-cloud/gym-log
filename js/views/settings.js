@@ -3,6 +3,7 @@ import { h, settings, toast, fmtDate } from '../util.js';
 import { lastBackup, markBackup, snapshot, snapshotInfo, undoRestore, errorLog, clearErrors } from '../safety.js';
 
 const LABEL = { workouts: 'buổi tập', templates: 'giáo án', exercises: 'bài tập', body: 'lần cân' };
+const scheduleDays = [[1, 'Thứ hai'], [2, 'Thứ ba'], [3, 'Thứ tư'], [4, 'Thứ năm'], [5, 'Thứ sáu'], [6, 'Thứ bảy'], [0, 'Chủ nhật']];
 
 export async function render(el) {
   const s = settings.get();
@@ -15,6 +16,19 @@ export async function render(el) {
   <section class="card settings-options" aria-labelledby="training-goals">
     <label class="row"><span class="grow">Số buổi mỗi tuần</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(s.weekGoal)}"></label>
     <label class="row"><span class="grow">Số buổi mỗi tháng</span><input class="tiny" type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(s.monthGoal)}"></label>
+  </section>
+  <h2 id="workout-schedule">Lịch tập hằng tuần</h2>
+  <section class="card schedule-settings" data-schedule aria-labelledby="workout-schedule">
+    <p class="muted small">Bản xem trước · Lựa chọn chưa được lưu.</p>
+    ${scheduleDays.map(([day, label]) => `
+      <div class="schedule-option" data-day="${day}">
+        <label><input type="checkbox" data-f="on" ${day === 1 || day === 5 ? 'checked' : ''}> <span>${label}</span></label>
+        <select data-f="tpl" aria-label="Giáo án ${label.toLowerCase()}">
+          <option value="">Tự do</option>
+          <option value="sample-upper" ${day === 1 ? 'selected' : ''}>Tập thân trên</option>
+          <option value="sample-legs" ${day === 5 ? 'selected' : ''}>Tập chân</option>
+        </select>
+      </div>`).join('')}
   </section>
   <h2 id="rest-settings">Đồng hồ nghỉ</h2>
   <section class="card settings-options" aria-labelledby="rest-settings">

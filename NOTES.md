@@ -27,11 +27,12 @@
 - Hôm nay có thẻ nhắc sao lưu riêng. Cài đặt đặt nút hoàn tác cạnh ngày tạo bản dự phòng và trình bày từng lỗi thành một mục có thể xuống dòng.
 - Nền đầu trang chuyển xanh đậm, thẻ kính có viền mảnh, số lớn và biểu đồ có nhãn; màn Tập nhóm ô nhập theo dạng kg × rep @ RPE.
 - Thẻ Mục tiêu tập đánh dấu tuần/tháng đã đạt và dẫn đến nhóm ô số buổi ở đầu trang Cài đặt.
+- Lịch tập có bảy dòng T2–CN trong Cài đặt và thẻ mời đặt lịch cùng bản xem trước ba trạng thái ở Hôm nay.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Codex] Giao diện nhắc lịch tập theo ngày trong tuần (số liệu giả, Claude nối sau). (1) Cài đặt: khối `section[data-schedule]`, 7 hàng T2→CN `[data-day=1..6,0]` (theo `getDay()`), mỗi hàng có `input[type=checkbox][data-f=on]` (ngày tập) + `select[data-f=tpl]` (giáo án, option `value=""` = "Tự do"). (2) Hôm nay, ngay dưới nút bắt đầu: thẻ `.schedule-reminder[data-schedule-today]` có 3 trạng thái `data-state=due|done|rest` (cần tập / đã tập hôm nay / nghỉ), tên giáo án, nút tập dùng lại `button[data-act=tpl][data-id]` hoặc `[data-act=empty]`; dải tuần `[data-week-plan]` 7 ô `i[data-day][data-state=done|planned|missed|rest|today]`. Chưa đặt lịch → thẻ mời đặt lịch, link `#/settings`. (js/views/home.js, js/views/settings.js, css/app.css)
+- [cho Claude] Nối dữ liệu và lưu lịch T2–CN ở `section[data-schedule]` qua `[data-day][data-f]` (trường `data-f` nằm trong từng hàng `data-day`), dùng danh sách giáo án thật và giữ option Tự do. Ở Hôm nay thay `.schedule-preview` bằng lời nhắc thật `[data-schedule-today]` với dải `[data-week-plan]`, bật nút tập thích hợp khi có lịch và chưa có buổi đang tập, giữ thẻ mời khi chưa đặt lịch. Xoá dữ liệu mẫu và bổ sung smoke (js/views/home.js, js/views/settings.js, smoke.html).
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).
