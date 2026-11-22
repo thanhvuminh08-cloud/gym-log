@@ -2,6 +2,7 @@ import { all, get, put, del } from '../db.js';
 import { h, uid, fmtDate, fmtTime, fmtDur, fmtNum, e1rm, exMap, toast } from '../util.js';
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
+import { analyzeWorkout, TIER_LABEL } from '../overload.js';
 
 export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
@@ -26,14 +27,19 @@ export async function render(el, [id]) {
 async function detail(el, id, ex) {
   const w = await get('workouts', id);
   if (!w) { el.innerHTML = '<p>Không tìm thấy buổi tập.</p>'; return; }
+  const ov = analyzeWorkout(w, await finished());
+  const nCmp = ov.filter((o) => !o.first).length, nUp = ov.filter((o) => o.res).length;
+  const tierRow = (o) => o.res ? `<div class="tier small" data-tier="${o.res.tier}">${TIER_LABEL[o.res.tier]} · ${h(o.res.msg)}</div>`
+    : `<div class="tier small muted" data-tier="${o.first ? 'first' : 'none'}">${o.first ? 'Lần đầu tập bài này' : 'Chưa vượt lần trước'}</div>`;
   el.innerHTML = `
   <a href="#/history" class="small">← Lịch sử</a>
   <h1>${h(w.name)}</h1>
   <p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p>
-  <div class="stats"><div><b>${setCount(w)}</b><small>set</small></div><div><b>${fmtNum(volume(w))}</b><small>kg khối lượng</small></div><div><b>${w.entries.length}</b><small>bài</small></div></div>
-  ${w.entries.map((e) => {
+  <div class="stats"><div><b>${setCount(w)}</b><small>set</small></div><div><b>${fmtNum(volume(w))}</b><small>kg khối lượng</small></div><div><b>${w.entries.length}</b><small>bài</small></div>${nCmp ? `<div class="overload"><b>${nUp}/${nCmp}</b><small>bài vượt lần trước</small></div>` : ''}</div>
+  ${w.entries.map((e, ei) => {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));
     return `<section class="card"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>
+      ${tierRow(ov[ei])}
       <div class="small">${e.sets.map((s, i) => `<span class="pill">${i + 1}: ${fmtNum(s.w)}×${s.r}</span>`).join('')}</div></section>`;
   }).join('')}
   ${w.note ? `<section class="card"><b>Ghi chú</b><p>${h(w.note)}</p></section>` : ''}

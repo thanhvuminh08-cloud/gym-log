@@ -3,6 +3,7 @@ import { h, uid, e1rm, toast, settings, exMap, fmtNum } from '../util.js';
 import { lastSets, records, doneSets } from '../stats.js';
 import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
+import { compare, target, TIERS } from '../overload.js';
 
 async function newEntry(exerciseId, nSets, reps, rest) {
   const prev = await lastSets(exerciseId);
@@ -35,6 +36,8 @@ export async function render(el) {
     if (!(id in prev)) { prev[id] = await lastSets(id, w.id); recs[id] = await records(id, w.id); }
   };
   for (const e of w.entries) await loadMeta(e.exerciseId);
+  const result = (e) => compare(e.sets, prev[e.exerciseId], recs[e.exerciseId].e1rm);
+  const shown = new Map(w.entries.map((e) => [e, TIERS[result(e)?.tier] || 0])); // cấp đã cổ vũ, tránh lặp toast
   const save = () => put('workouts', w);
 
   const setRow = (e, ei, s, si) => {
@@ -63,6 +66,7 @@ export async function render(el) {
           <label class="muted small">Nghỉ <input type="number" inputmode="numeric" class="tiny" data-ei="${ei}" data-f="rest" value="${e.rest}">s</label>
           <button class="ghost icon" data-act="up" data-ei="${ei}" ${ei ? '' : 'disabled'}>↑</button>
           <button class="ghost icon danger" data-act="rmEntry" data-ei="${ei}">✕</button></div>
+        ${prev[e.exerciseId].length ? `<div class="target small">${h(target(prev[e.exerciseId]))}</div>` : ''}
         <div class="set head muted small"><span>Set</span><span>Lần trước</span><span>kg</span><span>Rep</span><span></span></div>
         ${e.sets.map((s, si) => setRow(e, ei, s, si)).join('')}
         <div class="row"><button class="ghost grow" data-act="addSet" data-ei="${ei}">+ Thêm set</button>
@@ -117,8 +121,8 @@ export async function render(el) {
       row.outerHTML = setRow(e, ei, s, si);
       if (s.done) {
         timer.start(e.rest);
-        const r = recs[e.exerciseId];
-        if (r.e1rm > 0 && e1rm(s.w, s.r) > r.e1rm) toast(`🏆 PR mới! ~1RM ${fmtNum(e1rm(s.w, s.r))} kg`);
+        const res = result(e), lvl = TIERS[res?.tier] || 0;
+        if (lvl > (shown.get(e) || 0)) { shown.set(e, lvl); toast(res.msg, 3000); }
       }
       return;
     }
@@ -144,6 +148,8 @@ export async function render(el) {
       if (!confirm(`Kết thúc buổi tập?${skipped ? `\n${skipped} set chưa đánh dấu sẽ bị bỏ.` : ''}`)) return;
       Object.assign(w, { entries, end: Date.now() });
       await save(); timer.stop();
+      const up = entries.filter((e) => result(e)).length, cmp = entries.filter((e) => prev[e.exerciseId].length).length;
+      if (cmp) toast(up ? `💪 Vượt lần trước ${up}/${cmp} bài!` : 'Buổi sau cố vượt lần trước nhé 💪', 3500);
       location.hash = '#/history/' + w.id; return;
     }
     await save();
