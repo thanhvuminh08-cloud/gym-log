@@ -9,6 +9,9 @@ import { compare, target, TIERS, RPE } from '../overload.js';
 import { muscleKey } from '../insights.js';
 import { lockedPath, filterByPath } from '../dao.js';
 import { weekPlan } from '../schedule.js';
+import { sfx } from '../sfx.js';
+
+const PHAM_SFX = { gold: 'phamKim', silver: 'phamNgoc', bronze: 'phamDong' };
 
 async function newEntry(exerciseId, nSets, reps, rest) {
   const prev = await lastSets(exerciseId);
@@ -32,7 +35,7 @@ export async function startWorkout({ template, from } = {}) {
   for (const e of olds.kept) entries.push(await newEntry(e.exerciseId, doneSets(e).length, 0, e.rest));
   const dropped = items.dropped.length + olds.dropped.length;
   if (dropped) toast(`Bỏ ${dropped} bài ngoài danh sách bài theo mạch`);
-  const name = template?.name || from?.name || 'Buổi tập ' + new Date().toLocaleDateString('vi-VN');
+  const name = template?.name || from?.name || 'Buổi tập tự do'; // ngày đã hiện cạnh tên ở mọi nơi → không lặp ngày trong tên
   await put('workouts', { id: uid(), name, start: Date.now(), end: null, templateId: template?.id || null, note: '', entries });
   // Bắt đầu từ trang chọn ở #/workout: hash không đổi → tự phát hashchange để vẽ lại.
   if (location.hash === '#/workout') dispatchEvent(new HashChangeEvent('hashchange'));
@@ -196,7 +199,13 @@ export async function render(el) {
         if (lvl > (shown.get(e) || 0)) {
           shown.set(e, lvl); toast(`${term(res.tier)} · ${res.msg}`, 3000);
           celebrate(el.querySelector(`.set[data-ei="${ei}"][data-si="${si}"]`), res.tier);
-        } else tap();
+          sfx(PHAM_SFX[res.tier]);
+        } else {
+          // Set thường vừa lưu: ấn niêm + âm nhẹ, gỡ lớp sau hiệu ứng.
+          const r = el.querySelector(`.set[data-ei="${ei}"][data-si="${si}"]`);
+          r?.classList.add('is-set-sealed'); setTimeout(() => r?.classList.remove('is-set-sealed'), 480);
+          tap(); sfx('setXong');
+        }
       }
       return;
     }
@@ -221,7 +230,7 @@ export async function render(el) {
       const skipped = w.entries.reduce((a, e) => a + e.sets.length, 0) - entries.reduce((a, e) => a + e.sets.length, 0);
       if (!confirm(`${term('finish')} và lưu buổi tập?${skipped ? `\n${skipped} set chưa đánh dấu sẽ bị bỏ.` : ''}`)) return;
       Object.assign(w, { entries, end: Date.now() });
-      await save(); timer.stop();
+      await save(); timer.stop(); sfx('xuatQuan');
       const up = entries.filter((e) => result(e)).length, cmp = entries.filter((e) => prev[e.exerciseId].length).length;
       if (cmp) toast(up ? `💪 Vượt lần trước ${up}/${cmp} bài!` : 'Buổi sau cố vượt lần trước nhé 💪', 3500);
       location.hash = '#/ky/' + w.id;

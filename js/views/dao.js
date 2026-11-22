@@ -267,8 +267,8 @@ export async function render(el, [part] = []) {
   const show = () => { el.innerHTML = daoView(state(step, data)); };
   show();
   if (step === 6) {
-    if (matchMedia('(prefers-reduced-motion: reduce)').matches) sfx('dotPha');
-    else el.querySelector('.dao-altar .cultivation-seal').addEventListener('animationend', () => sfx('dotPha'), { once: true });
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) sfx('nhapMon');
+    else el.querySelector('.dao-altar .cultivation-seal').addEventListener('animationend', () => sfx('nhapMon'), { once: true });
   }
   const goStep = (n) => { location.hash = `#/nhap-mon/${n}`; };
   el.onchange = (ev) => {

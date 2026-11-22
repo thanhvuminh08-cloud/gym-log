@@ -17,12 +17,26 @@ function start(a, retry) {
   p?.catch?.((e) => { if (e?.name === 'NotAllowedError' && retry) retryOnTouch(() => start(a, false)); });
 }
 
-/** Âm hiệu ứng một lần (dotPha, loiKiep, nhiemVu). */
-export function sfx(name) {
-  if (!settings.get().sfx || !SRC[name]) return;
+// Âm nghi lễ (Đột phá, Lôi kiếp…) ưu tiên: đang phát thì âm nhỏ bỏ qua; bắt đầu thì cắt âm nhỏ đang phát.
+const MAJOR = new Set(['loiKiep', 'dotPha', 'thoiThe', 'xacChung', 'nhapMon']);
+const playing = (n) => { const a = cache[n]; return a && !a.paused && !a.ended; };
+/** Nhật ký 20 lần phát gần nhất (smoke kiểm điểm gọi, không phụ thuộc trình duyệt có phát được hay không). */
+export const played = [];
+
+/**
+ * Âm hiệu ứng một lần. Tắt theo settings.sfx, trừ `force` (hetGio theo công tắc âm báo Điều tức).
+ * Trả về true nếu đã gửi lệnh phát.
+ */
+export function sfx(name, { force = false } = {}) {
+  if ((!force && !settings.get().sfx) || !SRC[name]) return false;
+  const major = MAJOR.has(name);
+  if (!major && [...MAJOR].some(playing)) return false;
+  if (major) for (const n of Object.keys(cache)) if (n !== 'dongPhu' && !MAJOR.has(n) && playing(n)) cache[n].pause();
+  played.push(name); if (played.length > 20) played.shift();
   const a = audio(name);
   a.currentTime = 0;
   start(a, true);
+  return true;
 }
 
 let musicOn = false;

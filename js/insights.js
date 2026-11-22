@@ -35,7 +35,7 @@ function setsByMuscle(w, ex) {
 /**
  * Lưới thói quen 1 năm: 12 cột tháng × 31 hàng ngày.
  * Trả về {year, months:[[{day, t, muscle|null, future}|null ×31] ×12], counts:{muscle: số ngày}, total}.
- * Nhóm cơ của ngày = nhóm có nhiều set nhất trong các buổi ngày đó.
+ * Nhóm cơ của ngày (màu ô) = nhóm có nhiều set nhất; counts đếm mọi nhóm có tập trong ngày.
  */
 export function yearGrid(workouts, ex, year = new Date().getFullYear(), now = Date.now()) {
   const byDay = {};
@@ -53,7 +53,9 @@ export function yearGrid(workouts, ex, year = new Date().getFullYear(), now = Da
     let muscle = null;
     if (sets) {
       muscle = Object.entries(sets).sort((a, b) => b[1] - a[1])[0]?.[0] || 'Khác';
-      counts[muscle] = (counts[muscle] || 0) + 1;
+      // Số ngày đếm mọi nhóm cơ có tập trong ngày (màu ô vẫn theo nhóm nhiều set nhất).
+      for (const mu of Object.keys(sets)) counts[mu] = (counts[mu] || 0) + 1;
+      if (!Object.keys(sets).length) counts[muscle] = (counts[muscle] || 0) + 1;
       total++;
     }
     return { day: i + 1, t: d.getTime(), muscle, future: d.getTime() > now };

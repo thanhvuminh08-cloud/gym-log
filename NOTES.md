@@ -28,6 +28,8 @@
 - Động phủ gọn (22/11): thẻ lịch kiêm nút Bế quan/Tiếp tục, dải Tu vi, ba nhiệm vụ tuần và một hàng số. Thất mạch/Luyện thể/Bình cảnh ở Tàng thư › Thất mạch, Sức mạnh ở Tàng thư › Tổng quan. Nút Tiếp tục nằm trong thẻ đầu trang.
 - Dễ dùng (22/11): người dùng chọn "giữ tu tiên, thêm chú" — tên tu tiên luôn kèm chữ thường (`hint`), gom 12 hệ tiến độ còn 4, một việc một tên, mục Bế quan có trang bắt đầu, không ép Nhập môn. Kế hoạch: VISION.md › Dễ dùng.
 - Dễ dùng bước 2 (Codex): chú ngắn luôn hiện, Từ điển trong Tàng thư › Thư viện, Khí huyết chuyển sang Thất mạch, đổi nhãn Lịch tập/Mục tiêu tuần/Bài theo mạch và dựng mẫu chọn cách bắt đầu buổi tập.
+- O5 + O4 bỏ gọn (Claude, 23/11): bỏ Mục tiêu tháng (`monthGoal`) và nhiệm vụ "đủ buổi" (còn 2 nhiệm vụ, ô Buổi tuần lấy số ngày theo lịch nếu có); nhiệm vụ chỉ gợi ý bài đã tập hoặc trong `dao.path`; nhắc sao lưu khi ≥3 buổi (`BACKUP_MIN`); lưới năm đếm mọi nhóm cơ trong ngày; set tốt nhất hiện kg×rep; tên buổi mặc định "Buổi tập tự do"; Lịch tập chưa có giáo án → 1 dòng. Thạch bi (Công đức bạ + tổng kết buổi) và Hư cảnh (chỉ khi có lời khai) đã đúng, giữ.
+- Âm Hồn tu tiên (Claude, 23/11): `sfx()` ưu tiên âm nghi lễ (`MAJOR`: loiKiep/dotPha/thoiThe/xacChung/nhapMon) — đang phát thì âm nhỏ bỏ qua, bắt đầu thì cắt âm nhỏ; `played` ghi 20 lần phát cho smoke. setXong + `.is-set-sealed` 480 ms cho set thường, pham* cho phẩm mới, hetGio theo công tắc âm báo (thay bíp), xuatQuan khi lưu buổi, thoiThe/xacChung theo loại Đột phá, nhapMon ở ấn triện.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -62,8 +64,8 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
+- [cho Codex] O4: gộp Khí huyết + Căn cơ thành một ô "Trạng thái" chỉ ở Thất mạch (js/views/hero.js); thẻ lần đầu ở Động phủ đã bỏ dòng chú `start` — xem lại bố cục.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Claude] Hồn tu tiên: gọi `sfx('setXong')` và gắn `.is-set-sealed` chỉ cho set thường vừa lưu (gỡ sau ~480 ms), dùng `phamKim`/`phamNgoc`/`phamDong` cho phẩm mới, `hetGio` ở Điều tức (giữ công tắc âm báo), `xuatQuan` khi lưu buổi và `nhapMon`/`thoiThe`/`xacChung` ở nghi lễ tương ứng. Giữ tuỳ chọn âm/rung, không phát chồng với Đột phá hoặc Lôi kiếp, thêm smoke cho điểm gọi mới.
 
 
 ## Ý tưởng sau khi dùng thực tế

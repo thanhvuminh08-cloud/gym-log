@@ -22,7 +22,7 @@ function trainingCard(cur, plan, template, first) {
         ${plan.state === 'none' ? '<a href="#/cong-phap">Đặt lịch</a>' : ''}</div>
       ${cur ? `<h2>${h(cur.name)}</h2>` : scheduled ? `<h2>${h(template.name)}</h2>` : first ? '<h2>Ghi buổi tập đầu tiên</h2>' : ''}
       ${plan.state === 'due' && !cur && !template ? '<p>Tập tự do</p>' : ''}
-      ${!cur && plan.state !== 'due' ? `<p class="gloss">${gloss('start')}</p>` : ''}
+      ${!cur && !first && plan.state !== 'due' ? `<p class="gloss">${gloss('start')}</p>` : ''}
       <div class="row wrap training-actions">
         ${cur ? `<a class="btn primary" href="#/workout">${icon('play')}Tiếp tục buổi tập</a>` :
           scheduled ? `<button type="button" class="primary" data-act="tpl" data-id="${h(template.id)}">${icon('play')}${termLabel('start')}</button>
@@ -39,7 +39,7 @@ export async function render(el) {
   const { schedule, weekGoal } = settings.get(), plan = weekPlan(schedule, done, now);
   const template = templates.find((t) => t.id === plan.templateId);
   const { week } = sessionCounts(done, now), { streak } = medals(done, now);
-  const target = Math.max(1, Math.round(weekGoal) || 1);
+  const target = Object.keys(schedule || {}).length || Math.max(1, Math.round(weekGoal) || 1); // có lịch → số ngày theo lịch
   const last = lastBackup(), remind = backupDue(last, done);
   const date = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
 

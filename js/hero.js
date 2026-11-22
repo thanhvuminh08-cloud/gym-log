@@ -369,28 +369,25 @@ export function breakthroughs(seen, profile) {
 }
 
 /**
- * Nhiệm vụ tuần (T2–CN chứa `now`), 3 cái sinh từ dữ liệu, không lưu gì:
- *  schedule — tập đủ số ngày theo lịch (không có lịch → weekGoal);
+ * Nhiệm vụ tuần (T2–CN chứa `now`), 2 cái sinh từ dữ liệu, không lưu gì (số buổi tuần đã có ô riêng ở Động phủ):
  *  overload — vượt lần trước ở một bài của mạch yếu nhất (p thấp nhất, trừ Bụng);
  *  canCo    — tập ≥1 buổi có mạch Căn cơ thấp nhất (chưa có Căn cơ → mạch lâu chưa tập nhất), khác mạch nhiệm vụ 2.
  * Trả về {quests:[{id, title, detail, meridian, goal, done, complete}], done, total}.
  */
-export function quests({ workouts = [], exercises = [], profile, base = null, schedule = {}, weekGoal = 3, now = Date.now() } = {}) {
+export function quests({ workouts = [], exercises = [], profile, base = null, dao = null, now = Date.now() } = {}) {
   const exMap = Object.fromEntries(exercises.map((e) => [e.id, e]));
   const done = workouts.filter((w) => w.end && w.start <= now).sort((a, b) => a.start - b.start);
   const wk = weekKey(now), week = done.filter((w) => weekKey(w.start) === wk);
   const keyOf = (id) => meridianOf(exMap[id]);
   const trains = (w, key) => w.entries.some((e) => keyOf(e.exerciseId) === key && doneSets(e).length);
-  const days = new Set(week.filter((w) => w.entries.some((e) => doneSets(e).length)).map((w) => new Date(w.start).toDateString()));
   const list = [];
-
-  const planned = Object.keys(schedule || {}).length, goal1 = planned || Math.max(1, weekGoal || 0);
-  list.push({ id: 'schedule', title: `Tập đủ ${goal1} buổi tuần này`, detail: planned ? 'Theo lịch tập' : 'Theo mục tiêu tuần', meridian: null, goal: goal1, done: Math.min(goal1, days.size) });
+  // Chỉ gợi ý bài người dùng đã tập hoặc đã chọn trong Công pháp — không tự chỉ định bài từ thư viện.
+  const known = new Set([...done.flatMap((w) => w.entries.filter((e) => doneSets(e).length).map((e) => e.exerciseId)), ...Object.values(dao?.path || {}).flat()]);
 
   // Chọn mạch theo hồ sơ đầu tuần (base) để nhiệm vụ không đổi giữa tuần khi số liệu thay đổi.
   const body = (base || profile).meridians.filter((m) => m.key !== 'core');
   const weak = [...body].sort((a, b) => a.p - b.p || weight(b.key) - weight(a.key))[0];
-  const hint = weak.next?.name || weak.best?.name || exercises.filter((e) => !e.custom && liftOf(e)?.m === weak.key).sort((a, b) => LIFTS.indexOf(liftOf(a)) - LIFTS.indexOf(liftOf(b)))[0]?.name;
+  const hint = (known.has(weak.next?.exerciseId) && weak.next.name) || weak.best?.name || null;
   // Còn lời khai chưa xác chứng → nhiệm vụ Xác chứng (bài nặng ký nhất của mạch có trọng số lớn nhất).
   const P0 = base || profile;
   const claim = (P0.claims || []).filter((c) => !c.verified && c.target)

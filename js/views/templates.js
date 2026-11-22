@@ -22,7 +22,7 @@ export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
   if (id) return edit(el, id, ex);
   const list = (await all('templates')).sort((a, b) => a.name.localeCompare(b.name));
-  const { dao, schedule, weekGoal, monthGoal } = settings.get(), plan = cleanSchedule(schedule);
+  const { dao, schedule, weekGoal } = settings.get(), plan = cleanSchedule(schedule);
   const { label, icon, hint } = NAV.find((item) => item.key === 'cong-phap');
   el.innerHTML = `<header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${hintLabel(label, hint)}</h1></header>
   <section class="card plan-overview">
@@ -31,7 +31,7 @@ export async function render(el, [id]) {
   </section>
   <section class="card plan-overview plan-schedule" aria-labelledby="plan-schedule-title">
     <h2 id="plan-schedule-title">Lịch tập</h2>
-    <p class="muted small">Chọn ngày tập để xem lời nhắc ở Động phủ.</p>
+    ${list.length ? `<p class="muted small">Chọn ngày tập để xem lời nhắc ở Động phủ.</p>
     <ul class="plan-days" data-schedule>
       ${days.map(([day, name]) => `
       <li class="plan-day" data-day="${day}">
@@ -41,13 +41,12 @@ export async function render(el, [id]) {
           ${list.map((t) => `<option value="${h(t.id)}" ${plan[day] === t.id ? 'selected' : ''}>${h(t.name)}</option>`).join('')}
         </select>
       </li>`).join('')}
-    </ul>
+    </ul>` : `<p class="muted small" data-schedule-empty><a href="#/cong-phap/new">Tạo giáo án</a> hoặc <a href="#/nhap-mon">${termLabel('nhapMon')}</a> để đặt lịch.</p>`}
   </section>
   <section class="card plan-overview plan-goals" data-goals aria-labelledby="plan-goals-title">
     <h2 id="plan-goals-title">Mục tiêu tập</h2>
     <div class="plan-goal-fields">
       <label><span>Mục tiêu tuần <small>(buổi)</small></span><input type="number" inputmode="numeric" min="1" data-k="weekGoal" value="${h(weekGoal)}"></label>
-      <label><span>Mục tiêu tháng <small>(buổi)</small></span><input type="number" inputmode="numeric" min="1" data-k="monthGoal" value="${h(monthGoal)}"></label>
     </div>
   </section>
   <h2>${termLabel('giaoAn')}</h2>
@@ -65,7 +64,7 @@ export async function render(el, [id]) {
     const b = ev.target.closest('button[data-id]');
     if (b) startWorkout({ template: list.find((t) => t.id === b.dataset.id) });
   };
-  // Lịch bế quan (settings.schedule) và mục tiêu buổi (weekGoal/monthGoal) — chuyển từ Cài đặt sang đây.
+  // Lịch bế quan (settings.schedule) và mục tiêu buổi tuần (weekGoal) — chuyển từ Cài đặt sang đây.
   el.onchange = (ev) => {
     const t = ev.target, row = t.closest('[data-schedule] [data-day]');
     if (row) {
@@ -77,7 +76,7 @@ export async function render(el, [id]) {
       toast('Đã lưu lịch tập');
       return render(el, []); // vẽ lại lưới tuần
     }
-    if (t.dataset.k === 'weekGoal' || t.dataset.k === 'monthGoal') {
+    if (t.dataset.k === 'weekGoal') {
       const n = Math.max(1, Math.round(Number(t.value)) || 1);
       settings.set({ [t.dataset.k]: n });
       t.value = n;

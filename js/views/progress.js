@@ -85,7 +85,7 @@ export async function render(el, [tab, exId] = []) {
           <div class="lift-top"><b><span data-strength-total-value data-count="${sbd.max}">${fmtNum(sbd.max)}</span><small> kg</small></b>${sbd.delta ? `<span class="trend ${sbd.delta > 0 ? 'up' : 'down'}">${sbd.delta > 0 ? '↑' : '↓'} ${fmtNum(Math.abs(sbd.delta))}</span>` : ''}</div>
           <p class="muted small">Tổng ~1RM ${main.length ? main.map((id) => `${h(ex[id].name)} ${fmtNum(sbd.parts[id] || 0)}`).join(' · ') : 'Squat, Bench Press, Deadlift'}${sbd.delta ? ' · so với 30 ngày trước' : ''}</p>
           <div data-strength-total-chart>
-            ${sbd.series.length > 1 ? lineChart(sbd.series.slice(-40), { unit: ' kg', area: true, labels: true, head: false }) : `<p class="muted small">Tập Squat, Bench Press hoặc Deadlift để xem biểu đồ.</p>`}
+            ${sbd.series.length > 1 ? lineChart(sbd.series.slice(-40), { unit: ' kg', area: true, labels: true, head: false }) : `<p class="muted small">${sbd.series.length ? 'Cần ít nhất 2 buổi có Squat, Bench Press hoặc Deadlift để vẽ biểu đồ.' : 'Tập Squat, Bench Press hoặc Deadlift để xem biểu đồ.'}</p>`}
           </div>
         </section>
         <section class="card volume-card">
@@ -111,7 +111,7 @@ export async function render(el, [tab, exId] = []) {
         <section class="card">
           <div class="chart-head"><b>${pts.length ? fmtNum(pts.at(-1).v) : '–'} kg</b>${diff ? `<span class="trend ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '↑' : '↓'} ${fmtNum(Math.abs(diff))}</span>` : ''}<span class="muted"> ${pts.length} buổi${state.range ? ` · ${RANGES[state.range]}` : ''}</span></div>
           ${lineChart(pts, { unit: ' kg', area: true, labels: true, head: false })}</section>
-        <div class="stats"><div><b data-count="${r.e1rm}">${fmtNum(r.e1rm)}</b><small>~1RM tốt nhất</small></div><div><b data-count="${r.w}">${fmtNum(r.w)}</b><small>tạ nặng nhất</small></div><div><b data-count="${r.vol}">${fmtNum(r.vol)}</b><small>set tốt nhất (kg×rep)</small></div></div>`;
+        <div class="stats"><div><b data-count="${r.e1rm}">${fmtNum(r.e1rm)}</b><small>~1RM tốt nhất</small></div><div><b data-count="${r.w}">${fmtNum(r.w)}</b><small>tạ nặng nhất</small></div><div><b>${r.top ? `${fmtNum(r.top.w)}×${fmtNum(r.top.r)}` : '–'}</b><small>set tốt nhất (kg×rep)</small></div></div>`;
       }
     } else if (state.tab === 'medal') {
       const m = medals(done);

@@ -1,22 +1,11 @@
 import { settings } from './util.js';
 import { hint, term } from './lore.js';
+import { sfx } from './sfx.js';
 
 // Đồng hồ nghỉ: thanh cố định phía trên nav. Lưu thời điểm kết thúc để sống qua việc chuyển màn hình.
 // gym.restStart giữ mốc bắt đầu để vòng nghỉ tính đúng tỉ lệ sau ±15 và khi mở lại app.
 const KEY = 'gym.restEnd', START = 'gym.restStart', WARN_S = 10;
-let tick, bar, ctx;
-
-function beep() {
-  try {
-    ctx ||= new (window.AudioContext || window.webkitAudioContext)();
-    [0, 0.25, 0.5].forEach((d) => {
-      const o = ctx.createOscillator(), g = ctx.createGain();
-      o.frequency.value = 880; g.gain.value = 0.2;
-      o.connect(g).connect(ctx.destination);
-      o.start(ctx.currentTime + d); o.stop(ctx.currentTime + d + 0.15);
-    });
-  } catch {}
-}
+let tick, bar;
 
 function getEnd() { return Number(localStorage.getItem(KEY) || 0); }
 function setEnd(v) { v ? localStorage.setItem(KEY, v) : (localStorage.removeItem(KEY), localStorage.removeItem(START)); }
@@ -59,7 +48,7 @@ function update() {
   const left = Math.round((getEnd() - Date.now()) / 1000);
   if (left <= 0) {
     const s = settings.get();
-    if (s.sound) beep();
+    if (s.sound) sfx('hetGio', { force: true }); // công tắc âm báo Điều tức (không theo cài đặt âm hiệu ứng)
     if (s.vibrate && navigator.vibrate) navigator.vibrate([300, 150, 300]);
     return stop();
   }

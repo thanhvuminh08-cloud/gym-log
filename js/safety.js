@@ -5,16 +5,17 @@ import { DB_NAME, exportAll, importAll } from './db.js';
 const key = (k) => (DB_NAME === 'gym' ? k : `${k}.${DB_NAME}`);
 export const BACKUP_KEY = key('gym.lastBackup');
 const SNAP = key('gym.preRestore'), ERR = key('gym.errors');
-export const BACKUP_DAYS = 7;
+export const BACKUP_DAYS = 7, BACKUP_MIN = 3;
 
 const read = (k, d) => { try { return JSON.parse(localStorage.getItem(k)) ?? d; } catch { return d; } };
 
 export const lastBackup = () => Number(localStorage.getItem(BACKUP_KEY) || 0);
 export const markBackup = (t = Date.now()) => localStorage.setItem(BACKUP_KEY, t);
 
-/** Cần nhắc sao lưu? Có buổi tập xong mới hơn lần sao lưu cuối và đã quá BACKUP_DAYS ngày. */
+/** Cần nhắc sao lưu? Đã có ≥ BACKUP_MIN buổi xong, có buổi mới hơn lần sao lưu cuối và đã quá BACKUP_DAYS ngày. */
 export function backupDue(last, workouts, now = Date.now()) {
-  const newest = Math.max(0, ...workouts.filter((w) => w.end).map((w) => w.end));
+  const ends = workouts.filter((w) => w.end).map((w) => w.end), newest = Math.max(0, ...ends);
+  if (ends.length < BACKUP_MIN) return false;
   return newest > last && now - last > BACKUP_DAYS * 864e5;
 }
 

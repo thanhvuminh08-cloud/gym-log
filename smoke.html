@@ -62,6 +62,11 @@ try {
     return !!(await until(() => $$('.set:not(.head)').length >= 3));
   });
   await step('Ghi set + đồng hồ nghỉ chạy', async () => { fillSets([60, 65]); await check(0); await check(1); return $$('.set.done').length === 2 && !!$('.rest-bar.show'); });
+  await step('Set thường vừa lưu: .is-set-sealed (gỡ sau ~480 ms) + âm setXong; tên buổi không lặp ngày', async () => {
+    const sealed = !!$('.set.is-set-sealed'); await wait(500);
+    const { played } = await w.eval(`import('./js/sfx.js')`);
+    return sealed && !$('.set.is-set-sealed') && played.filter((n) => n === 'setXong').length === 2 && $('[data-f=name]').value === 'Buổi tập tự do';
+  });
   await step('Vòng nghỉ: --rest-progress, ±15, mở lại app, cảnh báo ≤10s', async () => {
     const t = await w.eval("import('./js/timer.js')"), ls = w.localStorage, bar = $('.rest-bar');
     const P = () => Number(bar.style.getPropertyValue('--rest-progress')), warn = () => bar.dataset.warn ?? '-';
@@ -102,6 +107,14 @@ try {
   await step('Toast cổ vũ khi vượt', () => $$('.toast').some((t) => t.textContent.includes('PR mới')));
   await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/ky/'))); });
   await step('Tổng kết: huy chương vàng + 1/1 bài vượt', async () => !!(await until(() => $('.tier[data-tier=gold]'))) && $('.overload')?.textContent.includes('1/1'));
+  await step('Âm: phẩm mới phamKim (không kèm setXong), Xuất quan khi lưu buổi, Điều tức hết giờ hetGio', async () => {
+    const S = await w.eval(`import('./js/sfx.js')`), p = S.played.join(',');
+    const pham = /phamKim,xuatQuan$/.test(p.replace(/,(dotPha|loiKiep|thoiThe|xacChung|nhiemVu)/g, ''));
+    const T = await w.eval(`import('./js/timer.js')`); T.start(1); await wait(1600);
+    const end = S.played.at(-1) === 'hetGio';
+    if (!pham || !end) lines.push(`  ${S.played.join(',')}`);
+    return pham && end && S.played.filter((n) => n === 'xuatQuan').length === 2;
+  });
   await step('Bế quan chưa có buổi: giáo án thật + lặp lại buổi gần nhất; Động phủ hết thẻ lần đầu', async () => {
     await go('#/'); await until(() => $('[data-schedule-today]'));
     const noFirst = !$('[data-first-run]');
@@ -181,7 +194,7 @@ try {
     const g = yearGrid(ws, ex, 2026, t0 + 41 * D), t = topLifts(ws, 3, t0 + 41 * D), v = weeklyVolume(ws, ex, 8, t0 + 41 * D);
     const got = [g.total, g.months[0][4].muscle, g.counts['Chân'], g.counts['Ngực'], t.lifts.map((l) => l.exerciseId).join(''), t.lifts[0].max, t.lifts[1].delta, t.total.max, t.total.delta,
       v.length, v[0].byMuscle['Ngực'] || 0, v.at(-1).total, new Date(v.at(-1).t).getDay()].join(',');
-    const want = [3, 'Chân', 2, 1, 'bs', 70, 10, 180, 10, 8, 0, 285, 1].join(',');
+    const want = [3, 'Chân', 2, 3, 'bs', 70, 10, 180, 10, 8, 0, 285, 1].join(',');
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
@@ -339,9 +352,9 @@ try {
     const ev = H.breakthroughs(low, p), q = H.quests({ workouts, exercises, profile: p, schedule: { 1: '' }, weekGoal: 2, now });
     const got2 = [H.breakthroughs(null, p).length, H.breakthroughs(snap, p).length, ev.map((e) => `${e.key}:${e.realm}:${e.tribulation}`).join('/'), ev[0].from, ev[0].to, ev[0].real,
       pm.legs.next.alt.r, pm.legs.next.alt.kg, p.challenge.key, p.challenge.pct,
-      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), `${q.quests[1].kind}:${q.quests[1].title}`].join(',');
+      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), `${q.quests[0].kind}:${q.quests[0].title}:${q.quests[0].detail}`].join(',');
     const want2 = [0, 0, 'legs:true:false/back:false:false', 'Bế mạch', 'Luyện Bì · Đại thành', 'Squat 1,67×BW · ~1RM 116,7 kg',
-      5, 32, 'biceps', 99, 'schedule:null:1/1/overload:triceps:0/1/canCo:chest:0/1', 1, '2/0/0', 'open:Khai mạch Tay sau'].join(',');
+      5, 32, 'biceps', 99, 'overload:triceps:0/1/canCo:chest:0/1', 0, '0/0', 'open:Khai mạch Tay sau:Còn thiếu 2 bài'].join(',');
     if (got2 !== want2) lines.push(`  ${got2}\n  ≠ ${want2}`);
     // Phàm nhân không hiện kỳ → lên kỳ bên trong Phàm nhân không phải đột phá; lên Luyện Khí thì có.
     const fake = (i, ph) => ({ tuvi: { realm: { i }, phase: { i: ph }, label: i ? `${H.REALMS[i]} · ${H.PHASES[ph]}` : 'Phàm nhân' }, linhKhi: { level: 2 }, meridians: [] });
@@ -397,7 +410,7 @@ try {
     const p0 = H.hero({ ...ctx, now: now + 1 });
     const sh = p0.meridians.find((m) => m.key === 'shoulders'), dsp = sh.lifts.find((l) => l.name === 'Dumbbell Shoulder Press');
     const core = p0.meridians.find((m) => m.key === 'core');
-    const q0 = H.quests({ workouts: [], exercises: ex, profile: p0, now: now + 1 }).quests[1];
+    const q0 = H.quests({ workouts: [], exercises: ex, profile: p0, now: now + 1 }).quests[0];
     // Tập thật: DB Shoulder Press 24 kg × 8 ≈ 92% mức khai 26 × 8 → xác chứng.
     const real = { id: 'r', start: now + D, end: now + D + 1, entries: [{ exerciseId: id('Dumbbell Shoulder Press'), sets: [{ w: 24, r: 8, done: true }] }] };
     const p1 = H.hero({ ...ctx, workouts: [real], now: now + 2 * D });
@@ -440,11 +453,19 @@ try {
   });
   // Import trong iframe → cùng module với app, DB_NAME = gym-smoke.
   const mod = (p) => w.eval(`import('./js/${p}')`);
-  await step('Hôm nay nhắc sao lưu khi chưa sao lưu', async () => { await go('#/'); return !!(await until(() => $('.backup-reminder'))); });
+  await step('Hôm nay nhắc sao lưu khi chưa sao lưu (chỉ khi đã ≥3 buổi)', async () => {
+    const db = await mod('db.js'), n = (await db.all('workouts')).filter((x) => x.end).length;
+    const pad = Array.from({ length: Math.max(0, 3 - n) }, (_, i) => ({ id: 'bk' + i, name: 'pad', start: 1e12 + i, end: 1e12 + i + 1, note: '', entries: [] }));
+    for (const x of pad) await db.put('workouts', x);
+    await go('#/ky'); await go('#/'); const ok = !!(await until(() => $('.backup-reminder')));
+    for (const x of pad) await db.del('workouts', x.id);
+    return ok;
+  });
   await step('Luật nhắc sao lưu', async () => {
     const { backupDue } = await mod('safety.js'), D = 864e5, now = 100 * D, W = (end) => ({ end });
-    return backupDue(0, [W(now - D)], now) && !backupDue(0, [], now) && !backupDue(0, [{ end: null }], now)
-      && !backupDue(now - 3 * D, [W(now - D)], now) && backupDue(now - 8 * D, [W(now - D)], now) && !backupDue(now - 8 * D, [W(now - 9 * D)], now);
+    const old = [W(now - 20 * D), W(now - 19 * D)]; // + 1 buổi = đủ 3 buổi mới nhắc
+    return backupDue(0, [...old, W(now - D)], now) && !backupDue(0, [W(now - D)], now) && !backupDue(0, [...old, { end: null }], now)
+      && !backupDue(now - 3 * D, [...old, W(now - D)], now) && backupDue(now - 8 * D, [...old, W(now - D)], now) && !backupDue(now - 8 * D, [W(now - 20 * D), W(now - 10 * D), W(now - 9 * D)], now);
   });
   await step('Khôi phục: từ chối file hỏng, ghi nguyên khối, hoàn tác được', async () => {
     const db = await mod('db.js'), sf = await mod('safety.js');
@@ -492,7 +513,7 @@ try {
     await go('#/ky'); await go('#/'); // Động phủ (bản gọn) vẫn phải bật Đột phá + hiện Nhiệm vụ tuần
     const dlg = await until(() => $('dialog.breakthrough-modal[open]'));
     const quests = $$('[data-quests] [data-quest]').length, sample = !!$('.cultivation-demo, .cultivation-data-badge');
-    if (!dlg || quests !== 3 || sample) throw new Error(`modal ${!!dlg}, ${quests} nhiệm vụ, mẫu ${sample}`);
+    if (!dlg || quests !== 2 || sample) throw new Error(`modal ${!!dlg}, ${quests} nhiệm vụ, mẫu ${sample}`);
     dlg.querySelector('[data-act=closeBreak]').click();
     const gone = await until(() => !$('dialog.breakthrough-modal[open]'), 5000);
     const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));

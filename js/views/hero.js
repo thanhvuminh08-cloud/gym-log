@@ -14,7 +14,7 @@ export async function loadProfile(now = Date.now(), { detail = false } = {}) {
   const profile = hero({ ...ctx, body, sex: s.sex, dao: s.dao });
   // Nhiệm vụ chọn mạch theo hồ sơ đầu tuần (T2 0h) để không đổi giữa tuần.
   const base = hero({ ...ctx, body, sex: s.sex, dao: s.dao, now: Math.min(now, Math.max(weekStart(now), s.dao?.at || 0)) });
-  profile.weekly = quests({ ...ctx, profile, base });
+  profile.weekly = quests({ workouts, exercises, now, profile, base, dao: s.dao });
   if (detail) profile.readiness = readiness(workouts, now);
   return profile;
 }
@@ -42,7 +42,7 @@ function showBreakthrough(event) {
       BOLTS.forEach((t) => timers.push(setTimeout(() => tap(80), t)));
       timers.push(setTimeout(() => sfx('dotPha'), BOLTS.at(-1)));
     } else {
-      sfx('dotPha');
+      sfx(event.kind === 'temper' ? 'thoiThe' : event.kind === 'verify' ? 'xacChung' : 'dotPha');
       tap(60);
     }
   });
@@ -68,12 +68,11 @@ export async function ceremony(profile) {
 
 const SAMPLE_QUESTS = {
   quests: [
-    { id: 'schedule', title: 'Tập đủ 3 buổi tuần này', detail: 'Theo mục tiêu tuần', meridian: null, goal: 3, done: 2, complete: false },
     { id: 'overload', title: 'Vượt lần trước ở mạch Tay trước', detail: 'Gợi ý: Barbell Curl', meridian: 'biceps', goal: 1, done: 1, complete: true },
     { id: 'canCo', title: 'Thêm buổi cho mạch Vai', detail: 'Căn cơ 82%', meridian: 'shoulders', goal: 1, done: 0, complete: false },
   ],
   done: 1,
-  total: 3,
+  total: 2,
 };
 
 const SAMPLE_CHALLENGE = {

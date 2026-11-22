@@ -27,7 +27,7 @@ export async function records(exerciseId, skipId) {
       for (const s of doneSets(e)) {
         r.w = Math.max(r.w, s.w);
         r.e1rm = Math.max(r.e1rm, e1rm(s.w, s.r));
-        r.vol = Math.max(r.vol, s.w * s.r);
+        if (s.w * s.r > r.vol) { r.vol = s.w * s.r; r.top = { w: s.w, r: s.r }; } // set tốt nhất: hiện kg × rep, không hiện tích
       }
     }
   }
