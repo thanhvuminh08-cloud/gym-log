@@ -8,9 +8,10 @@
 :root {
   --cultivation-serif: "Noto Serif VI", Cambria, "Times New Roman", serif;
   --bg: #0a0f14; --card: #141d27; --raised: #1c2935; --line: #34485d; --text: #f1f5f8; --muted: #aab8c5;
-  --accent: #c5f464; --accent-ink: #18220b; --accent-soft: #26351c; --danger: #ff8e91; --pr: #fbbf24;
+  --accent: #c3ee9d; --accent-ink: #18220b; --accent-soft: #263824; --danger: #ff8e91; --pr: #f7c669;
   --cool: #79c8ff;
-  --surface: linear-gradient(155deg, rgb(127 188 255 / .15), transparent 62%) rgb(15 26 40 / .78);
+  --surface: linear-gradient(155deg, rgb(150 209 190 / .11), transparent 62%) rgb(16 29 33 / .85);
+  --formation: url("../assets/formation-ring.svg");
   --r: 20px;
   --nav-label-line: .825rem;
   /* Chừa chỗ cho biểu tượng, tên mục và chú ngắn trên thanh điều hướng. */
@@ -26,8 +27,8 @@ html, body { margin: 0; background: var(--bg); color: var(--text); font: 16px/1.
 body {
   min-height: 100vh; min-height: 100dvh; display: flex; flex-direction: column;
   background:
-    radial-gradient(ellipse 80% 380px at 85% 0, rgb(48 106 176 / .4), transparent 100%) no-repeat,
-    linear-gradient(168deg, #142c47 0, #101d30 235px, var(--bg) 550px) no-repeat var(--bg);
+    radial-gradient(ellipse 85% 370px at 85% 0, rgb(54 118 103 / .29), transparent) no-repeat,
+    linear-gradient(168deg, #14292f 0, #101e26 240px, var(--bg) 590px) no-repeat var(--bg);
 }
 main { flex: 1; width: 100%; max-width: 720px; margin: 0 auto; padding: 22px 16px calc(var(--nav-height) + var(--nav-bottom) + 34px); }
 /* Thanh nghỉ nằm trong luồng trang nên tự chừa đúng chiều cao, kể cả khi nội dung xuống dòng. */
@@ -61,7 +62,7 @@ a.card:hover, a.card:active { background: var(--raised); }
 
 button, .btn { font: inherit; font-size: .95rem; border: 1px solid var(--line); background: var(--raised); color: var(--text); border-radius: 10px; padding: 10px 14px; min-width: 44px; min-height: 44px; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; text-align: center; }
 button:disabled { opacity: .45; cursor: default; }
-.primary { background: linear-gradient(145deg, #d9ff91, var(--accent)); color: var(--accent-ink); border-color: var(--accent); font-weight: 750; }
+.primary { background: linear-gradient(145deg, #e1fac1, var(--accent)); color: var(--accent-ink); border-color: var(--accent); font-weight: 750; }
 @media (hover: hover) {
   button:not(:disabled):hover, .btn:hover { filter: brightness(1.13); }
 }
@@ -107,6 +108,17 @@ label.row { padding: 6px 0; }
 .tier[data-tier="first"] { --tier-text: #b5c9e1; --tier-line: #617c9d; --tier-bg: #1e2936; }
 
 /* Tổng kết buổi tập */
+.workout-record {
+  display: flex; align-items: center; gap: 12px; padding: 14px; color: #f6dcab;
+  border: 1px solid #78664a; border-radius: var(--r);
+  background: linear-gradient(100deg, #30281e, #172827 77%);
+}
+.workout-record h2 { display: block; margin: 0; font: 700 1.25rem/1.25 var(--cultivation-serif); overflow-wrap: anywhere; }
+.workout-record p { margin: 3px 0 0; font-size: .85rem; }
+.workout-record-seal {
+  flex: none; display: grid; place-items: center; width: 56px; aspect-ratio: 1;
+  background: var(--formation) center / contain no-repeat; color: #ffe0a4;
+}
 .stats.workout-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; margin: 18px 0; }
 .workout-summary > div { display: grid; align-content: center; min-height: 100px; padding: 12px; background: var(--surface); }
 .workout-summary b { font-size: clamp(1.55rem, 5vw, 2.2rem); line-height: 1.15; }
@@ -233,11 +245,11 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
 .dashboard-heading p span::first-letter { text-transform: uppercase; }
 .dashboard-heading .dashboard-icon { width: 16px; height: 16px; }
 .workout-hero {
-  display: flex; align-items: center; min-height: 124px;
+  position: relative; isolation: isolate; display: flex; align-items: center; min-height: 124px;
   padding: 12px 14px; border: 1px solid #394e60; border-radius: var(--r);
   background-color: #172027;
-  background-image: linear-gradient(90deg, #0e1923 8%, #0e1923ed 47%, #11223055),
-    url("../assets/workout-hero.jpg");
+  background-image: linear-gradient(90deg, #0d1c22 4%, #0d1c22e8 37%, #11232234 90%),
+    url("../assets/training-pavilion.webp");
   background-size: cover; background-position: center, right 56%;
   box-shadow: 0 12px 28px rgb(0 0 0 / .24);
 }
@@ -256,6 +268,7 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
   text-wrap: balance; text-shadow: 0 2px 10px #08121c;
 }
 .sanctum-training[data-first-run] .training-actions { margin-top: 12px; }
+.sanctum-training[data-first-run] { border-color: #637655; }
 a.card.dao-invite {
   gap: 10px; padding: 10px 12px; margin: 10px 0 0;
   border-color: #3e574f; background: linear-gradient(108deg, #1c302d, #141f25 82%);
@@ -351,12 +364,19 @@ a.backup-reminder:is(:hover, :active) { background: #293a24; }
 .entry > :nth-child(1 of .set[data-si]:not(.done)) .check { border-color: var(--accent); }
 .set.done:not(:focus-within) > :not(.pr) { opacity: .82; }
 .set.done :is(input, .rpe) { border-color: transparent; background: var(--accent-soft); }
-.set.done .check { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
-.set.done .check.pr { background: var(--pr); border-color: var(--pr); }
-.set.celebrate[data-celebrate="gold"] { --burst: #ffd76f; --burst-glow: rgb(255 215 111 / .62); --burst-scale: 1.018; }
-.set.celebrate[data-celebrate="silver"] { --burst: #bcdcff; --burst-glow: rgb(188 220 255 / .48); --burst-scale: 1.012; }
-.set.celebrate[data-celebrate="bronze"] { --burst: #f2ac7e; --burst-glow: rgb(242 172 126 / .36); --burst-scale: 1.006; }
-.set.celebrate[data-celebrate] { position: relative; border-radius: 10px; box-shadow: 0 0 0 2px var(--burst), 0 0 15px var(--burst-glow); }
+.set .check { position: relative; isolation: isolate; }
+.set .check:active::before, .set.done .check::before {
+  content: ""; position: absolute; z-index: -1; inset: 4px; border: 1px solid currentColor;
+  border-radius: 5px; opacity: .5; pointer-events: none;
+}
+.set.done .check { background: linear-gradient(146deg, #d8f7bf, #9fd28f); color: #1b3421; border-color: #c6e7ad; }
+.set.done .check.pr { --seal-fill: #f7c669; background: var(--seal-fill); border-color: var(--seal-fill); color: #352516; }
+.set.celebrate[data-celebrate="gold"] { --burst: #ffd76f; }
+.set.celebrate[data-celebrate="silver"] { --burst: #aeeac8; }
+.set.celebrate[data-celebrate="bronze"] { --burst: #efb187; }
+.set:is(.is-set-sealed, .celebrate[data-celebrate]) { position: relative; isolation: isolate; border-radius: 10px; }
+.set.celebrate[data-celebrate] { box-shadow: 0 0 0 1px var(--burst); }
+.set.celebrate .check.pr { --seal-fill: var(--burst); }
 .entry .row:first-child { margin-bottom: 8px; flex-wrap: wrap; }
 .entry .row:first-child b { min-width: 95px; overflow-wrap: anywhere; }
 .entry input.tiny { width: 48px; }
@@ -370,14 +390,14 @@ a.backup-reminder:is(:hover, :active) { background: #293a24; }
 }
 
 /* Đồng hồ nghỉ */
-.rest-bar { --rest-color: var(--accent); display: none; position: sticky; bottom: var(--rest-bar-bottom, var(--rest-offset)); width: min(608px, calc(100% - 32px)); margin-inline: auto; gap: 6px; align-items: center; background: var(--raised); border: 1px solid var(--rest-color); border-radius: 14px; padding: 8px; z-index: 20; }
+.rest-bar { --rest-color: #b4e5bb; display: none; position: sticky; bottom: var(--rest-bar-bottom, var(--rest-offset)); width: min(608px, calc(100% - 32px)); margin-inline: auto; gap: 6px; align-items: center; background: linear-gradient(110deg, #263c32, #101d23); border: 1px solid var(--rest-color); border-radius: 14px; padding: 8px; box-shadow: 0 5px 16px #0007; z-index: 20; }
 .rest-bar.show { display: flex; }
-.rest-bar[data-warn="true"] { --rest-color: var(--pr); }
+.rest-bar[data-warn="true"] { --rest-color: #ffd382; background: linear-gradient(110deg, #493225, #231e22); }
 .rest-bar button { flex: none; padding-inline: clamp(6px, 2.5vw, 14px); }
 .rest-clock { display: flex; flex: 1; align-items: center; justify-content: center; gap: 5px; min-width: 0; color: var(--rest-color); }
 .rest-ring { display: block; flex: none; width: clamp(28px, 9vw, 36px); aspect-ratio: 1; fill: none; stroke-width: 3; }
-.rest-ring-track { stroke: var(--line); }
-.rest-ring-progress { stroke: currentColor; stroke-dasharray: var(--rest-progress, 0) 100; }
+.rest-ring-track { stroke: currentColor; opacity: .38; stroke-dasharray: 1 3; }
+.rest-ring-progress { stroke: currentColor; stroke-linecap: round; stroke-dasharray: var(--rest-progress, 0) 100; filter: drop-shadow(0 0 3px currentColor); }
 .rest-ring-hands { stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .rest-time { text-align: center; font-size: clamp(.875rem, 4vw, 1.25rem); font-weight: 700; font-variant-numeric: tabular-nums; }
 @media (max-width: 360px) {
@@ -468,7 +488,11 @@ button.chip { min-height: 44px; }
 .glossary dd { margin: 3px 0 0; color: var(--muted); font-size: .9rem; }
 .workout-start .card h2 { margin: 0 0 4px; }
 .workout-start .card p { margin: 0 0 8px; overflow-wrap: anywhere; }
-.start-scheduled { border-inline-start: 3px solid var(--accent); }
+.workout-start > .card { border-color: #425951; }
+.workout-start .start-scheduled {
+  border-inline-start: 3px solid var(--accent);
+  background: linear-gradient(90deg, #122421 15%, #152c26db 53%, #10232755), url("../assets/training-pavilion.webp") right 58% / cover;
+}
 .start-templates ul { list-style: none; margin: 0; padding: 0; }
 .start-templates li { padding-block: 6px; }
 .start-templates li + li { border-top: 1px solid var(--line); }
@@ -563,7 +587,7 @@ button.chip { min-height: 44px; }
   .restore-undo { width: 100%; }
 }
 
-.toast { position: fixed; top: calc(var(--header-height) + 8px); inset-inline: 12px; width: fit-content; max-width: min(32rem, calc(100% - 24px)); margin-inline: auto; background: #24303a; border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; z-index: 50; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
+.toast { position: fixed; top: calc(var(--header-height) + 8px); inset-inline: 12px; width: fit-content; max-width: min(32rem, calc(100% - 24px)); margin-inline: auto; background: #24322d; border: 1px solid #657863; border-inline-start: 3px solid #d3b47a; padding: 10px 14px; border-radius: 10px; z-index: 50; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
 
 /* Động phủ */
 .cultivation, .breakthrough-modal {
@@ -668,6 +692,11 @@ button.chip { min-height: 44px; }
   background: var(--mist) right bottom / cover, radial-gradient(ellipse at 92% 6%, #634827 0%, #2a261c 48%, #171d21 100%);
 }
 .cultivation-challenge h2, .cultivation-scroll h2 { margin: 0; }
+.cultivation-challenge { isolation: isolate; }
+.cultivation-challenge::after {
+  content: ""; position: absolute; z-index: -1; inset: 7% 8% 7% auto; width: 120px;
+  background: var(--formation) center / contain no-repeat; opacity: .22; pointer-events: none;
+}
 .challenge-realm { color: var(--gold); margin: 9px 0 4px; font-size: .85rem; }
 .challenge-goal { display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: end; justify-content: space-between; }
 .challenge-goal p { margin: 0; }
@@ -692,7 +721,8 @@ button.chip { min-height: 44px; }
 .quest-list h3 { font-size: 1.06rem; }
 .quest-list p { color: #5d3f31; font-size: .85rem; }
 .quest-status { display: grid; justify-items: end; gap: 3px; font-variant-numeric: tabular-nums; }
-.quest-stamp { padding: 2px 5px; color: #811d25; border: 2px double #811d25; border-radius: 3px; font: 700 .77rem var(--cultivation-serif); transform: rotate(-7deg); }
+.quest-stamp { padding: 2px 5px; color: #78302b; border: 3px double #9a483c; border-radius: 3px; background: #f3ddb3; font: 700 .77rem var(--cultivation-serif); transform: rotate(-7deg); }
+.quest-list [data-quest].celebrate { background: linear-gradient(90deg, transparent, #a8672e2b); }
 .sanctum-cultivation { display: grid; gap: 10px; margin-top: 10px; }
 .tuvi-strip {
   display: flex; align-items: center; gap: 11px; padding: 10px 12px;
@@ -806,11 +836,11 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
 .dao-altar {
   position: relative; isolation: isolate; display: grid; place-items: center; min-height: 175px; overflow: hidden;
   border: 1px solid var(--ink-line); border-radius: 15px;
-  background: var(--mist) center / cover, radial-gradient(ellipse at 50% 65%, #2c584b, #101e23 72%);
+  background: var(--mist) center / cover, var(--mountains) center / cover #101e23;
 }
 .dao-altar::before {
-  content: ""; position: absolute; z-index: -1; width: 200px; aspect-ratio: 1; border-radius: 50%;
-  background: radial-gradient(circle, #b3db9255, transparent 67%);
+  content: ""; position: absolute; z-index: -1; width: 170px; aspect-ratio: 1; border-radius: 50%; pointer-events: none;
+  background: var(--formation) center / contain, radial-gradient(circle, #69bc9a88, transparent 71%);
 }
 .dao-stone { width: 155px; height: auto; filter: drop-shadow(0 0 9px #a5e6ba90); }
 .dao-sigil { fill: var(--muscle); stroke: #e3f4ce; stroke-width: .8; }
@@ -837,21 +867,32 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
 
 /* Đột phá và Độ kiếp */
 .breakthrough-modal.modal {
+  --ceremony-light: #a3e8c4; --ceremony-halo: #8de9ba66;
   display: none; inset: 0; align-items: start; margin: auto; padding: 0;
   width: min(450px, calc(100% - 24px)); max-width: none; height: fit-content; max-height: calc(100dvh - 24px);
   color: var(--text); background: #111f22; border: 1px solid #a88c58; border-radius: 20px; overflow: auto; animation: none;
 }
 .breakthrough-modal[open] { display: block; }
 .breakthrough-modal:popover-open { display: block; }
-.breakthrough-modal::backdrop { background: rgb(5 10 14 / .84); }
+.breakthrough-modal::backdrop { background: radial-gradient(ellipse, #102820cc, #05090df0 76%); }
 .breakthrough-scene { background: linear-gradient(#162a2d, #111f22 65%); }
-.breakthrough-celestial { position: relative; isolation: isolate; display: grid; place-items: center; height: clamp(170px, 53vw, 222px); overflow: hidden; background: var(--mist) center / cover; }
-.breakthrough-aura { position: absolute; z-index: -1; inset: -55%; background: radial-gradient(circle, #f9d99188, #e5b15d19 23%, transparent 46%); }
+.breakthrough-celestial {
+  position: relative; isolation: isolate; display: grid; place-items: center;
+  height: clamp(170px, 53vw, 222px); overflow: hidden;
+  background: var(--mist) center / cover, var(--mountains) center / cover;
+}
+.breakthrough-aura { position: absolute; z-index: -1; inset: 0; background: radial-gradient(ellipse at 50% 57%, var(--ceremony-halo), transparent 68%); }
+.breakthrough-celestial::before {
+  content: ""; position: absolute; inset: 5% 0; z-index: -1; margin-inline: auto;
+  width: 180px; background: var(--formation) center / contain no-repeat;
+  opacity: .72; filter: drop-shadow(0 0 7px var(--ceremony-light)); pointer-events: none;
+}
 .breakthrough-figure { position: absolute; bottom: 0; width: min(83%, 240px); height: auto; }
 .breakthrough-celestial .cultivation-seal { position: absolute; bottom: 9%; right: 13%; width: 56px; transform: rotate(6deg); box-shadow: inset 0 0 0 3px var(--seal), inset 0 0 0 4px var(--seal-edge), 0 0 22px #edb55e8a; }
 .breakthrough-clouds, .breakthrough-bolts, .breakthrough-qi { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; pointer-events: none; }
 .breakthrough-clouds { z-index: 1; background: radial-gradient(ellipse at 24% 5%, #04070f 11%, #182230 36%, transparent 66%), radial-gradient(ellipse at 82% 4%, #0a101c 16%, #101927 38%, transparent 66%); }
 .breakthrough-bolts { z-index: 2; fill: #ffe9bb; filter: drop-shadow(0 0 8px #c5d9ff); }
+.breakthrough-bolts > path { opacity: 0; }
 .bolt-secondary { fill: #b5d6ff; }
 .breakthrough-qi {
   z-index: -1; inset: -5%; width: auto; height: auto;
@@ -867,33 +908,40 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
 .breakthrough-ranks strong { color: #ffe5a6; font-size: 1.15rem; }
 .breakthrough-real { padding: 5px 8px; background: #0b181a; border-radius: 8px; font-size: .88rem; }
 .breakthrough-close { min-width: 100px; margin-top: 5px; background: linear-gradient(#f5db9c, #d2a351); border-color: #f5db9c; }
-.breakthrough-modal[data-breakthrough-kind="temper"] { border-color: #c59670; box-shadow: 0 0 32px #be7d4f44; }
+.breakthrough-modal[data-tribulation="true"] { --ceremony-light: #bbd5f9; --ceremony-halo: #89afe563; }
+.breakthrough-modal[data-tribulation="true"] .breakthrough-clouds { opacity: .62; }
+.breakthrough-modal[data-breakthrough-kind="temper"] { --ceremony-light: #efb580; --ceremony-halo: #c3855e70; border-color: #c59670; box-shadow: 0 0 32px #be7d4f44; }
 [data-breakthrough-kind="temper"] .breakthrough-scene { background: linear-gradient(#3a2923, #201b1c 65%); }
-[data-breakthrough-kind="temper"] .breakthrough-aura { background: radial-gradient(circle, #f3bf9277, #b56c492f 25%, transparent 47%); }
-[data-breakthrough-kind="temper"] .breakthrough-celestial::before {
-  content: ""; position: absolute; width: 158px; aspect-ratio: 1; border: 1px solid #c5967099; border-radius: 50%;
-  box-shadow: 0 0 0 8px #c5967033, inset 0 0 0 5px #c5967033;
-}
+[data-breakthrough-kind="temper"] .breakthrough-celestial::before { filter: sepia(.75) drop-shadow(0 0 8px var(--ceremony-light)); }
 [data-breakthrough-kind="temper"] .breakthrough-content :is(h2, .breakthrough-ranks strong) { color: #f8d6b3; }
 [data-breakthrough-kind="temper"] .breakthrough-close { background: linear-gradient(#f5d9bb, #c58d64); border-color: #e7b790; }
-.breakthrough-modal[data-breakthrough="verify"] { border-color: #85d4b4; box-shadow: 0 0 35px #55c8ae55; }
+.breakthrough-modal[data-breakthrough="verify"] { --ceremony-light: #b7f3c6; --ceremony-halo: #59bca670; border-color: #85d4b4; box-shadow: 0 0 35px #55c8ae55; }
 [data-breakthrough="verify"] .breakthrough-scene { background: linear-gradient(#173831, #112723 65%); }
-[data-breakthrough="verify"] .breakthrough-aura { background: radial-gradient(circle, #a3f5bb8a, #50b29b25 25%, transparent 47%); }
 [data-breakthrough="verify"] .breakthrough-content :is(h2, .breakthrough-ranks strong) { color: #c3f5cc; }
 [data-breakthrough="verify"] .breakthrough-close { background: linear-gradient(#c6efcb, #77c6a4); border-color: #a5e7bd; }
 .breakthrough-verify-mark { position: absolute; top: 14%; left: 13%; width: clamp(36px, 13%, 54px); stroke: #bff4c9; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; filter: drop-shadow(0 0 7px #8eebb4); }
 
 /* Phản hồi khi tập và chuyển màn hình */
 @media (prefers-reduced-motion: no-preference) {
-  main > :nth-child(-n+8):not(.loading-view) { animation: screen-in .22s ease-out; }
+  main > :nth-child(-n+8):not(.loading-view) { animation: ink-in .24s ease-out; }
+  .workout-hero::after {
+    content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit; pointer-events: none;
+    background: radial-gradient(ellipse at 79% 76%, #d9dfb657, transparent 64%);
+    animation: pavilion-light 1.3s ease-out both;
+  }
+  .workout-start > .card { animation: ink-in .25s ease-out; }
+  .toast { animation: ink-in .2s ease-out; }
   .loading-view { animation: loading-in .14s .12s ease-out backwards; }
   .year-grid rect[data-muscle] { animation: chart-in .26s ease-out backwards; animation-delay: calc(var(--i) * .55ms); }
   .chart.bars .bar { animation: chart-in .3s ease-out backwards; animation-delay: calc(var(--i) * 24ms); }
   .modal { animation: shade-in .18s ease-out both; }
   .sheet { animation: sheet-in .24s ease-out both; }
   .rest-bar.show { animation: rest-in .2s ease-out both; }
+  .rest-bar[data-warn="true"] .rest-ring { animation: ember-alert .5s ease-out; }
   .rest-ring-progress { transition: stroke-dasharray .2s linear; }
-  .summary-medal { animation: medal-reveal .45s .22s ease-out backwards; }
+  .workout-record-seal { animation: stamp-in .66s .12s ease-out both; }
+  .summary-medal .pham-seal, .stats.medals [data-new] .pham-seal { animation: stamp-in .48s .12s ease-out both; }
+  .quest-list [data-quest].celebrate .quest-stamp { animation: stamp-in .55s ease-out both; }
   .cultivation-cover::after {
     content: ""; position: absolute; inset: 12% 0; z-index: -1; pointer-events: none;
     background: radial-gradient(circle at 44% 75%, var(--jade) 0 1px, transparent 3px),
@@ -901,55 +949,66 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
       radial-gradient(circle at 87% 77%, var(--jade) 0 1px, transparent 3px),
       radial-gradient(circle at 91% 40%, var(--gold) 0 1px, transparent 3px),
       radial-gradient(circle at 57% 29%, var(--jade) 0 1px, transparent 3px);
-    animation: cultivation-particles 7s ease-in-out infinite alternate;
+    animation: cultivation-particles 4.8s ease-in-out both;
   }
-  .radar-orbit { animation: cultivation-orbit 50s linear infinite; }
-  .dao-stone { animation: dao-awaken .7s ease-out both; }
-  .dao-result-branches > li { animation: dao-ignite .29s calc(.42s + var(--dao-order) * .12s) ease-out both; }
-  .dao-sigil { animation: dao-sigil .29s calc(.42s + var(--dao-order) * .12s) ease-out both; }
-  .dao-altar .cultivation-seal { animation: dao-seal .38s 1.46s cubic-bezier(.35,.05,.65,1.2) both; }
-  .breakthrough-aura { animation: breakthrough-halo 1.45s ease-out both; }
-  .breakthrough-qi { animation: breakthrough-gather 1.45s ease-in-out both; }
-  .breakthrough-modal[data-tribulation="true"] .breakthrough-clouds { animation: tribulation-clouds 3.3s ease-in-out both; }
-  .breakthrough-modal[data-tribulation="true"] .breakthrough-bolts { animation: tribulation-strike 3.2s linear both; }
+  .radar-orbit { animation: cultivation-orbit 2.4s ease-out; }
+  .dao-altar::before { animation: formation-unfold 1.3s ease-out both; }
+  .cultivation-challenge::after { animation: formation-unfold .7s ease-out; }
+  .dao-stone { animation: dao-awaken .8s ease-out both; }
+  .dao-result-branches > li { animation: dao-ignite .34s calc(.26s + var(--dao-order) * .145s) ease-out both; }
+  .dao-sigil { animation: dao-sigil .32s calc(.26s + var(--dao-order) * .145s) ease-out both; }
+  .dao-altar .cultivation-seal { animation: stamp-in .38s 1.30s cubic-bezier(.35,.05,.65,1.2) both; }
+  .breakthrough-celestial::before { animation: formation-unfold 1.25s ease-out both; }
+  .breakthrough-aura { animation: breakthrough-halo 1.24s ease-out both; }
+  .breakthrough-qi { animation: breakthrough-gather 1.22s ease-in-out both; }
+  .breakthrough-verify-mark { animation: stamp-in .38s .55s ease-out both; }
+  .breakthrough-modal[data-tribulation="true"] .breakthrough-clouds { animation: tribulation-clouds 3.25s ease-in-out both; }
+  .breakthrough-modal[data-tribulation="true"] .breakthrough-bolts { opacity: 1; }
+  .breakthrough-modal[data-tribulation="true"] .breakthrough-bolts > path { animation: bolt-flare .27s var(--strike-at) ease-out both; }
+  .breakthrough-bolts > path:nth-child(1) { --strike-at: 2.25s; }
+  .breakthrough-bolts > path:nth-child(2) { --strike-at: 1.05s; }
+  .breakthrough-bolts > path:nth-child(3) { --strike-at: 1.65s; }
   .breakthrough-modal[data-tribulation="true"] .breakthrough-aura { animation-delay: 2.25s; }
   .breakthrough-modal[data-tribulation="true"] .breakthrough-qi { animation-delay: 2.1s; }
   .breakthrough-modal[data-tribulation="true"] .breakthrough-celestial::after {
     content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
-    background: radial-gradient(ellipse at 50% 30%, #c6ddff59, transparent 72%); animation: tribulation-strike 3.2s linear both;
+    background: radial-gradient(ellipse at 50% 30%, #c6ddff49, transparent 64%); animation: bolt-flare .42s 2.25s ease-out both;
   }
   @supports (animation-timeline: view()) {
     .cultivation-mist { animation: cultivation-parallax linear both; animation-timeline: view(); animation-range: exit 0% exit 100%; }
   }
   .set .check { transition: background-color .15s ease-out, filter .15s ease-out; }
-  .set.celebrate[data-celebrate] { animation: set-celebration .85s ease-out both; }
-  .set.celebrate[data-celebrate]::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    border-radius: inherit;
-    pointer-events: none;
-    background: linear-gradient(105deg, transparent 40%, var(--burst-glow) 50%, transparent 60%) 100% 0 / 250% 100%;
-    animation: set-shine .6s ease-out both;
+  .set.is-set-sealed { --burst: #b4e5bb; }
+  .set.celebrate[data-celebrate] { animation: set-outline .52s ease-out both; }
+  .set:is(.is-set-sealed, .celebrate[data-celebrate]) .check::after {
+    content: ""; position: absolute; inset: -1px; border: 2px solid var(--burst);
+    border-radius: inherit; pointer-events: none; animation: seal-ring .38s ease-out both;
+  }
+  .set:is(.is-set-sealed, .celebrate[data-celebrate])::after {
+    content: ""; position: absolute; z-index: -1; inset: auto 3% 1px; height: 3px;
+    border-radius: 60% 18% 48% 20%; pointer-events: none; background: var(--burst);
+    transform-origin: right; animation: brush-line .48s ease-out both;
   }
   nav a, nav a span, a.card { transition: color .15s ease-out, background-color .15s ease-out; }
 }
 @keyframes chart-in { from { opacity: 0; } }
-@keyframes screen-in {
-  from { opacity: .65; translate: 0 5px; }
+@keyframes ink-in {
+  from { opacity: .72; translate: 0 4px; }
 }
+@keyframes pavilion-light { from { opacity: 0; } to { opacity: .72; } }
 @keyframes loading-in { from { opacity: 0; } }
 @keyframes shade-in { from { background-color: transparent; } }
 @keyframes sheet-in { from { translate: 0 24px; opacity: .8; } }
 @keyframes rest-in { from { translate: 0 8px; opacity: .65; } }
-@keyframes medal-reveal { from { opacity: 0; translate: 0 6px; } }
-@keyframes cultivation-particles { from { opacity: .35; translate: -5px 11px; } to { opacity: .85; translate: 7px -14px; } }
+@keyframes ember-alert { 45% { filter: drop-shadow(0 0 5px #ffd382); } }
+@keyframes stamp-in { from { opacity: 0; translate: 0 -12px; scale: 1.16; } 72% { opacity: 1; scale: .95; } to { scale: 1; } }
+@keyframes cultivation-particles { from { opacity: 0; translate: -5px 11px; } 53% { opacity: .65; } to { opacity: .28; translate: 6px -10px; } }
 @keyframes cultivation-parallax { to { translate: 0 34px; } }
-@keyframes cultivation-orbit { to { transform: rotate(360deg); } }
+@keyframes cultivation-orbit { from { transform: rotate(-35deg); opacity: .25; } }
 @keyframes dao-awaken { from { filter: brightness(.57) drop-shadow(0 0 1px #a5e6ba); } to { filter: brightness(1.12) drop-shadow(0 0 16px #a5e6ba); } }
 @keyframes dao-ignite { from { opacity: .42; } 60% { box-shadow: inset 0 0 15px var(--muscle); } to { opacity: 1; } }
 @keyframes dao-sigil { from { opacity: .18; } 65% { filter: drop-shadow(0 0 5px var(--muscle)); } to { opacity: 1; } }
-@keyframes dao-seal { from { opacity: 0; transform: translateY(-24px) scale(1.2); } to { opacity: 1; transform: none; } }
+@keyframes formation-unfold { from { opacity: .1; scale: .64; rotate: -24deg; } 62% { opacity: 1; } }
 @keyframes breakthrough-halo { from { opacity: .12; scale: .78; } to { opacity: 1; scale: 1; } }
 @keyframes breakthrough-gather {
   0% { opacity: 0; scale: 1.25; }
@@ -958,20 +1017,13 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
   100% { opacity: 0; scale: .08; }
 }
 @keyframes tribulation-clouds {
-  0% { opacity: 0; translate: 0 -48%; }
-  26%, 72% { opacity: .96; translate: 0 0; }
-  100% { opacity: 0; translate: 0 -32%; }
+  0% { opacity: .28; translate: 0 -30%; }
+  24%, 76% { opacity: .96; translate: 0 0; }
+  100% { opacity: .62; translate: 0 -11%; }
 }
-@keyframes tribulation-strike {
-  0%, 30%, 41%, 49%, 60%, 68%, 81%, 100% { opacity: 0; }
-  33% { opacity: .9; }
-  52% { opacity: .66; }
-  71% { opacity: .86; }
-}
-@keyframes set-celebration {
-  35% { scale: var(--burst-scale); }
-  to { box-shadow: 0 0 0 1px var(--burst); }
-}
-@keyframes set-shine { to { background-position: 0 0; opacity: 0; } }
+@keyframes bolt-flare { 0%, 100% { opacity: 0; } 18% { opacity: .86; } }
+@keyframes set-outline { 20% { box-shadow: 0 0 0 2px var(--burst); } to { box-shadow: none; } }
+@keyframes seal-ring { from { opacity: .72; scale: .82; } to { opacity: 0; scale: 1.18; } }
+@keyframes brush-line { from { opacity: .9; scale: .05 1; } 57% { scale: 1; } to { opacity: 0; } }
 
 html[data-no-gloss] .gloss { display: none; }

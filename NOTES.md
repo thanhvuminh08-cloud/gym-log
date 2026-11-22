@@ -57,12 +57,13 @@
 - Luyện Thể Ký dùng năm mục từ `NAV`, một trang Động phủ, ba tab Tu luyện ký, ấn phẩm kim/ngọc/đồng và Thạch bi theo mốc tạ thật.
 - Công pháp gộp lịch thành một dòng mỗi ngày và đặt hai ô mục tiêu cạnh nhau. Động phủ giữ tên buổi dở khi tắt Chú giải. Công đức bạ dùng ba dáng ấn và bia khắc kg, ngày trên nền tranh núi có sẵn.
 - Khi mở Động phủ lần đầu, tiêu đề “Ghi buổi tập đầu tiên” dẫn mắt tới nút Bế quan. Thẻ Nhập môn tuỳ chọn nằm ngay dưới, với biểu tượng và viền xanh ngọc.
+- Hồn tu tiên: hiên luyện công do ImageGen tạo (tranh mực, sương núi, đèn đồng), nén WebP bằng FFmpeg. Vòng ấn vẽ bằng SVG. Nhạc và âm gốc tổng hợp bằng Node.js, mã hoá bằng FFmpeg, không dùng bản thu bên ngoài.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Codex] Hồn tu tiên (VISION.md mục cuối): làm lại toàn bộ hiệu ứng hình ảnh, animation, âm thanh cho hợp tu tiên; được dùng nội dung AI tạo.
+- [cho Claude] Hồn tu tiên: gọi `sfx('setXong')` và gắn `.is-set-sealed` chỉ cho set thường vừa lưu (gỡ sau ~480 ms), dùng `phamKim`/`phamNgoc`/`phamDong` cho phẩm mới, `hetGio` ở Điều tức (giữ công tắc âm báo), `xuatQuan` khi lưu buổi và `nhapMon`/`thoiThe`/`xacChung` ở nghi lễ tương ứng. Giữ tuỳ chọn âm/rung, không phát chồng với Đột phá hoặc Lôi kiếp, thêm smoke cho điểm gọi mới.
 
 
 ## Ý tưởng sau khi dùng thực tế

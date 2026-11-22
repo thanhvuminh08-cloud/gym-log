@@ -127,3 +127,13 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 - Giữ `data-*` và class mà logic dựa vào (AGENTS.md). Âm mới: thêm tên vào `SRC` trong `js/sfx.js` (việc một dòng, tự làm). Cần chỗ gọi `sfx()`/sự kiện mới trong logic → 1 dòng "Việc chờ cho Claude", Claude gắn + thêm smoke.
 
 **Thứ tự:** 1. **Codex** — tự lập danh sách hiệu ứng theo mức ưu tiên ghi vào đây, làm, smoke PASS, commit `ui:`. 2. **Claude** — gắn các điểm gọi mới, smoke.
+
+### Danh sách hiệu ứng theo mức ưu tiên
+1. **P0 · Trong lúc tập:** set xong có nét mực ngắn, PR hiện ấn kim/ngọc/đồng theo phẩm. Điều tức dùng vòng linh khí và viền cảnh báo rõ ở 10 giây cuối. Chuẩn bị âm chạm hoàn thành, âm PR và âm hết giờ để nối vào các móc hiện có.
+2. **P1 · Mốc lớn:** Đột phá dùng vòng ấn và ánh ngọc, Lôi kiếp có mây tối và ba nhịp sét, Thối thể màu đồng, Xác chứng hiện dấu khắc. Nghi lễ Nhập môn đánh thức bảy mạch rồi đóng ấn. Xuất quan/Phẩm và nhiệm vụ tuần có phản hồi riêng. Các nghi lễ có nút bỏ qua hoặc đóng.
+3. **P2 · Không khí và điều hướng:** thay ảnh tạ công nghiệp bằng hiên luyện công, dùng chung tranh núi và mây sẵn có. Động phủ, thẻ đầu tiên và màn chọn cách Bế quan cùng bảng màu mực, ngọc, giấy và đồng. Chuyển trang nhẹ. Thay nhạc Động phủ và các âm nghi lễ bằng bản tổng hợp gốc có tiết tấu riêng.
+4. **P3 · Kiểm tra:** thử ở chiều rộng điện thoại, chế độ giảm chuyển động, công tắc âm/rung và ngoại tuyến. Đo dung lượng tệp, chạy smoke và ghi điểm gọi âm còn chờ Claude.
+
+Ảnh hiên trong `assets/training-pavilion.webp` dùng ImageGen tích hợp với prompt:
+
+> Use case: illustration-story. Asset type: wide landscape background for Vietnamese cultivation workout PWA, text added separately over left side. Paint an original quiet mountainside training pavilion at blue hour in an elegant ink-wash and carefully textured digital gouache style, atmospheric and believable, with distant karst mountains and bands of mist. Place a warm bronze lantern and stone training terrace under a curved timber roof at the right-center; an understated circular design engraved in the paving, a few mossy jade stones and a pine branch. Keep the entire left third very dark blue-green with quiet low-contrast mist and no prominent objects for light text. Main subject must remain visible in center-right crop on mobile. Ink blacks, muted teal-jade, a few restrained warm copper highlights, no saturated cyan. 3:2 wide composition. No person, no gym equipment, no lettering, no runes, no logo, no watermark, no existing franchise.

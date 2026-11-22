@@ -2,7 +2,7 @@
 // iOS/Chrome chặn phát khi chưa chạm: play() bị từ chối → thử lại ở lần chạm kế tiếp.
 import { settings } from './util.js';
 
-const SRC = { dongPhu: 'dong-phu', loiKiep: 'loi-kiep', dotPha: 'dot-pha', nhiemVu: 'nhiem-vu' };
+const SRC = { dongPhu: 'dong-phu', loiKiep: 'loi-kiep', dotPha: 'dot-pha', nhiemVu: 'nhiem-vu', setXong: 'set-xong', phamDong: 'pham-dong', phamNgoc: 'pham-ngoc', phamKim: 'pham-kim', hetGio: 'het-gio', xuatQuan: 'xuat-quan', nhapMon: 'nhap-mon', thoiThe: 'thoi-the', xacChung: 'xac-chung' };
 const cache = {};
 const audio = (name) => (cache[name] ||= Object.assign(new Audio(`assets/audio/${SRC[name]}.mp3`), { preload: 'auto' }));
 

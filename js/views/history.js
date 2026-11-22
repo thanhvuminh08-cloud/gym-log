@@ -42,8 +42,10 @@ async function detail(el, id, ex) {
   el.innerHTML = `
   ${journalHeader('journal')}
   <a href="#/ky" class="small">← Nhật ký</a>
-  <h2>${h(w.name)}</h2>
-  <p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p>
+  <header class="workout-record">
+    <span class="workout-record-seal" aria-hidden="true"><svg class="dashboard-icon"><use href="#i-dumbbell"/></svg></span>
+    <div><h2>${h(w.name)}</h2><p class="muted">${fmtDate(w.start)} · ${fmtTime(w.start)}–${fmtTime(w.end)} (${fmtDur(w.end - w.start)})</p></div>
+  </header>
   <div class="stats workout-summary">
     <div><b data-count="${sets}">${sets}</b><small>Set hoàn thành</small></div>
     <div><b data-count="${kg}">${fmtNum(kg)}</b><small>Khối lượng (kg)</small></div>
