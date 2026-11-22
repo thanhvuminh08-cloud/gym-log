@@ -50,9 +50,10 @@ export async function render(el) {
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
-    ${remind ? `<a class="card row dashboard-item backup-reminder" href="#/settings">
-      <span class="tile-icon">${icon('layers')}</span>
-      <div class="grow"><b>Nên sao lưu dữ liệu</b><div class="muted small">${last ? `Lần cuối ${fmtDate(last)}` : 'Chưa sao lưu lần nào'} · dữ liệu chỉ nằm trên máy này</div></div>
+    ${remind ? `<a class="card row backup-reminder" href="#/settings">
+      <span class="tile-icon">${icon('backup')}</span>
+      <span class="grow"><b>Nên sao lưu dữ liệu</b><small class="muted">${last ? `Lần cuối ${fmtDate(last)}` : 'Chưa sao lưu lần nào'} · dữ liệu chỉ nằm trên máy này</small></span>
+      ${icon('chevron')}
     </a>` : ''}
     <section>
       <h2 class="section-heading">7 ngày qua <a href="#/report">Báo cáo tuần</a></h2>

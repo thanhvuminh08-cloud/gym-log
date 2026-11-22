@@ -23,11 +23,11 @@
 - Thanh nghỉ tự chừa chỗ phía cuối trang theo chiều cao thực. Toast nằm dưới header và dùng chiều rộng màn hình khi cần.
 - Hàng set dùng sáu cột trên điện thoại. Báo cáo tuần có điều hướng ngày, thẻ thống kê và màu theo hạng cho từng bài.
 - Hôm nay và Tiến độ dùng thẻ kính tối, số lớn và một bảng màu nhóm cơ cho biểu đồ, chú thích và viền thẻ bài. Nút “Tiếp tục tập” nổi trên thanh điều hướng và chừa chỗ riêng cho thanh nghỉ.
+- Hôm nay có thẻ nhắc sao lưu riêng. Cài đặt đặt nút hoàn tác cạnh ngày tạo bản dự phòng và trình bày từng lỗi thành một mục có thể xuống dòng.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. GitHub Pages v10 đã có CSS của `dae83be`. Bản cục bộ v16 đã qua kiểm tra bố cục trên Chrome ở 375 px.
-- [cho Codex] Làm đẹp thẻ nhắc sao lưu `.backup-reminder` ở Hôm nay (đang dùng tạm `card row dashboard-item` + icon layers) và mục `.error-log` / nút `undoRestore` trong Cài đặt (js/views/home.js, settings.js).
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).

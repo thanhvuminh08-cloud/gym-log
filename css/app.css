@@ -159,6 +159,19 @@ a.card.medal-row[data-new] { border-color: #548052; box-shadow: inset 0 0 18px r
   width: max-content; max-width: calc(100% - 32px); min-height: var(--resume-height); margin-inline: auto;
   border-radius: 999px; box-shadow: 0 8px 24px rgb(0 0 0 / .55), 0 0 18px rgb(197 244 100 / .22);
 }
+a.backup-reminder {
+  gap: 12px;
+  padding: 12px;
+  margin: 14px 0 0;
+  border-color: #4e6339;
+  background: linear-gradient(105deg, #26351c, #172321 88%);
+  overflow-wrap: anywhere;
+}
+a.backup-reminder:is(:hover, :active) { background: #293a24; }
+.backup-reminder .tile-icon { width: 40px; height: 40px; background: #374b26; }
+.backup-reminder b, .backup-reminder small { display: block; }
+.backup-reminder small { margin-top: 2px; line-height: 1.35; }
+.backup-reminder > svg { width: 16px; height: 16px; color: var(--accent); }
 .section-heading { margin-top: 22px; }
 .section-heading a { font-size: .875rem; font-weight: 650; white-space: nowrap; }
 .week-stats { margin-bottom: 0; gap: 8px; }
@@ -319,6 +332,26 @@ nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
 .report-ex > .row .muted, .report-day > .muted { text-align: end; }
 .report-ex .target { margin-bottom: 0; color: var(--tier-text, var(--accent)); background: var(--tier-bg, var(--accent-soft)); }
 .report-share { margin-top: 16px; }
+
+/* Cài đặt */
+.restore-snapshot {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 10px 16px; margin-top: 14px; padding: 12px;
+  border: 1px solid #36536b; border-radius: 12px; background: #152737;
+}
+.restore-snapshot p { margin: 0; }
+.restore-snapshot p span { display: block; margin-top: 2px; }
+.restore-undo { border-color: #476984; background: #20394c; color: var(--cool); }
+.restore-undo svg { width: 18px; height: 18px; }
+.error-log { overflow-wrap: anywhere; }
+.error-list { margin: 0; padding: 0; list-style: none; }
+.error-list li { border-inline-start: 2px solid #9e555e; padding: 8px 10px; border-radius: 4px 10px 10px 4px; background: var(--bg); }
+.error-list li + li { margin-top: 8px; }
+.error-list p { margin: 3px 0 0; font-size: .875rem; }
+.error-log-actions { display: flex; justify-content: end; margin-top: 12px; }
+@media (max-width: 480px) {
+  .restore-undo { width: 100%; }
+}
 
 .toast { position: fixed; top: calc(var(--header-height) + 8px); inset-inline: 12px; width: fit-content; max-width: min(32rem, calc(100% - 24px)); margin-inline: auto; background: #24303a; border: 1px solid var(--line); padding: 10px 14px; border-radius: 10px; z-index: 50; overflow-wrap: anywhere; pointer-events: none; box-shadow: 0 6px 20px rgba(0,0,0,.4); }
 

@@ -22,13 +22,19 @@ export async function render(el) {
     <p class="small muted">Sao lưu lần cuối: ${last ? fmtDate(last) : 'chưa bao giờ'} · Lưu trữ bền vững: ${persisted ? 'có' : 'chưa'}</p>
     <div class="row wrap"><button class="primary" data-act="export">Sao lưu (xuất JSON)</button>
       <label class="btn">Khôi phục từ file<input type="file" accept="application/json,.json" hidden data-act="import"></label></div>
-    ${snap ? `<p class="small muted">Có bản dự phòng trước lần khôi phục ${fmtDate(snap)}.</p>
-    <div class="row wrap"><button data-act="undoRestore">Hoàn tác khôi phục</button></div>` : ''}
+    ${snap ? `<div class="restore-snapshot">
+      <p class="small">Bản dự phòng trước lần khôi phục <span class="muted">${fmtDate(snap)}</span></p>
+      <button class="restore-undo" data-act="undoRestore">
+        <svg class="dashboard-icon" aria-hidden="true"><use href="#i-undo"/></svg>Hoàn tác khôi phục
+      </button>
+    </div>` : ''}
   </section>
   ${errs.length ? `<h2>Nhật ký lỗi</h2>
   <section class="card error-log">
-    ${errs.map((e) => `<p class="small"><span class="muted">${fmtDate(e.at)} · ${h(e.where)}</span><br>${h(e.msg)}</p>`).join('')}
-    <div class="row wrap"><button class="ghost" data-act="clearErrors">Xoá nhật ký</button></div>
+    <ul class="error-list" role="list">
+      ${errs.map((e) => `<li><small class="muted">${fmtDate(e.at)} · ${h(e.where)}</small><p>${h(e.msg)}</p></li>`).join('')}
+    </ul>
+    <div class="error-log-actions"><button class="ghost danger" data-act="clearErrors">Xoá nhật ký</button></div>
   </section>` : ''}
   <h2>Bài tập tự tạo</h2>
   ${custom.map((e) => `<div class="card row"><span class="grow">${h(e.name)} <small class="muted">${h(e.muscle)}</small></span><button class="ghost icon danger" data-del="${h(e.id)}">✕</button></div>`).join('') || '<p class="muted small">Chưa có. Tạo bài mới khi chọn bài tập trong buổi tập.</p>'}`;
