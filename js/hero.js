@@ -29,7 +29,9 @@ export const STANDARDS = {
 
 /**
  * Bài tính cảnh giới (theo tên): std = bài chuẩn, f = hệ số quy đổi (~1RM ÷ f = ~1RM chuẩn tương đương),
- * hands = 2 nếu tạ ghi theo 1 quả tạ đơn nhưng hệ số tính tổng 2 tay, m = mạch. Bài khác chỉ cho Linh khí.
+ * hands = 2 nếu tạ ghi theo 1 quả tạ đơn nhưng hệ số tính tổng 2 tay, m = mạch,
+ * bwf = phần cân nặng cơ thể nằm trong tải (mặc định 1 với chuẩn thân người, 0 với còn lại). Bài khác chỉ cho Linh khí.
+ * Bài phụ (máy, cáp, tạ đơn) là quy đổi ước lượng thô — đủ để xếp cảnh giới, không phải chuẩn chính xác.
  */
 export const LIFTS = [
   [/^squat\b/, 'squat', 1, 'legs'], [/^front squat/, 'squat', 0.8, 'legs'], [/^leg press/, 'squat', 2, 'legs'],
@@ -39,7 +41,14 @@ export const LIFTS = [
   [/^overhead press/, 'ohp', 1, 'shoulders'], [/^dumbbell shoulder press/, 'ohp', 0.7, 'shoulders', 2],
   [/^barbell row/, 'row', 1, 'back'], [/^t-bar row/, 'row', 1, 'back'], [/^dumbbell row/, 'row', 0.45, 'back'], [/^pull-?up/, 'pullup', 1, 'back'],
   [/^barbell curl/, 'curl', 1, 'biceps'], [/^dumbbell curl/, 'curl', 0.45, 'biceps'],
-].map(([re, std, f, m, hands = 1]) => ({ re, std, f, m, hands }));
+  [/^incline dumbbell press/, 'bench', 0.65, 'chest', 2], [/^chest fly/, 'bench', 0.45, 'chest'], [/^(hít đất|push-?up)/, 'bench', 1, 'chest', 1, 0.64],
+  [/^lat pulldown/, 'pullup', 0.9, 'back', 1, 0], [/^seated cable row/, 'row', 0.9, 'back'],
+  [/^lateral raise/, 'ohp', 0.6, 'shoulders', 2], [/^rear delt fly/, 'ohp', 0.45, 'shoulders', 2], [/^face pull/, 'ohp', 0.6, 'shoulders'],
+  [/^bulgarian split squat/, 'squat', 0.5, 'legs', 2], [/^leg extension/, 'squat', 0.7, 'legs'], [/^leg curl/, 'squat', 0.5, 'legs'],
+  [/^hip thrust/, 'squat', 1.3, 'legs'], [/^calf raise/, 'squat', 1.2, 'legs'],
+  [/^hammer curl/, 'curl', 0.5, 'biceps'], [/^cable curl/, 'curl', 0.8, 'biceps'],
+  [/^triceps pushdown/, 'bench', 0.4, 'triceps'], [/^overhead triceps extension/, 'bench', 0.3, 'triceps'],
+].map(([re, std, f, m, hands = 1, bwf]) => ({ re, std, f, m, hands, bwf: bwf ?? (STANDARDS[std].bw ? 1 : 0) }));
 
 /** Thất mạch: key = data-muscle (insights.MUSCLE), w = trọng số Tu vi, main = bài chuẩn gợi ý Bình cảnh khi chưa có dữ liệu. */
 export const MERIDIANS = [
@@ -72,6 +81,21 @@ export function progress(v, t) {
   const lo = i ? t[i - 1] : 0;
   return i + (v - lo) / (t[i] - lo);
 }
+
+/** Ngược của progress: giá trị cần để đạt vị trí p. */
+export function ratioAt(p, t) {
+  if (!(p > 0)) return 0;
+  const i = Math.min(5, Math.floor(p)), f = p - i;
+  if (i === 5) return t[4] + f * (t[4] - t[3]);
+  const lo = i ? t[i - 1] : 0;
+  return lo + f * (t[i] - lo);
+}
+
+/** Số bài tối thiểu mỗi mạch phải luyện: cảnh giới mạch = trung bình 2 bài mạnh nhất (thiếu bài = 0). */
+export const PAIR = 2;
+
+/** Mạch của một bài: theo bảng quy đổi nếu có, không thì theo nhóm cơ. */
+export const meridianOf = (ex) => liftOf(ex)?.m || MUSCLE[ex?.muscle]?.key || 'other';
 
 /** {p, lv, realm:{i,name}, phase:{i,name}, label, tribulation} từ p. */
 export function rank(p) {
@@ -140,31 +164,37 @@ export function linhKhi(done, exMap, { schedule = {}, weekGoal = 3 } = {}) {
  *   meridians: [{key, name, ...rank, ratio, best, canCo, shaky, xp, next}] × 7 (thứ tự MERIDIANS)
  * } — chi tiết từng trường ở NOTES.md.
  */
-export function hero({ workouts = [], exercises = [], body = [], sex, schedule = {}, weekGoal = 3, now = Date.now() } = {}) {
+export function hero({ workouts = [], exercises = [], body = [], sex, schedule = {}, weekGoal = 3, dao = null, now = Date.now() } = {}) {
   const exMap = Object.fromEntries(exercises.map((e) => [e.id, e]));
   const done = workouts.filter((w) => w.end && w.start <= now).sort((a, b) => a.start - b.start);
   const bw = bwAt(body.filter((b) => b.date <= now), now);
   const lk = linhKhi(done, exMap, { schedule, weekGoal });
+  // Công pháp (dao.path): chỉ các bài đã chọn mới xét cảnh giới; chưa Nhập môn → mọi bài có quy đổi đều xét.
+  const path = dao?.path && typeof dao.path === 'object' ? dao.path : null;
+  const counted = (key, id) => !path?.[key]?.length || path[key].includes(id);
+  // Trắc linh căn: mức tạ tự khai lúc Nhập môn = một "buổi" ảo ở dao.at, chỉ dùng cho kỷ lục/Căn cơ (không Linh khí, không nhiệm vụ).
+  const tested = dao?.at <= now && Array.isArray(dao.tested) && dao.tested.length
+    ? [{ id: 'dao', start: dao.at, tested: true, entries: dao.tested.map((t) => ({ exerciseId: t.exerciseId, sets: [{ w: +t.w || 0, r: +t.r || 0, done: true }] })) }] : [];
 
-  // Kỷ lục từng mạch: set có p cao nhất (theo cân nặng lúc tập); n = ~1RM chuẩn / ngưỡng Kết Đan (so sánh được giữa các bài, không phụ thuộc cân nặng) cho Căn cơ.
+  // Kỷ lục từng bài: set có p cao nhất (theo cân nặng lúc tập); n = ~1RM chuẩn / ngưỡng Kết Đan (so sánh được giữa các bài, không phụ thuộc cân nặng) cho Căn cơ.
   const rec = {}, recent = {}, cut = now - 90 * D;
-  for (const w of done) {
+  for (const w of [...tested, ...done]) {
     const bwT = bwAt(body, w.start);
     for (const e of w.entries) {
       const ex = exMap[e.exerciseId], L = liftOf(ex);
-      if (!L) continue;
-      const t = thresholds(L.std, sex), isBw = STANDARDS[L.std].bw;
+      if (!L || !counted(L.m, e.exerciseId)) continue;
+      const t = thresholds(L.std, sex);
       for (const s of doneSets(e)) {
-        const load = isBw ? (bwT || 0) + (+s.w || 0) : (+s.w || 0) * L.hands;
+        const load = L.bwf * (bwT || 0) + (+s.w || 0) * L.hands;
         const one = e1rm(load, Math.min(+s.r, MAX_REPS)), eq = one / L.f;
         if (!(eq > 0)) continue;
         const n = eq / t[2];
         if (w.start >= cut) recent[L.m] = Math.max(recent[L.m] || 0, n);
-        const cur = rec[L.m] || (rec[L.m] = { n: 0, p: -1 });
+        const cur = rec[e.exerciseId] || (rec[e.exerciseId] = { m: L.m, ex, L, n: 0, p: -1 });
         cur.n = Math.max(cur.n, n);
         if (!bwT) continue;
         const ratio = eq / bwT, p = progress(ratio, t);
-        if (p > cur.p) Object.assign(cur, { p, ratio, best: { exerciseId: e.exerciseId, name: ex.name, w: +s.w, r: +s.r, kg: r1(one), eq: r1(eq), ratio: r2(ratio), bw: bwT, t: w.start, workoutId: w.id } });
+        if (p > cur.p) Object.assign(cur, { p, ratio, best: { exerciseId: e.exerciseId, name: ex.name, w: +s.w, r: +s.r, kg: r1(one), eq: r1(eq), ratio: r2(ratio), bw: bwT, t: w.start, workoutId: w.tested ? null : w.id, tested: !!w.tested } });
       }
     }
   }
@@ -173,23 +203,34 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
     const xp = lk.byMeridian[M.key] || 0;
     if (M.key === 'core') {
       const p = progress(xp, CORE_XP), rk = rank(p), ni = rk.realm.i;
-      return { key: M.key, name: M.name, ...rk, ratio: null, best: null, canCo: null, shaky: false, xp,
+      return { key: M.key, name: M.name, ...rk, ratio: null, best: null, canCo: null, shaky: false, xp, lifts: [], need: 0,
         next: ni < 5 ? { realm: REALMS[ni + 1], xp: CORE_XP[ni], left: CORE_XP[ni] - xp } : null };
     }
-    const R = rec[M.key], p = R && R.p > 0 ? R.p : 0, rk = rank(p);
-    const canCo = R?.n ? Math.round(((recent[M.key] || 0) / R.n) * 100) : null;
-    // Bình cảnh: kg cần (1 rep, cân nặng hiện tại) ở bài đang giữ kỷ lục, hoặc bài chuẩn của mạch.
+    // Cảnh giới mạch = trung bình PAIR bài mạnh nhất (bài thiếu tính 0) → phải luyện đủ bài mới lên được.
+    const all = Object.values(rec).filter((r) => r.m === M.key), lifts = all.filter((r) => r.p > 0).sort((a, b) => b.p - a.p);
+    const top = lifts.slice(0, PAIR), p = top.reduce((a, r) => a + r.p, 0) / PAIR, rk = rank(p);
+    const nMax = Math.max(0, ...all.map((r) => r.n));
+    const canCo = nMax ? Math.round(((recent[M.key] || 0) / nMax) * 100) : null;
+    // Bình cảnh: bài cần nâng để mạch lên cảnh giới kế (1 rep, cân nặng hiện tại).
+    //  - bài mạnh nhất đã ≥ mốc → nâng bài thứ hai tới 2·mốc − bài mạnh nhất;
+    //  - chưa → cả hai bài cùng phải tới mốc (pair = true), gợi ý bài mạnh nhất (hoặc bài chuẩn).
     let next = null;
-    const ex = R?.best ? exMap[R.best.exerciseId] : exercises.find((e) => M.main?.test(e.name.trim().toLowerCase()) && !e.custom);
-    const L = liftOf(ex), ni = rk.realm.i;
+    const ni = rk.realm.i, P = ni + 1, [A, B] = lifts;
+    const pool = exercises.filter((e) => !e.custom && liftOf(e)?.m === M.key && counted(M.key, e.id) && e.id !== A?.ex.id)
+      .sort((a, b) => (path?.[M.key]?.indexOf(a.id) ?? 0) - (path?.[M.key]?.indexOf(b.id) ?? 0) || LIFTS.indexOf(liftOf(a)) - LIFTS.indexOf(liftOf(b))); // Công pháp trước, rồi theo thứ tự ưu tiên LIFTS
+    const pair = !A || A.p < P;
+    const ex = pair ? A?.ex || pool[0] : B?.ex || pool[0];
+    const L = liftOf(ex);
     if (L && bw && ni < 5) {
-      const ratio = thresholds(L.std, sex)[ni], eq = ratio * bw * L.f;
-      const bwLift = STANDARDS[L.std].bw;
-      const kgAt = (r) => { const load = r === 1 ? eq : eq / (1 + r / 30); return ceilHalf(Math.max(0, bwLift ? load - bw : load / L.hands)); };
-      next = { realm: REALMS[ni + 1], ratio, exerciseId: ex.id, name: ex.name, kg: kgAt(1), added: !!bwLift, perHand: L.hands === 2,
+      const pNeed = pair ? P : Math.max(2 * P - A.p, 1e-6);
+      const ratio = ratioAt(Math.min(pNeed, 5.99), thresholds(L.std, sex)), eq = ratio * bw * L.f;
+      const kgAt = (r) => { const load = r === 1 ? eq : eq / (1 + r / 30); return ceilHalf(Math.max(0, (load - L.bwf * bw) / L.hands)); };
+      next = { realm: REALMS[P], ratio: r2(ratio), exerciseId: ex.id, name: ex.name, kg: kgAt(1), added: L.bwf > 0, perHand: L.hands === 2, pair,
         alt: { r: CHALLENGE_REPS, kg: kgAt(CHALLENGE_REPS) } };
     }
-    return { key: M.key, name: M.name, ...rk, ratio: R?.ratio != null ? r2(R.ratio) : null, best: R?.best || null, canCo, shaky: canCo != null && canCo < SHAKY, xp, next };
+    return { key: M.key, name: M.name, ...rk, ratio: A?.ratio != null ? r2(A.ratio) : null, best: A?.best || null, canCo, shaky: canCo != null && canCo < SHAKY, xp,
+      lifts: top.map((r) => ({ exerciseId: r.ex.id, name: r.ex.name, ...rank(r.p), ratio: r2(r.ratio), kg: r.best.kg, tested: r.best.tested })),
+      need: Math.max(0, PAIR - lifts.length), next };
   });
 
   const wSum = MERIDIANS.reduce((a, m) => a + m.w, 0);
@@ -249,30 +290,37 @@ export function breakthroughs(seen, profile) {
  *  canCo    — tập ≥1 buổi có mạch Căn cơ thấp nhất (chưa có Căn cơ → mạch lâu chưa tập nhất), khác mạch nhiệm vụ 2.
  * Trả về {quests:[{id, title, detail, meridian, goal, done, complete}], done, total}.
  */
-export function quests({ workouts = [], exercises = [], profile, schedule = {}, weekGoal = 3, now = Date.now() } = {}) {
+export function quests({ workouts = [], exercises = [], profile, base = null, schedule = {}, weekGoal = 3, now = Date.now() } = {}) {
   const exMap = Object.fromEntries(exercises.map((e) => [e.id, e]));
   const done = workouts.filter((w) => w.end && w.start <= now).sort((a, b) => a.start - b.start);
   const wk = weekKey(now), week = done.filter((w) => weekKey(w.start) === wk);
-  const keyOf = (id) => MUSCLE[exMap[id]?.muscle]?.key;
+  const keyOf = (id) => meridianOf(exMap[id]);
   const trains = (w, key) => w.entries.some((e) => keyOf(e.exerciseId) === key && doneSets(e).length);
   const days = new Set(week.filter((w) => w.entries.some((e) => doneSets(e).length)).map((w) => new Date(w.start).toDateString()));
-  const named = (key) => profile.meridians.find((m) => m.key === key);
   const list = [];
 
   const planned = Object.keys(schedule || {}).length, goal1 = planned || Math.max(1, weekGoal || 0);
   list.push({ id: 'schedule', title: `Tập đủ ${goal1} buổi tuần này`, detail: planned ? 'Theo lịch tập' : 'Theo mục tiêu tuần', meridian: null, goal: goal1, done: Math.min(goal1, days.size) });
 
-  const body = profile.meridians.filter((m) => m.key !== 'core');
+  // Chọn mạch theo hồ sơ đầu tuần (base) để nhiệm vụ không đổi giữa tuần khi số liệu thay đổi.
+  const body = (base || profile).meridians.filter((m) => m.key !== 'core');
   const weak = [...body].sort((a, b) => a.p - b.p || weight(b.key) - weight(a.key))[0];
-  const beat = week.some((w) => analyzeWorkout(w, done).some((o) => o.res && keyOf(o.exerciseId) === weak.key));
-  const hint = weak.best?.name || weak.next?.name;
-  list.push({ id: 'overload', title: `Vượt lần trước ở mạch ${weak.name}`, detail: hint ? `Gợi ý: ${hint}` : `Mạch yếu nhất · ${weak.label}`, meridian: weak.key, goal: 1, done: beat ? 1 : 0 });
+  const hint = weak.next?.name || weak.best?.name || exercises.filter((e) => !e.custom && liftOf(e)?.m === weak.key).sort((a, b) => LIFTS.indexOf(liftOf(a)) - LIFTS.indexOf(liftOf(b)))[0]?.name;
+  if (weak.need) {
+    // Mạch chưa đủ bài để xét cảnh giới → "Khai mạch": tập bài còn thiếu (chưa có lần trước thì không thể "vượt").
+    const opened = week.some((w) => w.entries.some((e) => e.exerciseId === weak.next?.exerciseId && doneSets(e).length));
+    const any = week.some((w) => trains(w, weak.key));
+    list.push({ id: 'overload', kind: 'open', title: `Khai mạch ${weak.name}`, detail: hint ? `Luyện ${hint}` : `Còn thiếu ${weak.need} bài`, meridian: weak.key, goal: 1, done: (weak.next ? opened : any) ? 1 : 0 });
+  } else {
+    const beat = week.some((w) => analyzeWorkout(w, done).some((o) => o.res && keyOf(o.exerciseId) === weak.key));
+    list.push({ id: 'overload', kind: 'beat', title: `Vượt lần trước ở mạch ${weak.name}`, detail: hint ? `Gợi ý: ${hint}` : `Mạch yếu nhất · ${weak.label}`, meridian: weak.key, goal: 1, done: beat ? 1 : 0 });
+  }
 
   const rest = body.filter((m) => m.key !== weak.key);
   const last = (key) => done.filter((w) => trains(w, key)).at(-1)?.start ?? -Infinity;
   const withCc = rest.filter((m) => m.canCo != null).sort((a, b) => a.canCo - b.canCo || last(a.key) - last(b.key));
   const low = withCc[0] || [...rest].sort((a, b) => last(a.key) - last(b.key) || weight(b.key) - weight(a.key))[0];
-  list.push({ id: 'canCo', title: `Thêm buổi cho mạch ${low.name}`, detail: low.canCo != null ? `Căn cơ ${low.canCo}%` : 'Lâu chưa tập', meridian: low.key, goal: 1, done: week.some((w) => trains(w, low.key)) ? 1 : 0 });
+  list.push({ id: 'canCo', title: `Thêm buổi cho mạch ${low.name}`, detail: low.canCo != null ? `Căn cơ ${low.canCo}%` : last(low.key) > -Infinity ? 'Lâu chưa tập' : 'Chưa từng luyện', meridian: low.key, goal: 1, done: week.some((w) => trains(w, low.key)) ? 1 : 0 });
 
   for (const q of list) q.complete = q.done >= q.goal;
   return { quests: list, done: list.filter((q) => q.complete).length, total: list.length };

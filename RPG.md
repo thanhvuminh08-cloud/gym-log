@@ -121,3 +121,25 @@ Bụng: cảnh giới theo Linh khí mạch — ngưỡng Luyện Khí/Trúc Cơ
 - `snapshot(profile)` / `breakthroughs(seen, profile)` → `[{ key: 'tuvi'|mạch, name, from, to, realm, tribulation, real }]`, quan trọng nhất trước. `realm` = lên cảnh giới (false = lên kỳ); `tribulation` = độ kiếp (lên Kết Đan trở lên). `real` = dòng số thật (`Squat 1,67×BW · ~1RM 116,7 kg`). Claude sẽ lưu mốc ở `gym.heroSeen` và gọi màn khi mở Động phủ / xong buổi. Markup gợi ý: `.breakthrough-modal.modal[data-tribulation]`, nút đóng `data-act="closeBreak"`; rung lôi kiếp do Claude.
 - `quests({ workouts, exercises, profile, schedule, weekGoal, now })` → `{ quests: [{ id: 'schedule'|'overload'|'canCo', title, detail, meridian, goal, done, complete }] × 3, done, total }` — nhiệm vụ tuần T2–CN, không thưởng Linh khí (chỉ hiển thị). Đặt trong Động phủ (`[data-quests]`, mỗi mục `[data-quest=<id>]`), có thể thêm `done/total` vào thẻ Tu luyện ở Hôm nay.
 - Microcopy: `settings.lore` (mặc định false), `term(k, on)` với k = `start|rest|finish` → `Bắt đầu/Bế quan`, `Nghỉ/Điều tức`, `Kết thúc/Xuất quan`. Cài đặt: checkbox `data-k="lore"`; đổi giới tính: `<select data-k="sex">` (m/f) — handler đã nhận giá trị chuỗi.
+
+## 5. Nhập môn, Trắc linh căn, Công pháp (đợt 3 — logic xong ở `js/dao.js` + `js/hero.js`)
+Ý tưởng: lần đầu mở app như khai báo với PT nhưng bằng văn phong tu tiên; xếp cảnh giới ngay từ đầu (người tập lâu năm không phải bắt đầu ở Luyện Khí); người dùng tự chọn bài cho từng mạch (không ép Deadlift); mạch phải luyện ≥ 2 bài mới lên được.
+
+**Luật mới (đã áp dụng cho mọi người dùng):**
+- **Cảnh giới mạch = trung bình 2 bài mạnh nhất** của mạch (`PAIR = 2`, bài thiếu tính 0). Chỉ Squat 1,67×BW → mạch Chân Luyện Khí Hậu kỳ; thêm Front Squat mới lên. Tu vi vẫn là trung bình có trọng số các mạch.
+- **Công pháp** (`settings.dao.path = {chest:[exerciseId…], …}`): chỉ bài trong Công pháp được xét cảnh giới (bài khác vẫn cho Linh khí). Chưa Nhập môn → mọi bài có quy đổi đều xét.
+- Bảng quy đổi mở rộng gần đủ thư viện (máy/cáp/tạ đơn là ước lượng thô); thêm `bwf` cho bài thân người (Hít đất = 64% cân nặng).
+- **Bình cảnh** chỉ sang bài cần nâng: bài mạnh nhất đã qua mốc → bài thứ hai cần `2·mốc − bài mạnh nhất`; chưa → cả hai cùng tới mốc (`next.pair = true`, gợi ý bài mạnh nhất).
+- **Trắc linh căn**: mức tạ tự khai (`dao.tested`) = một buổi ảo ở `dao.at`, tính kỷ lục + Căn cơ (90 ngày sau không tập lại thì Căn cơ tụt — tự khai mà không luyện sẽ "lung lay"), không cho Linh khí.
+- **Nhiệm vụ "Khai mạch"**: mạch yếu nhất chưa đủ 2 bài → `kind: 'open'`, "Khai mạch Tay sau · Luyện Dips" (thay "Vượt lần trước" khi chưa có lần trước). Nhiệm vụ chọn mạch theo hồ sơ đầu tuần nên không đổi giữa tuần.
+
+**Hợp đồng dữ liệu cho Codex** (`import * as G from '../dao.js'`):
+- `settings.dao = { at, name, height, age, experience, goal, days, path, tested:[{exerciseId, w, r}] }` (null = chưa Nhập môn; `G.entered(settings.get())`).
+- Lựa chọn: `G.EXPERIENCE` (Thời gian tu đạo: `{id, label, real, test}` — `test=false` thì bỏ bước Trắc linh căn), `G.GOALS` (Đạo tâm: `{id, label, real}`), số buổi bế quan/tuần 2–6 (`G.DAYS`).
+- `G.pathOptions(exercises)` → `[{key, name, min: 2, options:[{id, name, ranked, main}]}] × 7`; `ranked=false` = bài không xét cảnh giới (ghi chú "chỉ cho Linh khí"). `G.defaultPath(exercises)` để tick sẵn. `G.validatePath(path, exercises)` → `{ok, problems:[{key, name, have, need}]}` — nút tiếp tục tắt khi `!ok`, ghi "Mạch Lưng cần thêm 1 bài".
+- `G.testList(path, exercises)` → `[{exerciseId, name, meridian, meridianName, bodyweight, perHand}]` — mỗi bài 2 ô "kg × rep tốt nhất gần đây" (bodyweight → "kg đeo thêm", perHand → "kg mỗi tay"), được bỏ trống.
+- `G.assess({dao, exercises, body, sex, now})` → `{tuvi, meridians:[{key, name, label, p, need}], top:{name, label}|null, verdict}` cho màn kết quả (ấn triện + lời phán + "Thiên phú: mạch Chân").
+- `G.buildPlan({path, days, goal, experience}, exercises)` → `{templates:[{id, name, items}], schedule}` để xem trước giáo án tự sinh.
+- `hero()` mỗi mạch thêm `lifts: [{exerciseId, name, label, ratio, kg, tested}]` (tối đa 2), `need` (số bài còn thiếu), `next.pair`, `best.tested` (kỷ lục tự khai → nhãn nhỏ "tự khai").
+
+**Luồng UI đề xuất** (route `#/nhap-mon`, view `js/views/dao.js` export `render`): 1. Nhập môn — Đạo hiệu (tuỳ chọn) · 2. Thân thể — giới tính, Thân trọng (kg), Thân cao (cm), Tuổi · 3. Đạo hạnh — Thời gian tu đạo, Đạo tâm, số buổi bế quan/tuần · 4. Chọn Công pháp — 7 mạch, mỗi mạch tick ≥ 2 bài · 5. Trắc linh căn (bỏ qua nếu `test=false`) · 6. Kết quả + giáo án tự sinh, nút "Nhận công pháp" / "Để sau". Markup: mỗi bước `[data-dao-step=<1..6>]`; input `name=name|sex|weight|height|age|experience|goal|days`; tick bài `input[type=checkbox][data-path=<mạch>][value=<exerciseId>]`; mức tạ `[data-test=<exerciseId>]` có 2 input `name=w`, `name=r`; nút `data-act="daoNext|daoBack|daoSkip|daoSave"`. Claude nối: lưu, tạo giáo án + lịch, đặt mốc `gym.heroSeen` (không ăn mừng cảnh giới khởi đầu), tự chuyển tới `#/nhap-mon` ở lần mở đầu, mục "Sửa Công pháp" trong Cài đặt/Động phủ.

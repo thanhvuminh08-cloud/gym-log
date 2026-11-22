@@ -190,7 +190,8 @@ try {
     const H = await import('./js/hero.js');
     const D = 864e5, t0 = new Date(2026, 0, 5, 18).getTime(); // thứ Hai
     const X = (id, name, muscle) => ({ id, name, muscle });
-    const exercises = [X('sq', 'Squat', 'Chân'), X('bp', 'Bench Press (đòn)', 'Ngực'), X('pu', 'Pull-up', 'Lưng'), X('dc', 'Dumbbell Curl', 'Tay trước'), X('pl', 'Plank', 'Bụng'), X('lr', 'Lateral Raise', 'Vai')];
+    const exercises = [X('sq', 'Squat', 'Chân'), X('bp', 'Bench Press (đòn)', 'Ngực'), X('pu', 'Pull-up', 'Lưng'), X('dc', 'Dumbbell Curl', 'Tay trước'), X('pl', 'Plank', 'Bụng'), X('lr', 'Lateral Raise', 'Vai'),
+      X('fs', 'Front Squat', 'Chân'), X('dr', 'Dumbbell Row', 'Lưng'), X('hc', 'Hammer Curl', 'Tay trước')];
     const S = (w, r) => ({ w, r, done: true }), E = (exerciseId, ...sets) => ({ exerciseId, sets });
     const W = (id, day, ...entries) => ({ id, start: t0 + day * D, end: t0 + day * D + 36e5, entries });
     const workouts = [W('1', 0, E('sq', S(100, 5)), E('bp', S(60, 1)), E('pl', S(0, 60), S(0, 60), S(0, 60)), E('lr', S(10, 12), S(10, 12))),
@@ -203,28 +204,58 @@ try {
     const got = [ex.label, ex.lv, r.tuvi.label, r.tuvi.lv, r.canCo, r.shaky, r.linhKhi.xp, r.linhKhi.level, r.linhKhi.into, r.linhKhi.need,
       m.legs.label, m.legs.lv, m.legs.canCo, m.legs.next.kg, m.back.label, m.back.next.kg, m.back.next.added, m.biceps.lv, m.biceps.next.kg, m.chest.label,
       m.shoulders.label, m.shoulders.xp, m.core.p, m.core.next.left, H.thresholds('squat', 'f')[2], H.thresholds('bench', 'f')[2].toFixed(2),
-      none.needsWeight, none.needsSex, none.meridians.length].join(',');
-    const want = ['Kết Đan · Sơ kỳ', 32, 'Trúc Cơ · Sơ kỳ', 21, 23, true, 470, 3, 87, 520,
-      'Kết Đan · Sơ kỳ', 33, 90, 180, 'Trúc Cơ · Đại viên mãn', 28, true, 40, 31, 'Trúc Cơ · Trung kỳ',
-      'Phàm nhân', 20, 0.06, 470, 1.125, '0.60', true, true, 7].join(',');
+      none.needsWeight, none.needsSex, none.meridians.length,
+      // Mạch = trung bình 2 bài mạnh nhất: Squat 1,67×BW một mình chỉ ra Luyện Khí; Bình cảnh chỉ sang bài thứ hai.
+      m.legs.need, m.legs.lifts.map((l) => l.label).join('|'), m.legs.next.name, m.legs.next.pair, m.triceps.need, m.triceps.next].join(',');
+    const want = ['Kết Đan · Sơ kỳ', 32, 'Luyện Khí · Sơ kỳ', 13, 18, true, 470, 3, 87, 520,
+      'Luyện Khí · Hậu kỳ', 17, 90, 37.5, 'Luyện Khí · Trung kỳ', 19, false, 20, 0.5, 'Luyện Khí · Sơ kỳ',
+      'Luyện Khí · Sơ kỳ', 20, 0.06, 470, 1.125, '0.60', true, true, 7,
+      1, 'Kết Đan · Sơ kỳ', 'Front Squat', false, 2, null].join(',');
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
     if (got !== want) return false;
     // Đợt 2: Đột phá, nhiệm vụ tuần, thử thách Bình cảnh, microcopy.
     const now = t0 + 30 * D + 72e5, p = H.hero({ workouts, exercises, body, sex: 'm', schedule: { 1: '' }, weekGoal: 2, now });
     const pm = Object.fromEntries(p.meridians.map((x) => [x.key, x]));
-    const snap = H.snapshot(p), low = { ...snap, legs: [2, 3], chest: [2, 0] };
+    const snap = H.snapshot(p), low = { ...snap, legs: [0, 0], back: [1, 0] };
     const ev = H.breakthroughs(low, p), q = H.quests({ workouts, exercises, profile: p, schedule: { 1: '' }, weekGoal: 2, now });
     const got2 = [H.breakthroughs(null, p).length, H.breakthroughs(snap, p).length, ev.map((e) => `${e.key}:${e.realm}:${e.tribulation}`).join('/'), ev[0].from, ev[0].to, ev[0].real,
       pm.legs.next.alt.r, pm.legs.next.alt.kg, p.challenge.key, p.challenge.pct,
-      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), H.term('start', true), H.term('rest', false)].join(',');
-    const want2 = [0, 0, 'legs:true:true/chest:false:false', 'Trúc Cơ · Đại viên mãn', 'Kết Đan · Sơ kỳ', 'Squat 1,67×BW · ~1RM 116,7 kg',
-      5, 154.5, 'biceps', 99, 'schedule:null:1/1/overload:shoulders:0/1/canCo:chest:0/1', 1, '2/1/0', 'Bế quan', 'Nghỉ'].join(',');
+      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), H.term('start', true), H.term('rest', false), `${q.quests[1].kind}:${q.quests[1].title}`].join(',');
+    const want2 = [0, 0, 'legs:true:false/back:false:false', 'Phàm nhân', 'Luyện Khí · Hậu kỳ', 'Squat 1,67×BW · ~1RM 116,7 kg',
+      5, 32, 'biceps', 99, 'schedule:null:1/1/overload:triceps:0/1/canCo:chest:0/1', 1, '2/0/0', 'Bế quan', 'Nghỉ', 'open:Khai mạch Tay sau'].join(',');
     if (got2 !== want2) lines.push(`  ${got2}\n  ≠ ${want2}`);
     // Phàm nhân không hiện kỳ → lên kỳ bên trong Phàm nhân không phải đột phá; lên Luyện Khí thì có.
     const fake = (i, ph) => ({ tuvi: { realm: { i }, phase: { i: ph }, label: i ? `${H.REALMS[i]} · ${H.PHASES[ph]}` : 'Phàm nhân' }, linhKhi: { level: 2 }, meridians: [] });
-    const got3 = [H.breakthroughs({ tuvi: [0, 0] }, fake(0, 2)).length, H.breakthroughs({ tuvi: [0, 2] }, fake(1, 0)).map((e) => `${e.from}>${e.to}`).join()].join(',');
-    if (got3 !== '0,Phàm nhân>Luyện Khí · Sơ kỳ') { lines.push(`  Phàm nhân: ${got3}`); return false; }
+    const got3 = [H.breakthroughs({ tuvi: [0, 0] }, fake(0, 2)).length, H.breakthroughs({ tuvi: [0, 2] }, fake(1, 0)).map((e) => `${e.from}>${e.to}`).join(), H.breakthroughs({ tuvi: [2, 3] }, fake(3, 0))[0].tribulation].join(',');
+    if (got3 !== '0,Phàm nhân>Luyện Khí · Sơ kỳ,true') { lines.push(`  Phàm nhân: ${got3}`); return false; }
     return got2 === want2;
+  });
+  await step('Nhập môn: Công pháp ≥2 bài/mạch, Trắc linh căn, giáo án tự sinh', async () => {
+    const G = await import('./js/dao.js'), { DEFAULT_EXERCISES: ex } = await import('./js/exercises.js');
+    const id = (n) => ex.find((e) => e.name === n).id, now = new Date(2026, 2, 2, 9).getTime();
+    const dp = G.defaultPath(ex), bad = { ...dp, back: [id('Deadlift')] };
+    // Người không thích Deadlift: Lưng = Pull-up + Barbell Row. Khai mức tạ như một người tập lâu năm.
+    const path = { ...dp, back: [id('Pull-up'), id('Barbell Row')] };
+    const T = (n, w, r) => ({ exerciseId: id(n), w, r });
+    const dao = { at: now, path, tested: [T('Squat', 140, 5), T('Front Squat', 110, 3), T('Bench Press (đòn)', 100, 5), T('Incline Bench Press', 80, 5),
+      T('Pull-up', 20, 5), T('Barbell Row', 90, 5), T('Overhead Press', 60, 5), T('Dumbbell Shoulder Press', 26, 8),
+      T('Barbell Curl', 50, 8), T('Dumbbell Curl', 20, 8), T('Dips', 30, 8), T('Close-Grip Bench Press', 90, 5)] };
+    const body = [{ date: now, weight: 80 }];
+    const a = G.assess({ dao, exercises: ex, body, sex: 'm', now });
+    // Deadlift 300 kg trong lịch sử không được tính vì không thuộc Công pháp.
+    const dl = { id: 'd', start: now + 1, end: now + 2, entries: [{ exerciseId: id('Deadlift'), sets: [{ w: 300, r: 1, done: true }] }] };
+    const b = G.assess({ dao, exercises: ex, body, sex: 'm', workouts: [dl], now: now + 3 });
+    const plan = G.buildPlan({ path, days: 4, goal: 'strength', experience: 'veteran' }, ex);
+    const tl = G.testList(path, ex);
+    const got = [G.validatePath(dp, ex).ok, G.validatePath(bad, ex).problems.map((p) => `${p.key}:${p.need}`).join(), Object.values(dp).every((l) => l.length === 2),
+      a.tuvi.label, a.top.name, a.meridians.find((m) => m.key === 'back').label, b.meridians.find((m) => m.key === 'back').label,
+      a.profile.meridians.find((m) => m.key === 'legs').best.tested, plan.templates.map((t) => `${t.name}:${t.items.length}`).join('/'),
+      Object.entries(plan.schedule).map(([d, t]) => `${d}=${plan.templates.findIndex((x) => x.id === t)}`).join(' '),
+      plan.templates[0].items[0].reps + '×' + plan.templates[0].items[0].sets, tl.length, tl.find((t) => t.name === 'Dips').bodyweight].join(',');
+    const want = [true, 'back:1', true, 'Kết Đan · Trung kỳ', 'Vai', 'Kết Đan · Hậu kỳ', 'Kết Đan · Hậu kỳ', true,
+      'Công pháp · Thượng thân A:5/Công pháp · Hạ thân A:3/Công pháp · Thượng thân B:5/Công pháp · Hạ thân B:3', '1=0 2=1 4=2 5=3', '5×4', 12, true].join(',');
+    if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
+    return got === want;
   });
   await step('Luật huy chương: chuỗi, mốc, tuần', async () => {
     const { medals } = await import('./js/medals.js');

@@ -7,8 +7,10 @@ import { sfx, music } from '../sfx.js';
 export async function loadProfile(now = Date.now()) {
   const [workouts, exercises, body] = await Promise.all([all('workouts'), all('exercises'), all('body')]);
   const s = settings.get(), ctx = { workouts, exercises, schedule: s.schedule, weekGoal: s.weekGoal, now };
-  const profile = hero({ ...ctx, body, sex: s.sex });
-  profile.weekly = quests({ ...ctx, profile });
+  const profile = hero({ ...ctx, body, sex: s.sex, dao: s.dao });
+  // Nhiệm vụ chọn mạch theo hồ sơ đầu tuần (T2 0h) để không đổi giữa tuần.
+  const base = hero({ ...ctx, body, sex: s.sex, dao: s.dao, now: Math.min(now, Math.max(weekStart(now), s.dao?.at || 0)) });
+  profile.weekly = quests({ ...ctx, profile, base });
   return profile;
 }
 
