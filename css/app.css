@@ -123,6 +123,7 @@ label.row { padding: 6px 0; }
 
 /* Công đức bạ */
 .gloss { color: var(--muted); font-size: .82rem; }
+[data-no-gloss] .gloss { display: none; } /* Tàng thư › Cài đặt › Chú giải tắt */
 .pham-seal {
   display: inline-grid; width: 1em; height: 1em; place-items: center; vertical-align: -.15em; flex: none;
   border-radius: 29%; border: 1px solid var(--tier-line, currentColor);

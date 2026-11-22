@@ -1,6 +1,6 @@
 import { seed, activeWorkout } from './db.js';
 import * as timer from './timer.js';
-import { countUp, toast, settings } from './util.js';
+import { countUp, toast, settings, applyGloss } from './util.js';
 import { logError } from './safety.js';
 import { NAV } from './lore.js';
 
@@ -97,6 +97,7 @@ async function route() {
   window.scrollTo(0, 0);
 }
 
+applyGloss();
 await seed();
 navigator.storage?.persist?.();
 timer.resume();

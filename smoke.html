@@ -109,14 +109,14 @@ try {
     const pairs = [['#/hero', '#/', '.cultivation'], ['#/history', '#/ky', 'a.card[href^="#/ky/"]'], [`#/history/${wid}`, `#/ky/${wid}`, 'section[data-muscle]'],
       ['#/report', '#/ky/tuan', '.report-stats'], ['#/report/-1', '#/ky/tuan/-1', '.report-stats, .empty, h1'], ['#/progress', '#/tang-thu', '.tabs'],
       ['#/progress/overview', '#/tang-thu/overview', '.year-grid'], ['#/progress/medal', '#/ky/cong-duc', '.medals'],
-      ['#/templates', '#/cong-phap', '[href="#/cong-phap/new"]'], ['#/templates/new', '#/cong-phap/new', 'input'], ['#/settings', '#/tang-thu/cai-dat', '[data-k=weekGoal]']];
+      ['#/templates', '#/cong-phap', '[href="#/cong-phap/new"]'], ['#/templates/new', '#/cong-phap/new', 'input'], ['#/settings', '#/tang-thu/cai-dat', '[data-k=gloss]']];
     const bad = [];
     for (const [from, to, sel] of pairs) {
       await go(from);
       if (!(await until(() => w.location.hash === to && $(sel))) || $('.error')) bad.push(`${from}→${w.location.hash}`);
     }
-    const back = w.history.length; await go('#/settings'); await until(() => w.location.hash === '#/tang-thu/cai-dat');
-    if (w.history.length !== back + 1) bad.push('chuyển hướng thêm mục lịch sử');
+    await go('#/ky/tuan'); await go('#/settings'); await until(() => w.location.hash === '#/tang-thu/cai-dat');
+    w.history.back(); await wait(300); if (w.location.hash !== '#/ky/tuan') bad.push(`Back sau chuyển hướng → ${w.location.hash}`); // replace, không thêm mục lịch sử
     await go('#/ky/tuan'); if (!$('nav a.on')) bad.push('nav không tô mục đang mở');
     if (bad.length) lines.push('  ' + bad.join(' '));
     return !bad.length;
@@ -169,19 +169,53 @@ try {
     const ok = Number(v?.dataset.count) > 70 && $('[data-strength-total]').textContent.includes('Bench') && !$('.sample-label');
     await go('#/history'); return ok;
   });
-  await step('Lịch tập: đặt ở Cài đặt → Hôm nay nhắc, bỏ → mời đặt lịch', async () => {
-    await go('#/'); if (!(await until(() => $('[data-schedule-today][data-state=none] a[href="#/tang-thu/cai-dat"]')))) return false;
+  await step('Lịch tập: đặt ở Công pháp → Hôm nay nhắc, bỏ → mời đặt lịch', async () => {
+    await go('#/'); if (!(await until(() => $('[data-schedule-today][data-state=none] a[href="#/cong-phap"]')))) return false;
     const dow = String(new Date().getDay());
-    await go('#/settings'); const row = await until(() => $(`[data-schedule] [data-day="${dow}"]`));
+    await go('#/cong-phap'); const row = await until(() => $(`[data-schedule] [data-day="${dow}"]`));
     const sel = row.querySelector('[data-f=tpl]'), tpl = [...sel.options].find((o) => o.textContent === 'Smoke A');
     if (!tpl) return false;
     sel.value = tpl.value; sel.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
     const saved = JSON.parse(w.localStorage.getItem('gym.settings')).schedule[dow] === tpl.value && row.querySelector('[data-f=on]').checked;
     await go('#/'); const card = await until(() => $('[data-schedule-today][data-state=done]')); // smoke đã tập hôm nay
     const ok = saved && !!card && $$('[data-week-plan] i').length === 7 && $(`[data-week-plan] i[data-day="${dow}"]`).dataset.state === 'done';
-    await go('#/settings'); const on = (await until(() => $(`[data-schedule] [data-day="${dow}"] [data-f=on]`)));
+    await go('#/cong-phap'); const on = (await until(() => $(`[data-schedule] [data-day="${dow}"] [data-f=on]`)));
     on.checked = false; on.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
     await go('#/'); return ok && !!(await until(() => $('[data-schedule-today][data-state=none]'))) && !$('.schedule-preview');
+  });
+  await step('Công pháp: sửa mục tiêu tuần; Cài đặt không còn lịch/mục tiêu', async () => {
+    await go('#/tang-thu/cai-dat'); const gone = !!(await until(() => $('[data-k=gloss]'))) && !$('[data-schedule]') && !$('[data-k=weekGoal]');
+    await go('#/cong-phap'); const g = await until(() => $('[data-goals] [data-k=weekGoal]'));
+    input(g, '5'); g.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    const s = JSON.parse(w.localStorage.getItem('gym.settings'));
+    input(g, '3'); g.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    return gone && s.weekGoal === 5 && JSON.parse(w.localStorage.getItem('gym.settings')).weekGoal === 3;
+  });
+  await step('Chú giải: mặc định hiện .gloss, tắt ở Cài đặt → ẩn, bật lại', async () => {
+    await go('#/ky/cong-duc'); const shown = !!(await until(() => $('.gloss')));
+    const el = w.document.body.appendChild(Object.assign(w.document.createElement('small'), { className: 'gloss' })); // phần tử thử, không bị gỡ khi đổi trang
+    const vis = () => w.getComputedStyle(el).display !== 'none';
+    const a = shown && vis();
+    await go('#/tang-thu/cai-dat'); const box = await until(() => $('[data-k=gloss]'));
+    box.checked = false; box.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    const off = w.document.documentElement.hasAttribute('data-no-gloss') && JSON.parse(w.localStorage.getItem('gym.settings')).gloss === false;
+    const b = vis();
+    box.checked = true; box.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    const c = vis(); el.remove();
+    return a && off && !b && c && !w.document.documentElement.hasAttribute('data-no-gloss');
+  });
+  await step('Bế quan: đánh dấu set xong → set sau còn trống tự điền kg × rep', async () => {
+    const { startWorkout } = await w.eval("import('./js/views/workout.js')");
+    await startWorkout({ template: { id: 't-fill', name: 'Điền', items: [{ exerciseId: 'x-face-pull', sets: 3, reps: 0, rest: 60 }] } });
+    await until(() => $$('.set:not(.head)').length === 3);
+    const rows = () => $$('.set:not(.head)'), val = (i) => [...rows()[i].querySelectorAll('input')].slice(0, 2).map((x) => x.value).join('×');
+    const blank = val(1);
+    const [a, b] = rows()[0].querySelectorAll('input'); input(a, 22.5); input(b, 12);
+    await check(0);
+    const got = [blank, val(1), val(2)].join(',');
+    $('[data-act=discard]').click(); await until(() => w.location.hash !== '#/workout');
+    if (got !== '×,22.5×12,×') lines.push(`  ${got}`);
+    return got === '×,22.5×12,×';
   });
   await step('Luật lịch tập tuần', async () => {
     const { weekPlan } = await import('./js/schedule.js');
@@ -257,9 +291,9 @@ try {
     const ev = H.breakthroughs(low, p), q = H.quests({ workouts, exercises, profile: p, schedule: { 1: '' }, weekGoal: 2, now });
     const got2 = [H.breakthroughs(null, p).length, H.breakthroughs(snap, p).length, ev.map((e) => `${e.key}:${e.realm}:${e.tribulation}`).join('/'), ev[0].from, ev[0].to, ev[0].real,
       pm.legs.next.alt.r, pm.legs.next.alt.kg, p.challenge.key, p.challenge.pct,
-      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), H.term('start', true), H.term('rest', false), `${q.quests[1].kind}:${q.quests[1].title}`].join(',');
+      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), `${q.quests[1].kind}:${q.quests[1].title}`].join(',');
     const want2 = [0, 0, 'legs:true:false/back:false:false', 'Bế mạch', 'Luyện Bì · Đại thành', 'Squat 1,67×BW · ~1RM 116,7 kg',
-      5, 32, 'biceps', 99, 'schedule:null:1/1/overload:triceps:0/1/canCo:chest:0/1', 1, '2/0/0', 'Bế quan', 'Nghỉ', 'open:Khai mạch Tay sau'].join(',');
+      5, 32, 'biceps', 99, 'schedule:null:1/1/overload:triceps:0/1/canCo:chest:0/1', 1, '2/0/0', 'open:Khai mạch Tay sau'].join(',');
     if (got2 !== want2) lines.push(`  ${got2}\n  ≠ ${want2}`);
     // Phàm nhân không hiện kỳ → lên kỳ bên trong Phàm nhân không phải đột phá; lên Luyện Khí thì có.
     const fake = (i, ph) => ({ tuvi: { realm: { i }, phase: { i: ph }, label: i ? `${H.REALMS[i]} · ${H.PHASES[ph]}` : 'Phàm nhân' }, linhKhi: { level: 2 }, meridians: [] });
@@ -343,7 +377,7 @@ try {
     const got = [r.cur.sessions, r.cur.sets, r.cur.vol, r.prev.sessions, r.beats, r.compared, r.rpe, r.weight.kg, r.weight.delta, r.days.map((d) => d.day).join(''), r.exercises[0].top.w].join(',');
     const want = [2, 2, 920, 1, 2, 2, 8.5, 69.5, -0.5, 'T2T5', 60].join(',');
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
-    return got === want && reportText(r).includes('Bench: 2 set');
+    return got === want && reportText(r).includes('Bench: 2 set') && reportText(r).includes('Thượng phẩm') && !/🥇|🥈|🥉/.test(reportText(r));
   });
   // Import trong iframe → cùng module với app, DB_NAME = gym-smoke.
   const mod = (p) => w.eval(`import('./js/${p}')`);

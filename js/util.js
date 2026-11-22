@@ -25,7 +25,7 @@ export function toast(msg, ms = 2200) {
 }
 
 const SKEY = 'gym.settings';
-const DEFAULTS = { rest: 90, sound: true, vibrate: true, weekGoal: 3, monthGoal: 12, schedule: {}, lore: false, music: false, sfx: true, dao: null, daoSkip: null };
+const DEFAULTS = { rest: 90, sound: true, vibrate: true, weekGoal: 3, monthGoal: 12, schedule: {}, gloss: true, music: false, sfx: true, dao: null, daoSkip: null };
 export const settings = {
   get() {
     try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SKEY) || '{}') }; } catch { return { ...DEFAULTS }; }
@@ -33,9 +33,13 @@ export const settings = {
   set(patch) {
     const v = { ...settings.get(), ...patch };
     try { localStorage.setItem(SKEY, JSON.stringify(v)); } catch {}
+    if ('gloss' in patch) applyGloss();
     return v;
   },
 };
+
+/** Chú giải (dòng nghĩa thật `.gloss`): tắt → <html data-no-gloss>, CSS ẩn đi. */
+export const applyGloss = () => document.documentElement.toggleAttribute('data-no-gloss', settings.get().gloss === false);
 
 const calm = () => matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const BUZZ = { gold: [80, 60, 80, 60, 160], silver: [80, 60, 120], bronze: [90] };

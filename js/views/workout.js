@@ -134,8 +134,12 @@ export async function render(el) {
         if (!(s.r > 0)) return toast('Nhập số rep trước');
       }
       s.done = !s.done;
+      // Set kế tiếp còn trống → tự điền kg × rep của set vừa xong (vẫn sửa được trước khi đánh dấu).
+      const nx = e.sets[si + 1], fill = s.done && nx && !nx.done && (nx.w === '' || nx.r === '');
+      if (fill) { if (nx.w === '') nx.w = s.w; if (nx.r === '') nx.r = s.r; }
       await save();
       row.outerHTML = setRow(e, ei, s, si);
+      if (fill) el.querySelector(`.set[data-ei="${ei}"][data-si="${si + 1}"]`).outerHTML = setRow(e, ei, nx, si + 1);
       if (s.done) {
         timer.start(e.rest);
         const res = result(e), lvl = TIERS[res?.tier] || 0;

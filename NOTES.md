@@ -24,6 +24,7 @@
 
 - Hướng mới (22/11): app thành **Luyện Thể Ký**, tu tiên là chủ đề chính; huy chương → Công đức bạ / phẩm / Liên kích / Đạo tâm / Thạch bi; nav 5 mục. Xem `VISION.md`.
 - Luyện Thể Ký bước 1 (Claude, 22/11): `js/lore.js` (NAV/PHAM/term/gloss), `TIER_LABEL = PHAM`, router `ROUTES` 5 mục + `ALIASES` route cũ (`location.replace`); `#/` tạm xếp chồng home + hero. Hợp đồng chi tiết cuối VISION.md.
+- Luyện Thể Ký bước 3 (Claude, 22/11): lịch bế quan + mục tiêu buổi chuyển từ Cài đặt sang Công pháp (`[data-schedule]`, `[data-goals]`); "Chú giải" `settings.gloss` (mặc định bật, thay `lore`) → `<html data-no-gloss>` ẩn `.gloss`; chữ chia sẻ Tuần ký dùng tên phẩm; bỏ `LORE/term` cũ trong js/hero.js (dùng lore.js); Bế quan: đánh dấu set xong → ô trống của set kế tự điền kg × rep.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -54,11 +55,11 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Claude] Luyện Thể Ký bước 3 (VISION.md): chuyển quyền sửa lịch/mục tiêu sang Công pháp, nối tuỳ chọn Chú giải cho `.gloss` (mặc định bật) và dùng tên phẩm trong nội dung chia sẻ Tuần ký.
+- [cho Codex] Công pháp: khối lịch bế quan (`[data-schedule]`) và "Mục tiêu bế quan" (`[data-goals]`) vừa chuyển từ Cài đặt sang, đang dùng lại class cũ — chỉnh cho hợp trang; Động phủ: `<p class="gloss">` đang chứa tên buổi dở, Chú giải tắt sẽ ẩn mất tên (js/views/home.js).
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md): đánh bóng ấn phẩm và tranh Thạch bi, thử trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 
 
 ## Ý tưởng sau khi dùng thực tế
-- Chơi thử vai fan tiên hiệp (22/11, Trắc linh căn + Khai mạch đã làm ở đợt 3): Set sau không tự điền theo set trước. Microcopy tu tiên nên mời bật ở lần đầu vào Động phủ.
+- Chơi thử vai fan tiên hiệp (22/11): set sau tự điền — đã làm ở Luyện Thể Ký bước 3; microcopy luôn bật nên bỏ ý "mời bật".
 - (ghi thêm ở đây khi tập)

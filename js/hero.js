@@ -418,6 +418,3 @@ export function quests({ workouts = [], exercises = [], profile, base = null, sc
   return { quests: list, done: list.filter((q) => q.complete).length, total: list.length };
 }
 
-/** Microcopy tu tiên (settings.lore, mặc định tắt). term('start', on) → 'Bế quan' | 'Bắt đầu'. */
-export const LORE = { start: ['Bắt đầu', 'Bế quan'], rest: ['Nghỉ', 'Điều tức'], finish: ['Kết thúc', 'Xuất quan'] };
-export const term = (k, on) => LORE[k]?.[on ? 1 : 0] ?? k;

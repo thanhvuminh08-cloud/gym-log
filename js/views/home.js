@@ -100,7 +100,7 @@ export async function render(el) {
       <div class="row schedule-heading">
         <span class="tile-icon">${icon('calendar')}</span>
         <div class="grow"><h2>Chưa đặt lịch tập</h2><p class="muted small">Chọn ngày tập để xem lời nhắc ở đây.</p></div>
-        <a class="btn" href="#/tang-thu/cai-dat">Đặt lịch</a>
+        <a class="btn" href="#/cong-phap">Đặt lịch</a>
       </div>
     </section>` : scheduleReminder(plan.state, plan.days, plan.templateId ? templates.find((t) => t.id === plan.templateId) : null, !cur)}
     ${remind ? `<a class="card row backup-reminder" href="#/tang-thu/cai-dat">
@@ -129,7 +129,7 @@ export async function render(el) {
         <small class="muted">7 ngày gần nhất</small>
       </section>
       <section class="card summary-card" data-session-goals>
-        <h2 class="section-heading">Mục tiêu tập <a class="goal-settings-link" href="#/tang-thu/cai-dat">Đổi mục tiêu</a></h2>
+        <h2 class="section-heading">Mục tiêu tập <a class="goal-settings-link" href="#/cong-phap">Đổi mục tiêu</a></h2>
         <div class="lift-top"><b><span data-session-count data-count="${sess.month}">${sess.month}</span><small> buổi tháng này</small></b></div>
         ${goal('week', 'Tuần này', sess.week, goals.weekGoal)}
         ${goal('month', 'Tháng này', sess.month, goals.monthGoal)}
