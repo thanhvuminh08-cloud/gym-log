@@ -17,7 +17,7 @@
 - Tu luyện (js/hero.js, hàm thuần): `hero()` → Tu vi, Thất mạch (cảnh giới theo ~1RM/cân nặng lúc tập, kỷ lục không rớt), Căn cơ 90 ngày, Bình cảnh (kg cần theo cân nặng hiện tại), Linh khí/Công lực. Hợp đồng ở cuối RPG.md.
 - Rung xong set: `tap()` (util.js) 25 ms theo cài đặt rung; set có huy chương mới chỉ rung `celebrate`. Tu luyện đợt 2 bước 1: `challenge`, `next.alt`, `snapshot/breakthroughs`, `quests`, `term` + `settings.lore` (hợp đồng cuối RPG.md).
 - Tu luyện đợt 2 nối xong: `loadProfile()` kèm `profile.weekly` (quests); `ceremony(profile)` (views/hero.js) so `gym.heroSeen` → mở tối đa 3 màn Đột phá/Độ kiếp (dialog gắn body, sống qua đổi trang), lần đầu / chưa đủ cân nặng-giới tính chỉ lưu mốc; gọi khi vào Động phủ và sau Kết thúc buổi. `gym.questSeen` {week, done} → `nhiem-vu.mp3` khi nhiệm vụ vừa xong. Âm (js/sfx.js): `music()` lặp dong-phu khi ở Động phủ (cleanup route dừng, tạm dừng khi ẩn tab), `sfx()` một lần; bị chặn tự phát → thử lại ở lần chạm đầu. Mặc định `music: false`, `sfx: true`. Độ kiếp rung + dot-pha ở 1,05/1,65/2,25 s.
-- Tu luyện đợt 3 (logic, RPG.md mục 5): `js/dao.js` Nhập môn — `settings.dao` {at, path, tested, experience, goal, days…}; mạch = TB 2 bài mạnh nhất trong Công pháp (`PAIR`), Trắc linh căn = buổi ảo từ mức tạ tự khai, nhiệm vụ "Khai mạch", `buildPlan` sinh giáo án + lịch. Chờ Codex dựng màn `#/nhap-mon`.
+- Tu luyện đợt 3 (RPG.md mục 5): `js/dao.js` tính hồ sơ, cảnh giới và giáo án/lịch Công pháp. `#/nhap-mon` có bản xem trước sáu bước; Động phủ hiện hai bài mạnh nhất, số bài còn thiếu và nhãn tự khai.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -45,7 +45,7 @@
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
-- [cho Codex] Dựng màn Nhập môn 6 bước (`#/nhap-mon`, `js/views/dao.js`) với số giả theo RPG.md mục 5; thẻ mạch ở Động phủ hiện 2 bài (`m.lifts`), cảnh báo `m.need` và nhãn "tự khai" (js/views/hero.js markup, css/).
+- [cho Claude] Nối Nhập môn qua `daoView(state)` trong `js/views/dao.js`: điều hướng và giữ thông tin sáu bước, bỏ bước 5 theo kinh nghiệm, xác thực Công pháp, lưu hồ sơ/giáo án/lịch và mốc `gym.heroSeen`, chuyển lần đầu và đổi link mẫu thành Sửa Công pháp; thêm smoke cho luồng.
 - [cho Codex] Tiêu đề chữ có chân (Georgia) vỡ dấu chồng tiếng Việt: "tuầ n", "Độ kiế p", "cấ p" ở Động phủ/màn Đột phá — đổi sang font serif có đủ tiếng Việt (vd. Noto Serif, RPG.md mục 4) (css/).
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 

@@ -21,6 +21,7 @@ const ROUTES = {
   settings: () => import('./views/settings.js'),
   report: () => import('./views/report.js'),
   hero: () => import('./views/hero.js'),
+  'nhap-mon': () => import('./views/dao.js'),
 };
 
 const main = document.getElementById('main');

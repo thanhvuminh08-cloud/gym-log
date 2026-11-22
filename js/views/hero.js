@@ -134,7 +134,7 @@ function loadText(next, kg) {
 }
 
 function meridianCard(m) {
-  const { next, best } = m;
+  const { next, lifts } = m;
   const progress = Math.round((m.p - m.realm.i) * 100);
   const target = next && ('kg' in next
     ? `${h(next.name)} ${loadText(next, next.kg)} × 1`
@@ -143,9 +143,11 @@ function meridianCard(m) {
     <div class="cultivation-meridian-head">
       <h3>${h(m.name)}</h3><strong>${h(m.label)}</strong>
     </div>
-    <p class="cultivation-lift">${best
-      ? `${h(best.name)} · ${m.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(best.kg)} kg`
-      : m.key === 'core' ? `${fmtNum(m.xp)} Linh khí` : 'Chưa có kỷ lục'}</p>
+    ${lifts?.length ? `<ul class="cultivation-lifts">${lifts.map((lift) => `<li class="cultivation-lift">
+      <span><b>${h(lift.name)}</b>${lift.tested ? ' <small class="cultivation-tested">tự khai</small>' : ''}</span>
+      <span>${lift.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(lift.kg)} kg</span>
+    </li>`).join('')}</ul>` : `<p class="cultivation-lift">${m.key === 'core' ? `${fmtNum(m.xp)} Linh khí` : 'Chưa có kỷ lục'}</p>`}
+    ${m.need > 0 ? `<p class="cultivation-path-warning">Còn thiếu ${m.need} bài để khai mạch.</p>` : ''}
     ${m.canCo != null ? `<p class="cultivation-condition${m.shaky ? ' is-shaky' : ''}">Căn cơ <b>${m.canCo}%</b>${m.shaky ? ' · Lung lay' : ''}</p>` : ''}
     ${next ? `<div class="cultivation-target">
       <div class="cultivation-target-label"><span>${target}</span><b>${h(next.realm)}</b></div>
@@ -228,7 +230,10 @@ function challengeCard(challenge, sample) {
 export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, challenge = SAMPLE_CHALLENGE, demo = true } = {}) {
   const { tuvi, canCo, shaky, linhKhi, meridians, bw } = profile;
   return `<article class="cultivation">
-    <a class="cultivation-back small" href="#/">← Hôm nay</a>
+    <div class="cultivation-navigation">
+      <a class="cultivation-back small" href="#/">← Hôm nay</a>
+      <a class="cultivation-back small" href="#/nhap-mon">Xem Nhập môn →</a>
+    </div>
     <header class="cultivation-cover">
       <span class="cultivation-mist" aria-hidden="true"></span>
       ${realmArt(tuvi.realm.i, 'cultivation-guardian')}

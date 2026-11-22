@@ -556,6 +556,12 @@ a.card.cultivation-link {
 .cultivation-meridian-head h3 { margin: 0; color: var(--muscle); }
 .cultivation-meridian-head strong { color: var(--gold); font-size: .875rem; }
 .cultivation-lift { margin: 4px 0 0; color: var(--muted); font-size: .85rem; }
+.cultivation-navigation { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; }
+.cultivation-lifts { list-style: none; padding: 0; margin: 5px 0; }
+.cultivation-lifts .cultivation-lift { display: grid; gap: 2px; padding: 6px 0; border-bottom: 1px solid var(--ink-line); }
+.cultivation-lift b { color: var(--text); }
+.cultivation-tested { color: var(--gold); }
+.cultivation-path-warning { margin: 6px 0; font-size: .85rem; color: var(--gold); }
 .cultivation-target { display: grid; gap: 5px; margin-top: 12px; font-size: .8rem; }
 .cultivation-target-label b { color: var(--jade); }
 .cultivation-profile { display: grid; gap: 8px; }
@@ -611,6 +617,63 @@ a.card.cultivation-link {
 @media (min-width: 600px) {
   .cultivation-meridians { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .cultivation-atlas ul { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Nhập môn */
+.dao-wizard { max-width: 590px; margin-inline: auto; }
+.dao-wizard :is(h1, h2, h3) { font-family: Cambria, "Times New Roman", serif; }
+.dao-cover {
+  padding: clamp(16px, 5vw, 26px); border: 1px solid var(--ink-line); border-radius: var(--r);
+  box-shadow: inset 0 0 0 4px #162521, 0 12px 24px #0005;
+  background: var(--mist) center bottom / cover, var(--mountains) center / cover #12282e;
+}
+.dao-cover-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: var(--jade); font-size: .85rem; }
+.dao-cover h1 { margin: 12px 0 5px; color: var(--gold); font-size: clamp(2rem, 8vw, 3.15rem); line-height: 1.06; }
+.dao-cover p { margin: 0 0 14px; text-shadow: 0 1px 3px #071218; }
+.dao-step { overflow-wrap: anywhere; }
+.dao-fields, .dao-tests { display: grid; gap: 12px; }
+.dao-field { display: grid; gap: 4px; min-width: 0; color: var(--jade); }
+.dao-field small, .dao-branch small, .dao-test small, .dao-template small { color: var(--muted); }
+.dao-branch { margin: 0 0 8px; border: 1px solid var(--ink-line); border-radius: 11px; padding: 0 11px; background: #101e23; }
+.dao-branch summary { min-height: 44px; padding: 10px 0; cursor: pointer; color: var(--gold); }
+.dao-branch[data-muscle] summary { color: var(--muscle); font-weight: 650; }
+.dao-branch summary small { margin-inline-start: 5px; }
+.dao-branch summary :is(.dao-need-one, .dao-need-all, .dao-path-warning) { color: var(--gold); }
+.dao-options { display: grid; grid-template-columns: 25px minmax(0, 1fr); align-items: center; gap: 0 7px; padding-bottom: 4px; }
+.dao-options input { margin-inline: 0; }
+.dao-options label { display: grid; align-content: center; min-height: 44px; padding: 5px 0; cursor: pointer; }
+.dao-options label small { display: block; }
+.dao-preview :is(.dao-need-one, .dao-need-all, .dao-next-new, .dao-next-blocked) { display: none; }
+.dao-preview .dao-branch:not(:has(.dao-ranked:checked)) .dao-need-all,
+.dao-preview .dao-branch:has(.dao-ranked:checked):not(:has(.dao-ranked:checked ~ .dao-ranked:checked)) .dao-need-one { display: inline; }
+.dao-preview .dao-step:has([name="experience"] option[value="new"]:checked) .dao-next,
+.dao-preview .dao-branch:not(:has(.dao-ranked:checked ~ .dao-ranked:checked)) ~ .dao-actions .dao-next { display: none; }
+.dao-preview .dao-step:has([name="experience"] option[value="new"]:checked) .dao-next-new,
+.dao-preview .dao-branch:not(:has(.dao-ranked:checked ~ .dao-ranked:checked)) ~ .dao-actions .dao-next-blocked { display: inline-flex; }
+.dao-test { min-width: 0; margin: 0; padding: 6px 9px 10px; border: 1px solid var(--ink-line); border-radius: 10px; background: #101e23; }
+.dao-test legend { padding-inline: 3px; color: var(--muscle); font-weight: 650; }
+.dao-test legend small { font-weight: 400; }
+.dao-test-fields { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, .7fr); align-items: end; gap: 6px; color: var(--muted); }
+.dao-test-fields > span { padding-bottom: 10px; }
+.dao-test-fields label { display: grid; gap: 4px; font-size: .85rem; }
+.dao-actions { display: flex; flex-wrap: wrap; justify-content: end; gap: 8px; margin-top: 16px; }
+.dao-actions > :first-child.ghost { margin-inline-end: auto; }
+.dao-rank { display: flex; align-items: center; gap: 12px; color: var(--gold); }
+.dao-rank p { margin: 4px 0 0; font-size: .88rem; color: var(--muted); }
+.dao-rank .dao-talent { color: var(--jade); }
+.dao-result-branches, .dao-schedule, .dao-template ul { list-style: none; margin: 8px 0 0; padding: 0; }
+.dao-result-branches li, .dao-schedule li, .dao-template li { display: flex; justify-content: space-between; gap: 5px 12px; padding: 7px 0; border-bottom: 1px solid var(--ink-line); }
+.dao-result-branches li > b { color: var(--muscle); flex: none; }
+.dao-result-branches li > span { text-align: end; }
+.dao-result-branches small { display: block; color: var(--gold); }
+.dao-schedule li { align-items: baseline; }
+.dao-schedule li > b { flex: none; }
+.dao-template li { flex-wrap: wrap; font-size: .9rem; }
+.dao-template li:last-child { border: 0; }
+.dao-step h3 { margin: 15px 0 6px; color: var(--gold); }
+.dao-preview-note { margin: 0; }
+@media (min-width: 490px) {
+  .dao-step[data-dao-step="2"] .dao-fields, .dao-tests { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 }
 
 /* Đột phá và Độ kiếp */
