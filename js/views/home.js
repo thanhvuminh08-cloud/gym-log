@@ -97,7 +97,7 @@ export async function render(el) {
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
-    ${heroCard(profile.tuvi)}
+    ${heroCard(profile.tuvi, false, profile.weekly)}
     ${plan.state === 'none' ? `<section class="card schedule-reminder" data-schedule-today data-state="none">
       <div class="row schedule-heading">
         <span class="tile-icon">${icon('calendar')}</span>

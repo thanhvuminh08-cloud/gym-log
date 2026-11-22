@@ -293,11 +293,26 @@ try {
     if (!ok) lines.push(`  ${lift?.textContent} | body ${body.length}`);
     await go('#/'); return ok && !!(await until(() => $('[data-hero-link]')));
   });
+  await step('Động phủ đợt 2: nhiệm vụ thật, Đột phá mở + đóng, lưu mốc', async () => {
+    const card = await until(() => $('[data-hero-link] .cultivation-link-quests'));
+    if (!card || card.textContent.includes('mẫu')) throw new Error('thẻ Hôm nay chưa có nhiệm vụ thật');
+    const zero = Object.fromEntries(['tuvi', 'chest', 'back', 'shoulders', 'legs', 'biceps', 'triceps', 'core'].map((k) => [k, [0, 0]]));
+    w.localStorage.setItem(`gym.heroSeen.${DB}`, JSON.stringify(zero));
+    await go('#/hero');
+    const dlg = await until(() => $('dialog.breakthrough-modal[open]'));
+    const quests = $$('[data-quests] [data-quest]').length, sample = !!$('.cultivation-demo, .cultivation-data-badge');
+    if (!dlg || quests !== 3 || sample) throw new Error(`modal ${!!dlg}, ${quests} nhiệm vụ, mẫu ${sample}`);
+    dlg.querySelector('[data-act=closeBreak]').click();
+    const gone = await until(() => !$('dialog.breakthrough-modal[open]'), 5000);
+    const seen = JSON.parse(w.localStorage.getItem(`gym.heroSeen.${DB}`));
+    await go('#/');
+    return !!gone && seen.chest[0] + seen.chest[1] > 0;
+  });
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
   w.localStorage.removeItem('gym.restEnd'); w.localStorage.removeItem('gym.restStart'); localStorage.removeItem('gym.restStart');
-  for (const k of ['gym.lastBackup', 'gym.preRestore', 'gym.errors']) w.localStorage.removeItem(`${k}.${DB}`);
+  for (const k of ['gym.lastBackup', 'gym.preRestore', 'gym.errors', 'gym.heroSeen', 'gym.questSeen']) w.localStorage.removeItem(`${k}.${DB}`);
   if (seenBak === null) w.localStorage.removeItem('gym.medalSeen'); else w.localStorage.setItem('gym.medalSeen', seenBak);
   if (setBak === null) w.localStorage.removeItem('gym.settings'); else w.localStorage.setItem('gym.settings', setBak);
   frame.src = 'about:blank'; await wait(100);

@@ -163,7 +163,9 @@ export async function render(el) {
       await save(); timer.stop();
       const up = entries.filter((e) => result(e)).length, cmp = entries.filter((e) => prev[e.exerciseId].length).length;
       if (cmp) toast(up ? `💪 Vượt lần trước ${up}/${cmp} bài!` : 'Buổi sau cố vượt lần trước nhé 💪', 3500);
-      location.hash = '#/history/' + w.id; return;
+      location.hash = '#/history/' + w.id;
+      import('./hero.js').then(async (m) => m.ceremony(await m.loadProfile())); // Đột phá / nhiệm vụ vừa xong
+      return;
     }
     await save();
     draw();

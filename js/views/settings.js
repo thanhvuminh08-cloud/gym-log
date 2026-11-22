@@ -47,7 +47,6 @@ export async function render(el) {
     </select></label>
     <label class="row"><span class="grow">Nhạc nền Động phủ</span><input type="checkbox" data-k="music" ${s.music ? 'checked' : ''}></label>
     <label class="row"><span class="grow">Âm hiệu ứng tu luyện</span><input type="checkbox" data-k="sfx" ${s.sfx ? 'checked' : ''}></label>
-    <p class="muted small">Bản xem trước lưu tuỳ chọn âm thanh.</p>
   </section>
   <h2>Dữ liệu</h2>
   <section class="card">

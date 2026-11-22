@@ -1,12 +1,62 @@
-import { all, put } from '../db.js';
-import { hero, REALMS } from '../hero.js';
-import { fmtNum, h, uid, settings, countUp } from '../util.js';
+import { all, put, DB_NAME } from '../db.js';
+import { hero, REALMS, snapshot, breakthroughs, quests } from '../hero.js';
+import { fmtNum, h, uid, settings, countUp, tap } from '../util.js';
+import { sfx, music } from '../sfx.js';
 
-/** Dữ liệu thật cho Động phủ: hero() từ toàn bộ buổi tập, thư viện bài, cân nặng và cài đặt. */
+/** Dữ liệu thật cho Động phủ: hero() + nhiệm vụ tuần (profile.weekly) từ toàn bộ buổi tập, thư viện bài, cân nặng và cài đặt. */
 export async function loadProfile(now = Date.now()) {
   const [workouts, exercises, body] = await Promise.all([all('workouts'), all('exercises'), all('body')]);
-  const s = settings.get();
-  return hero({ workouts, exercises, body, sex: s.sex, schedule: s.schedule, weekGoal: s.weekGoal, now });
+  const s = settings.get(), ctx = { workouts, exercises, schedule: s.schedule, weekGoal: s.weekGoal, now };
+  const profile = hero({ ...ctx, body, sex: s.sex });
+  profile.weekly = quests({ ...ctx, profile });
+  return profile;
+}
+
+// Mốc đã xem (khoá riêng theo DB để smoke không đụng dữ liệu thật).
+const lsKey = (k) => (DB_NAME === 'gym' ? k : `${k}.${DB_NAME}`);
+export const SEEN_KEY = lsKey('gym.heroSeen'), QUEST_KEY = lsKey('gym.questSeen');
+const read = (k) => { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } };
+const write = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+const BOLTS = [1050, 1650, 2250]; // ms: ba tia sét trong màn Độ kiếp (khớp CSS tribulation-strike)
+const MAX_SHOW = 3;
+const weekStart = (t) => { const d = new Date(t); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return d.getTime(); };
+
+/** Mở một màn Đột phá/Độ kiếp (gắn vào body để sống qua đổi trang), chờ người dùng đóng. */
+function showBreakthrough(event) {
+  return new Promise((resolve) => {
+    const wrap = document.createElement('div');
+    wrap.innerHTML = breakthroughModal(event, { id: 'breakthrough-' + uid() });
+    const dlg = wrap.firstElementChild, timers = [];
+    document.body.append(dlg);
+    dlg.addEventListener('close', () => { timers.forEach(clearTimeout); dlg.remove(); resolve(); }, { once: true });
+    dlg.showModal();
+    if (event.tribulation) {
+      sfx('loiKiep');
+      BOLTS.forEach((t) => timers.push(setTimeout(() => tap(80), t)));
+      timers.push(setTimeout(() => sfx('dotPha'), BOLTS.at(-1)));
+    } else {
+      sfx('dotPha');
+      tap(60);
+    }
+  });
+}
+
+/**
+ * Nghi lễ khi vào Động phủ / xong buổi: so profile với mốc đã xem (gym.heroSeen) → mở màn Đột phá
+ * (tối đa 3, quan trọng nhất trước), rồi phát âm nhiệm vụ nếu có nhiệm vụ tuần vừa xong (gym.questSeen).
+ * Lần đầu chỉ lưu mốc. Trả về { shown, quests: id nhiệm vụ vừa xong }.
+ */
+export async function ceremony(profile) {
+  if (profile.needsWeight || profile.needsSex) return { shown: 0, quests: [] }; // chưa đủ thông tin: chưa lưu mốc
+  const events = breakthroughs(read(SEEN_KEY), profile).slice(0, MAX_SHOW);
+  write(SEEN_KEY, snapshot(profile));
+  const week = weekStart(Date.now()), done = (profile.weekly?.quests || []).filter((q) => q.complete).map((q) => q.id);
+  const prev = read(QUEST_KEY);
+  const fresh = !prev ? [] : done.filter((id) => prev.week !== week || !prev.done?.includes(id));
+  write(QUEST_KEY, { week, done });
+  for (const e of events) await showBreakthrough(e);
+  if (fresh.length) sfx('nhiemVu');
+  return { shown: events.length, quests: fresh };
 }
 
 const SAMPLE_QUESTS = {
@@ -227,8 +277,12 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
   </article>`;
 }
 
+const view = (profile) => heroView(profile, { weekly: profile.weekly, challenge: profile.challenge, demo: false });
+
 export async function render(el) {
-  el.innerHTML = heroView(await loadProfile());
+  const profile = await loadProfile();
+  el.innerHTML = view(profile);
+  ceremony(profile).then(({ quests: fresh }) => fresh.forEach((id) => el.querySelector(`[data-quest="${id}"]`)?.classList.add('celebrate')));
   el.onclick = el.onchange = null; // bỏ handler của màn trước (main dùng chung)
   // Lưu cân nặng (bảng body, như Tiến độ › Cơ thể) và giới tính rồi tính lại.
   el.onsubmit = async (ev) => {
@@ -240,7 +294,10 @@ export async function render(el) {
     if (f.has('sex') && sex !== 'm' && sex !== 'f') return;
     if (f.has('weight')) await put('body', { id: uid(), date: Date.now(), weight, waist: null });
     if (f.has('sex')) settings.set({ sex });
-    el.innerHTML = heroView(await loadProfile());
+    const next = await loadProfile();
+    el.innerHTML = view(next);
     countUp(el);
+    ceremony(next);
   };
+  return music();
 }

@@ -16,6 +16,7 @@
 - Vòng nghỉ (js/timer.js): `--rest-progress` = % thời gian còn lại theo `gym.restStart`→`gym.restEnd` (±15 đổi cả tổng), `data-warn="true"` khi ≤10s.
 - Tu luyện (js/hero.js, hàm thuần): `hero()` → Tu vi, Thất mạch (cảnh giới theo ~1RM/cân nặng lúc tập, kỷ lục không rớt), Căn cơ 90 ngày, Bình cảnh (kg cần theo cân nặng hiện tại), Linh khí/Công lực. Hợp đồng ở cuối RPG.md.
 - Rung xong set: `tap()` (util.js) 25 ms theo cài đặt rung; set có huy chương mới chỉ rung `celebrate`. Tu luyện đợt 2 bước 1: `challenge`, `next.alt`, `snapshot/breakthroughs`, `quests`, `term` + `settings.lore` (hợp đồng cuối RPG.md).
+- Tu luyện đợt 2 nối xong: `loadProfile()` kèm `profile.weekly` (quests); `ceremony(profile)` (views/hero.js) so `gym.heroSeen` → mở tối đa 3 màn Đột phá/Độ kiếp (dialog gắn body, sống qua đổi trang), lần đầu / chưa đủ cân nặng-giới tính chỉ lưu mốc; gọi khi vào Động phủ và sau Kết thúc buổi. `gym.questSeen` {week, done} → `nhiem-vu.mp3` khi nhiệm vụ vừa xong. Âm (js/sfx.js): `music()` lặp dong-phu khi ở Động phủ (cleanup route dừng, tạm dừng khi ẩn tab), `sfx()` một lần; bị chặn tự phát → thử lại ở lần chạm đầu. Mặc định `music: false`, `sfx: true`. Độ kiếp rung + dot-pha ở 1,05/1,65/2,25 s.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -44,8 +45,6 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Claude] Tu luyện đợt 2: truyền `weekly` và `profile.challenge` vào `heroView(profile, { weekly, challenge: profile.challenge, demo: false })`, truyền `weekly` vào `heroCard(profile.tuvi, false, weekly)`; nối `gym.heroSeen` và mở `breakthroughModal(event)` bằng `showModal()` khi vào Động phủ hoặc xong buổi, xử lý đóng và thêm smoke.
-- [cho Claude] Nối âm Động phủ từ `assets/audio/`: `dong-phu.mp3` lặp khi ở Động phủ (dừng khi rời trang); `loi-kiep.mp3` phát lúc mở màn Độ kiếp, rung tại ba tia khoảng 1,05 / 1,65 / 2,25 giây; `dot-pha.mp3` phát lúc hào quang hiện (ngay khi mở Đột phá hoặc sau khoảng 2,25 giây ở Độ kiếp); `nhiem-vu.mp3` phát khi nhiệm vụ vừa hoàn thành. Tôn trọng `settings.music`, `settings.sfx`, cài đặt rung và lần chạm đầu trên iOS. Bỏ dòng báo âm thanh xem trước ở Cài đặt sau khi nối.
 
 
 ## Ý tưởng sau khi dùng thực tế

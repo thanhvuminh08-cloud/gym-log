@@ -25,7 +25,7 @@ export function toast(msg, ms = 2200) {
 }
 
 const SKEY = 'gym.settings';
-const DEFAULTS = { rest: 90, sound: true, vibrate: true, weekGoal: 3, monthGoal: 12, schedule: {}, lore: false };
+const DEFAULTS = { rest: 90, sound: true, vibrate: true, weekGoal: 3, monthGoal: 12, schedule: {}, lore: false, music: false, sfx: true };
 export const settings = {
   get() {
     try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SKEY) || '{}') }; } catch { return { ...DEFAULTS }; }
