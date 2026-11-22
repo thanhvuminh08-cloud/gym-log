@@ -31,6 +31,7 @@
 - O5 + O4 bỏ gọn (Claude, 23/11): bỏ Mục tiêu tháng (`monthGoal`) và nhiệm vụ "đủ buổi" (còn 2 nhiệm vụ, ô Buổi tuần lấy số ngày theo lịch nếu có); nhiệm vụ chỉ gợi ý bài đã tập hoặc trong `dao.path`; nhắc sao lưu khi ≥3 buổi (`BACKUP_MIN`); lưới năm đếm mọi nhóm cơ trong ngày; set tốt nhất hiện kg×rep; tên buổi mặc định "Buổi tập tự do"; Lịch tập chưa có giáo án → 1 dòng. Thạch bi (Công đức bạ + tổng kết buổi) và Hư cảnh (chỉ khi có lời khai) đã đúng, giữ.
 - Âm Hồn tu tiên (Claude, 23/11): `sfx()` ưu tiên âm nghi lễ (`MAJOR`: loiKiep/dotPha/thoiThe/xacChung/nhapMon) — đang phát thì âm nhỏ bỏ qua, bắt đầu thì cắt âm nhỏ; `played` ghi 20 lần phát cho smoke. setXong + `.is-set-sealed` 480 ms cho set thường, pham* cho phẩm mới, hetGio theo công tắc âm báo (thay bíp), xuatQuan khi lưu buổi, thoiThe/xacChung theo loại Đột phá, nhapMon ở ấn triện.
 - O1 hỏi cân nặng + O2 tổng kết (Claude, 23/11): `js/recap.js` `recap(w, ctx)` so hồ sơ trước/sau buổi (Phẩm, +Linh khí/Công lực, Tu vi, mạch có tập: Linh khí + khai/lên bậc, Đột phá, nhiệm vụ vừa xong) + `nextSession` (lịch → giáo án Công pháp xoay vòng/lâu chưa dùng → mạch lâu chưa tập). Trang `#/ky/<id>` có thẻ `[data-recap]` "Thu hoạch"; thiếu cân nặng/giới tính → form `profileForm` ngay trong thẻ (lưu xong vẽ lại). Markup tạm, chưa CSS.
+- O3 một nơi cho thân thể (Claude, 23/11): Động phủ + Thất mạch bỏ form, thay bằng dòng `profileHint` `[data-profile-hint=weight|sex]` dẫn tới Thân trọng (`#/tang-thu/body`) hoặc Cài đặt. Form chỉ còn ở trang tổng kết (hỏi một lần). Nhập môn bước 2: đã có giới tính + cân nặng → chỉ hiện 1 dòng `[data-dao-known]`, không hỏi lại.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -67,6 +68,7 @@ Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nh
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] O4: gộp Khí huyết + Căn cơ thành một ô "Trạng thái" chỉ ở Thất mạch (js/views/hero.js); thẻ lần đầu ở Động phủ đã bỏ dòng chú `start` — xem lại bố cục.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
+- [cho Codex] O3: style dòng `a.card.row.cultivation-profile[data-profile-hint]` (Động phủ/Thất mạch, js/views/hero.js `profileHint`) và `p[data-dao-known]` (Nhập môn bước 2).
 - [cho Codex] O2: làm giao diện thẻ "Thu hoạch" `[data-recap]` ở trang tổng kết (js/views/history.js `recapView`): giữ data-recap-*, data-act=next, form data-hero-profile; class recap-pham/-linhkhi/-tuvi/-meridians/-breaks/-quests/-next, li.is-up.
 
 

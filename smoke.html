@@ -495,19 +495,27 @@ try {
     $('[data-act=clearErrors]').click(); await wait(200);
     return ok && !$('.error-log') && !sf.errorLog().length;
   });
-  await step('Động phủ: số thật, hỏi cân nặng + giới tính, lưu rồi tính lại', async () => {
+  await step('Động phủ (O3): không còn form, dòng dẫn → Thân trọng rồi Cài đặt, lưu xong tính lại', async () => {
     await go('#/');
     const card = await until(() => $('.sanctum-cultivation'));
     if (!card || $('[data-hero-link]') || card.textContent.includes('Số liệu mẫu')) throw new Error('Động phủ chưa gộp hoặc chưa dùng số thật');
-    const form = await until(() => $('[data-hero-profile]'));
-    if (!form || $('.cultivation-sample') || !form.querySelector('[name=weight]') || !form.querySelector('[name=sex]')) throw new Error('thiếu form hỏi thông tin');
-    input(form.querySelector('[name=weight]'), '70'); form.querySelector('[name=sex]').value = 'm';
-    form.querySelector('button').click();
-    const strip = await until(() => !$('[data-hero-profile]') && $('.tuvi-strip[href="#/tang-thu/that-mach"]'));
+    const hintW = await until(() => $('[data-profile-hint=weight][href="#/tang-thu/body"]'));
+    if (!hintW || $('[data-hero-profile]') || $('.cultivation-sample')) throw new Error('Động phủ còn form hoặc thiếu dòng dẫn cân nặng');
+    hintW.click();
+    const bf = await until(() => $('[data-form=body]'));
+    input(bf.querySelector('[name=weight]'), '70'); bf.querySelector('button').click(); await wait(200);
+    await go('#/tang-thu/that-mach');
+    const hintS = await until(() => $('[data-profile-hint=sex][href="#/tang-thu/cai-dat"]'));
+    if (!hintS || $('[data-hero-profile]')) throw new Error('Thất mạch còn form hoặc thiếu dòng dẫn giới tính');
+    hintS.click();
+    const sel = await until(() => $('select[data-k=sex]'));
+    sel.value = 'm'; sel.dispatchEvent(new w.Event('change', { bubbles: true })); await wait(100);
+    await go('#/');
+    const strip = await until(() => !$('[data-profile-hint]') && $('.tuvi-strip[href="#/tang-thu/that-mach"]'));
     const body = await (await mod('db.js')).all('body');
     if (strip) strip.click();
     const lift = await until(() => $('.cultivation-meridian[data-muscle=chest] .cultivation-lift'));
-    const ok = !!lift?.textContent.includes('×BW') && !!$('[data-tab=that-mach][aria-current=page]')
+    const ok = !!lift?.textContent.includes('×BW') && !!$('[data-tab=that-mach][aria-current=page]') && !$('[data-profile-hint]')
       && body.length === 1 && body[0].weight === 70 && JSON.parse(w.localStorage.getItem('gym.settings')).sex === 'm';
     if (!ok) lines.push(`  ${lift?.textContent} | body ${body.length}`);
     await go('#/'); return ok && !!(await until(() => $('.tuvi-strip')));
@@ -533,7 +541,8 @@ try {
     const next = async (n) => { $('[data-act=daoNext]').click(); return at(n); };
     await go('#/nhap-mon/1'); await at(1);
     input($('[name=name]'), 'Thanh Vân'); if (!(await next(2))) throw new Error('bước 2');
-    $('[name=sex]').value = 'm'; input($('[name=weight]'), '80'); input($('[name=height]'), '174');
+    if (!$('[data-dao-known]') || $('select[name=sex]')) throw new Error('Nhập môn hỏi lại giới tính/cân nặng đã có (O3)');
+    input($('[name=height]'), '174'); // giới tính + cân nặng đã có từ Cài đặt/Thân trọng
     if (!(await next(3))) throw new Error('bước 3');
     $('[name=experience][value=mid]').click(); $('[name=goal][value=strength]').click(); $('[name=days][value="4"]').click();
     if (!(await next(4))) throw new Error('bước 4');

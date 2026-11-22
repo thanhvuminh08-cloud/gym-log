@@ -7,7 +7,7 @@ import { sessionCounts } from '../insights.js';
 import { medals } from '../medals.js';
 import { lastBackup, backupDue } from '../safety.js';
 import { music } from '../sfx.js';
-import { bindProfileForm, ceremony, loadProfile, profileForm, questBoard, tuviStrip } from './hero.js';
+import { ceremony, loadProfile, profileHint, questBoard, tuviStrip } from './hero.js';
 import { NAV, gloss } from '../lore.js';
 import { hintLabel, termLabel } from './sections.js';
 
@@ -59,7 +59,7 @@ export async function render(el) {
           </a>
           <a href="#/ky/cong-duc">${termLabel('streak')}<b class="streak-multiplier"><span data-count="${streak.cur}">${streak.cur}</span></b></a>
         </div>
-        ${profileForm(p)}
+        ${profileHint(p)}
       </div>
       ${remind ? `<a class="card row backup-reminder" href="#/tang-thu/cai-dat">
         ${icon('backup')}<span class="grow"><b>Nên sao lưu dữ liệu</b><small class="muted">${last ? `Lần cuối ${fmtDate(last)}` : 'Chưa sao lưu lần nào'}</small></span>${icon('chevron')}
@@ -73,7 +73,6 @@ export async function render(el) {
     if (b.dataset.act === 'empty') startWorkout();
     if (b.dataset.act === 'tpl') startWorkout({ template: templates.find((t) => t.id === b.dataset.id) });
   };
-  bindProfileForm(el, draw);
   const board = el.querySelector('[data-quests]');
   ceremony(profile).then(({ quests: fresh }) => fresh.forEach((id) => board?.querySelector(`[data-quest="${id}"]`)?.classList.add('celebrate')));
   return music();

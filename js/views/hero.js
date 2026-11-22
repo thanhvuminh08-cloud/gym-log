@@ -163,6 +163,17 @@ function meridianCard(m, claims) {
   </li>`;
 }
 
+/** O3: Động phủ/Thất mạch không còn form — một dòng dẫn tới nơi duy nhất (Thân trọng / Cài đặt). */
+export function profileHint({ needsWeight, needsSex }) {
+  if (!needsWeight && !needsSex) return '';
+  const [href, title, sub] = needsWeight
+    ? ['#/tang-thu/body', `Ghi ${term('thanTrong')}`, 'Cần cân nặng để tính cảnh giới các mạch']
+    : ['#/tang-thu/cai-dat', 'Chọn giới tính ở Cài đặt', 'Cần để so chuẩn cảnh giới'];
+  return `<a class="card row cultivation-profile" href="${href}" data-profile-hint="${needsWeight ? 'weight' : 'sex'}">
+    <span class="grow"><b>${h(title)}</b> <small class="muted">${sub}</small></span><span aria-hidden="true">›</span></a>`;
+}
+
+/** Hỏi một lần ở trang tổng kết (O1) — nơi duy nhất còn form. */
 export function profileForm({ needsWeight, needsSex }) {
   if (!needsWeight && !needsSex) return '';
   return `<form class="card cultivation-panel cultivation-profile" data-hero-profile>
@@ -272,7 +283,7 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
         </div>
       </div>
     </header>
-    ${profileForm(profile)}
+    ${profileHint(profile)}
     <section class="card cultivation-panel">
       <div class="cultivation-section-heading">
         <h2>${hintLabel(`${term('congLuc')} cấp ${linhKhi.level}`, hint('congLuc'))}</h2>
@@ -352,7 +363,6 @@ export async function render(el) {
   const options = { detail: true };
   const profile = await loadProfile(Date.now(), options);
   el.innerHTML = view(profile);
-  bindProfileForm(el, (next) => { el.innerHTML = view(next); }, options);
   ceremony(profile);
   return music();
 }

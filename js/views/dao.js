@@ -112,16 +112,18 @@ function showResult(result, plan, exerciseNames) {
   </details>`).join('')}`;
 }
 
-function stepContent({ step, dao, sex, weight, groups, validation, tests, result, plan, exerciseNames }, preview) {
+function stepContent({ step, dao, sex, weight, known, groups, validation, tests, result, plan, exerciseNames }, preview) {
   switch (step) {
     case 1:
       return `<label class="dao-field">Đạo hiệu <small>Tuỳ chọn</small><input name="name" value="${h(dao.name ?? '')}" placeholder="Ví dụ: Thanh Vân"></label>`;
     case 2:
       return `<div class="dao-fields">
+        ${known ? `<p class="dao-field muted small" data-dao-known>${sex === 'f' ? 'Nữ' : 'Nam'} · ${h(weight)} kg <small>— đổi ở Cài đặt / ${termLabel('thanTrong')}</small>
+          <input type="hidden" name="sex" value="${h(sex)}"><input type="hidden" name="weight" value="${h(weight)}"></p>` : `
         <label class="dao-field">Giới tính<select name="sex" required>
           <option value="">Chọn giới tính</option><option value="m"${sex === 'm' ? ' selected' : ''}>Nam</option><option value="f"${sex === 'f' ? ' selected' : ''}>Nữ</option>
         </select></label>
-        <label class="dao-field">Cân nặng (kg)<input type="number" inputmode="decimal" name="weight" min="1" step="0.1" value="${h(weight ?? '')}" required></label>
+        <label class="dao-field">Cân nặng (kg)<input type="number" inputmode="decimal" name="weight" min="1" step="0.1" value="${h(weight ?? '')}" required></label>`}
         <label class="dao-field">Thân cao (cm)<input type="number" inputmode="numeric" name="height" min="1" value="${h(dao.height ?? '')}"></label>
         <label class="dao-field">Tuổi<input type="number" inputmode="numeric" name="age" min="1" value="${h(dao.age ?? '')}"></label>
       </div>`;
@@ -228,9 +230,13 @@ const missing = (step) => step === 2 && (!['m', 'f'].includes(draft.sex) ? 'Ch�
 
 function state(step, { exercises, body, workouts, s }, now = Date.now()) {
   const d = draft.dao, dao = { ...d, at: now };
+  // O3: đã có giới tính (Cài đặt) + cân nặng (Thân trọng) → không hỏi lại, dùng số đã lưu.
+  const latest = [...body].filter((x) => x.weight > 0).sort((a, b) => a.date - b.date).at(-1);
+  const known = ['m', 'f'].includes(s.sex) && latest?.weight > 0;
+  if (known) Object.assign(draft, { sex: s.sex, weight: latest.weight });
   const b = draft.weight > 0 ? [...body, { date: now, weight: draft.weight }] : body;
   return {
-    step, dao: d, sex: draft.sex, weight: draft.weight, editing: G.entered(s),
+    step, dao: d, sex: draft.sex, weight: draft.weight, known, editing: G.entered(s),
     groups: G.pathOptions(exercises), validation: G.validatePath(d.path, exercises),
     tests: G.testList(d.path, exercises),
     result: step === 6 ? G.assess({ dao, exercises, body: b, sex: draft.sex, workouts, now }) : null,
