@@ -1,5 +1,5 @@
 import { all, put, DB_NAME } from '../db.js';
-import { hero, REALMS, snapshot, breakthroughs, quests } from '../hero.js';
+import { hero, REALMS, TEMPERS, MASTERY, snapshot, breakthroughs, quests } from '../hero.js';
 import { fmtNum, h, uid, settings, countUp, tap } from '../util.js';
 import { sfx, music } from '../sfx.js';
 
@@ -72,13 +72,14 @@ const SAMPLE_QUESTS = {
 };
 
 const SAMPLE_CHALLENGE = {
-  key: 'legs', name: 'Chân', label: 'Kết Đan · Hậu kỳ', pct: 74,
-  next: { realm: 'Nguyên Anh', ratio: 2.25, exerciseId: 'x-squat', name: 'Squat', kg: 180, added: false, perHand: false, alt: { r: 5, kg: 154.5 } },
+  key: 'legs', name: 'Chân', label: 'Luyện Cân · Đại thành', pct: 74,
+  next: { realm: 'Luyện Cốt', ratio: 2.25, exerciseId: 'x-squat', name: 'Squat', kg: 180, added: false, perHand: false, alt: { r: 5, kg: 154.5 } },
 };
 
 const SAMPLE_BREAKTHROUGHS = [
-  { key: 'legs', name: 'Chân', from: 'Kết Đan · Sơ kỳ', to: 'Kết Đan · Trung kỳ', realm: false, tribulation: false, real: 'Squat 1,76×BW · ~1RM 140,8 kg' },
-  { key: 'legs', name: 'Chân', from: 'Trúc Cơ · Đại viên mãn', to: 'Kết Đan · Sơ kỳ', realm: true, tribulation: true, real: 'Squat 1,67×BW · ~1RM 116,7 kg' },
+  { key: 'tuvi', kind: 'tuvi', level: 2, name: 'Tu vi', from: 'Trúc Cơ · Sơ kỳ', to: 'Trúc Cơ · Trung kỳ', realm: false, tribulation: false, real: 'Công lực cấp 19' },
+  { key: 'tuvi', kind: 'tuvi', level: 3, name: 'Tu vi', from: 'Trúc Cơ · Đại viên mãn', to: 'Kết Đan · Sơ kỳ', realm: true, tribulation: true, real: 'Công lực cấp 19' },
+  { key: 'legs', kind: 'temper', level: 4, name: 'Mạch Chân', from: 'Luyện Cân · Viên mãn', to: 'Luyện Cốt · Sơ thành', realm: true, tribulation: false, real: 'Squat 2,25×BW · ~1RM 180 kg' },
 ];
 
 const realmArt = (index, className) => `<svg class="${className}" viewBox="0 0 220 210" aria-hidden="true" focusable="false"><use href="assets/cultivation-realms.svg#realm-${index}"/></svg>`;
@@ -102,7 +103,7 @@ function radar(meridians) {
     return [180 + radius * Math.sin(angle), 150 - radius * Math.cos(angle)];
   };
   const points = (radius) => meridians.map((m, i) => point(i, radius(m)).map((n) => n.toFixed(1)).join(',')).join(' ');
-  return `<svg class="cultivation-radar" viewBox="0 0 360 300" role="img" aria-label="Biểu đồ cảnh giới của bảy mạch">
+  return `<svg class="cultivation-radar" viewBox="0 0 360 300" role="img" aria-label="Biểu đồ bậc Luyện thể của bảy mạch">
     <g class="radar-orbit" aria-hidden="true">
       <circle cx="180" cy="150" r="110"/>
       <circle cx="180" cy="150" r="103"/>
@@ -136,11 +137,11 @@ function loadText(next, kg) {
 export function claimRows(claims = [], meridian) {
   const pending = claims.filter((claim) => claim.meridian === meridian && !claim.verified && claim.target);
   if (!pending.length) return '';
-  return `<div class="cultivation-claims"><b>Mốc xác chứng</b><ul>${pending.map(({ name, target }) => {
+  return `<div class="cultivation-claims"><b>Mốc xác chứng</b><ul>${pending.map(({ name, label, target }) => {
     const goal = target.reps != null ? `${fmtNum(target.reps)} ${h(target.unit)}`
       : target.alt ? `${loadText(target, target.alt.kg)} × ${target.alt.r} hoặc ${loadText(target, target.kg)} × 1`
       : `${loadText(target, target.kg)} × 1`;
-    return `<li>${h(name)} · ${goal}</li>`;
+    return `<li>${h(name)} · ${goal}${label ? `<small class="cultivation-claim-rank">Bậc tự khai: ${h(label)}</small>` : ''}</li>`;
   }).join('')}</ul></div>`;
 }
 
@@ -152,12 +153,13 @@ function meridianCard(m, claims) {
     : `Còn ${fmtNum(next.left)} Linh khí`);
   return `<li class="card cultivation-meridian" data-muscle="${h(m.key)}">
     <div class="cultivation-meridian-head">
-      <h3>${h(m.name)}</h3><strong>${h(m.label)}</strong>
+      <h3>${h(m.name)}</h3><strong class="cultivation-temper-rank">${h(m.label)}</strong>
     </div>
     ${m.unverified ? '<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>' : ''}
     ${lifts?.length ? `<ul class="cultivation-lifts">${lifts.map((lift) => `<li class="cultivation-lift">
       <span><b>${h(lift.name)}</b>${lift.unverified ? ' <small class="cultivation-tested" data-unverified>hư cảnh</small>' : lift.tested ? ' <small class="cultivation-tested">tự khai</small>' : ''}</span>
       <span>${lift.unit ? `${fmtNum(lift.reps)} ${h(lift.unit)}` : `${lift.ratio.toLocaleString('vi-VN')}×BW · ~1RM ${fmtNum(lift.kg)} kg`}</span>
+      <small class="cultivation-lift-rank">${h(lift.label)}</small>
     </li>`).join('')}</ul>` : `<p class="cultivation-lift">${m.key === 'core' ? `${fmtNum(m.xp)} Linh khí` : 'Chưa có kỷ lục'}</p>`}
     ${m.need > 0 ? `<p class="cultivation-path-warning">Còn thiếu ${m.need} bài để khai mạch.</p>` : ''}
     ${m.unverified ? claimRows(claims, m.key) : ''}
@@ -181,11 +183,13 @@ function profileForm({ needsWeight, needsSex }) {
 }
 
 export function breakthroughModal(event, { id = 'breakthrough', demo = false } = {}) {
-  const title = event.tribulation ? 'Độ kiếp' : event.verify ? 'Xác chứng' : event.kind === 'temper' ? 'Thối thể' : 'Đột phá';
+  const kind = event.kind ?? (event.verify ? 'verify' : 'tuvi');
+  const tribulation = kind === 'tuvi' && Boolean(event.tribulation);
+  const title = kind === 'temper' ? 'Thối thể' : kind === 'verify' ? 'Xác chứng' : tribulation ? 'Độ kiếp' : 'Đột phá';
   const realm = event.to.split(' · ')[0];
-  const index = event.level ?? Math.max(0, REALMS.indexOf(realm));
+  const index = event.level ?? Math.max(0, (kind === 'tuvi' ? REALMS : TEMPERS).indexOf(realm));
   const key = h(id);
-  return `<dialog id="${key}" class="breakthrough-modal modal" data-tribulation="${Boolean(event.tribulation)}"
+  return `<dialog id="${key}" class="breakthrough-modal modal" data-tribulation="${tribulation}" data-breakthrough-kind="${h(kind)}"
     data-breakthrough="${h(event.key)}" aria-labelledby="${key}-title"${demo ? ' popover="auto"' : ''}>
     <div class="breakthrough-scene">
       <div class="breakthrough-celestial" aria-hidden="true">
@@ -199,7 +203,7 @@ export function breakthroughModal(event, { id = 'breakthrough', demo = false } =
         <span class="breakthrough-qi"></span>
         ${realmArt(index, 'breakthrough-figure')}
         ${seal(index, realm)}
-        ${event.verify ? '<svg class="breakthrough-verify-mark" viewBox="0 0 56 60" fill="none"><path d="M28 3 51 13v16c0 15-10 23-23 28C15 52 5 44 5 29V13L28 3Z"/><path d="m17 30 8 8 15-17"/></svg>' : ''}
+        ${kind === 'verify' ? '<svg class="breakthrough-verify-mark" viewBox="0 0 56 60" fill="none"><path d="M28 3 51 13v16c0 15-10 23-23 28C15 52 5 44 5 29V13L28 3Z"/><path d="m17 30 8 8 15-17"/></svg>' : ''}
       </div>
       <div class="breakthrough-content">
         <p class="breakthrough-kind">${h(event.name)}${demo ? ' · Số liệu mẫu' : ''}</p>
@@ -281,9 +285,11 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
       <div class="row wrap">
         <button type="button" class="ghost" popovertarget="sample-breakthrough">Đột phá</button>
         <button type="button" class="ghost" popovertarget="sample-tribulation">Độ kiếp</button>
+        <button type="button" class="ghost" popovertarget="sample-temper">Thối thể</button>
       </div>
       ${breakthroughModal(SAMPLE_BREAKTHROUGHS[0], { id: 'sample-breakthrough', demo: true })}
       ${breakthroughModal(SAMPLE_BREAKTHROUGHS[1], { id: 'sample-tribulation', demo: true })}
+      ${breakthroughModal(SAMPLE_BREAKTHROUGHS[2], { id: 'sample-temper', demo: true })}
     </section>` : ''}
     <section class="card cultivation-panel cultivation-chart">
       <h2>Thất mạch đồ</h2>
@@ -291,13 +297,19 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
     </section>
     <section>
       <div class="cultivation-section-heading">
-        <h2>Thất mạch</h2>
+        <h2>Luyện thể · Thất mạch</h2>
         ${bw != null ? `<span class="muted small">Cân nặng ${fmtNum(bw)} kg</span>` : ''}
       </div>
+      <details class="cultivation-temper-guide">
+        <summary>Các bậc Luyện thể</summary>
+        <p>Tu vi được tổng hợp từ bảy mạch. Mỗi mạch có bậc Luyện thể riêng.</p>
+        <ol>${TEMPERS.map((name) => `<li>${h(name)}</li>`).join('')}</ol>
+        <p>Độ thuần thục: ${MASTERY.map(h).join(' → ')}</p>
+      </details>
       <ul class="cultivation-meridians">${meridians.map((m) => meridianCard(m, profile.claims)).join('')}</ul>
     </section>
     <details class="cultivation-atlas">
-      <summary>Đồ phổ cảnh giới</summary>
+      <summary>Đồ phổ cảnh giới Tu vi</summary>
       <ul>${REALMS.map((name, i) => `<li>${realmArt(i, 'cultivation-portrait')}${seal(i, name)}<b>${h(name)}</b></li>`).join('')}</ul>
     </details>
     <p class="cultivation-note muted small">Chuẩn tham khảo, ước lượng. BW là cân nặng lúc tập. Căn cơ so phong độ 90 ngày với kỷ lục.</p>

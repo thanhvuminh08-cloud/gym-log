@@ -46,6 +46,7 @@
 - Động phủ dùng hồ sơ thật; nhiệm vụ, Thử thách Bình cảnh và hai nghi lễ xem thử dùng mẫu có nhãn. Hình núi, sương và sáu cảnh giới là SVG tự vẽ. Có thể đổi giới tính trong Cài đặt.
 - Âm thanh tự tổng hợp bằng Node.js và mã hoá bằng FFmpeg, không dùng bản thu hay mẫu âm thanh bên ngoài. Tệp trong `assets/audio/`: `dong-phu.mp3`, `loi-kiep.mp3`, `dot-pha.mp3`, `nhiem-vu.mp3`.
 - Nhập môn có nghi lễ đá linh căn, bảy mạch sáng lần lượt và ấn triện; hiện mốc Xác chứng bên cạnh Hư cảnh. Tiêu đề dùng Noto Serif tiếng Việt ngoại tuyến, theo giấy phép OFL trong `assets/fonts/`.
+- Luyện thể có bảng bậc riêng ở Thất mạch và nghi lễ Thối thể tông đồng; dòng `.pick-lock` có nút Sửa Công pháp dễ chạm.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.

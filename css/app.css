@@ -393,6 +393,10 @@ nav a:focus-visible { outline: 2px solid var(--cool); outline-offset: -3px; }
 /* Modal chọn bài */
 .modal { position: fixed; inset: 0; background: rgba(0, 0, 0, .6); z-index: 30; display: flex; align-items: flex-end; justify-content: center; }
 .sheet { background: var(--surface); width: 100%; max-width: 640px; height: 88vh; height: 88dvh; border: 1px solid var(--line); border-radius: 24px 24px 0 0; padding: 14px 16px calc(14px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; }
+.pick-lock { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 0 10px; margin: 8px 0 0; padding: 0 9px; border: 1px solid #466458; border-inline-start: 3px solid #97dbad; border-radius: 10px; background: #172d29; }
+.pick-lock > span { padding-block: 6px; }
+.pick-lock a { display: inline-flex; align-items: center; min-height: 44px; gap: 3px; color: #b4ebc4; font-weight: 700; }
+.pick-lock a svg { width: 16px; height: 16px; }
 .pick-list { flex: 1; overflow-y: auto; margin-top: 6px; }
 .item { width: 100%; justify-content: space-between; margin: 4px 0; text-align: left; }
 .chips { display: flex; gap: 6px; overflow-x: auto; padding: 8px 0; }
@@ -564,7 +568,13 @@ a.card.cultivation-link {
 .cultivation-meridian { min-width: 0; margin: 0; padding: 13px; overflow-wrap: anywhere; }
 .cultivation-meridian-head, .cultivation-target-label { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 3px 10px; }
 .cultivation-meridian-head h3 { margin: 0; color: var(--muscle); }
-.cultivation-meridian-head strong { color: var(--gold); font-size: .875rem; }
+.cultivation-temper-rank { align-self: center; padding: 3px 7px; border: 1px solid #795e44; border-radius: 6px; background: #352b24; color: #f5d1a6; font-size: .8rem; }
+.cultivation-lift-rank, .cultivation-claim-rank { display: block; color: #e2b88e; }
+.cultivation-temper-guide { padding: 0 10px 4px; margin-top: 8px; border: 1px solid var(--ink-line); border-radius: 10px; background: #131e23; }
+.cultivation-temper-guide summary { min-height: 44px; padding-block: 10px; color: #f5d1a6; cursor: pointer; }
+.cultivation-temper-guide p { margin: 0 0 8px; color: var(--muted); font-size: .85rem; }
+.cultivation-temper-guide ol { display: flex; flex-wrap: wrap; gap: 4px; list-style: none; padding: 0; margin: 0 0 8px; }
+.cultivation-temper-guide li { padding: 3px 7px; border: 1px solid #795e44; border-radius: 6px; color: #f5d1a6; font-size: .8rem; }
 .cultivation-lift { margin: 4px 0 0; color: var(--muted); font-size: .85rem; }
 .cultivation-navigation { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; }
 .cultivation-lifts { list-style: none; padding: 0; margin: 5px 0; }
@@ -762,6 +772,15 @@ main:has(.dao-wizard) { padding-bottom: max(22px, env(safe-area-inset-bottom)); 
 .breakthrough-ranks strong { color: #ffe5a6; font-size: 1.15rem; }
 .breakthrough-real { padding: 5px 8px; background: #0b181a; border-radius: 8px; font-size: .88rem; }
 .breakthrough-close { min-width: 100px; margin-top: 5px; background: linear-gradient(#f5db9c, #d2a351); border-color: #f5db9c; }
+.breakthrough-modal[data-breakthrough-kind="temper"] { border-color: #c59670; box-shadow: 0 0 32px #be7d4f44; }
+[data-breakthrough-kind="temper"] .breakthrough-scene { background: linear-gradient(#3a2923, #201b1c 65%); }
+[data-breakthrough-kind="temper"] .breakthrough-aura { background: radial-gradient(circle, #f3bf9277, #b56c492f 25%, transparent 47%); }
+[data-breakthrough-kind="temper"] .breakthrough-celestial::before {
+  content: ""; position: absolute; width: 158px; aspect-ratio: 1; border: 1px solid #c5967099; border-radius: 50%;
+  box-shadow: 0 0 0 8px #c5967033, inset 0 0 0 5px #c5967033;
+}
+[data-breakthrough-kind="temper"] .breakthrough-content :is(h2, .breakthrough-ranks strong) { color: #f8d6b3; }
+[data-breakthrough-kind="temper"] .breakthrough-close { background: linear-gradient(#f5d9bb, #c58d64); border-color: #e7b790; }
 .breakthrough-modal[data-breakthrough="verify"] { border-color: #85d4b4; box-shadow: 0 0 35px #55c8ae55; }
 [data-breakthrough="verify"] .breakthrough-scene { background: linear-gradient(#173831, #112723 65%); }
 [data-breakthrough="verify"] .breakthrough-aura { background: radial-gradient(circle, #a3f5bb8a, #50b29b25 25%, transparent 47%); }

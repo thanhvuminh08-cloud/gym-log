@@ -10,7 +10,7 @@ const STEPS = [
   ['Nhập môn', 'Sơn môn đã mở. Nếu hữu duyên, hãy để lại một đạo hiệu và bắt đầu con đường tu luyện của riêng mình.'],
   ['Thân thể', 'Dùng thông tin cơ thể để ước lượng cảnh giới khởi đầu.'],
   ['Đạo hạnh', 'Chọn mục tiêu và số buổi tập phù hợp với bạn.'],
-  ['Chọn Công pháp', 'Mỗi mạch cần ít nhất hai bài được xét cảnh giới.'],
+  ['Chọn Công pháp', 'Mỗi mạch cần ít nhất hai bài được xét bậc Luyện thể.'],
   ['Trắc linh căn', 'Nhập mức tạ và số rep tốt nhất gần đây. Có thể để trống từng bài.'],
   ['Nghi lễ Trắc linh căn', 'Đá linh căn soi Thất mạch và ghi lại cảnh giới khởi đầu của đạo hữu.'],
 ];
@@ -94,6 +94,7 @@ function showResult(result, plan, exerciseNames) {
       <strong>${h(tuvi.label)}</strong><p>${h(verdict)}</p>
       ${top ? `<p class="dao-talent">Thiên phú: mạch ${h(top.name)} · ${h(top.label)}</p>` : ''}
     </div>
+    <h3>Luyện thể · Thất mạch</h3>
     <ul class="dao-result-branches">${meridians.map((m, index) => `<li data-muscle="${h(m.key)}" style="--dao-order:${index}">
       <div class="dao-branch-result"><b>${h(m.name)}</b><span>${h(m.label)}${m.need > 0 ? `<small>Còn thiếu ${m.need} bài</small>` : ''}</span></div>
       ${m.unverified ? `<small class="cultivation-claim-badge" data-unverified>Hư cảnh · chưa xác chứng</small>${claimRows(claims, m.key)}` : ''}
