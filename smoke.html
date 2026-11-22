@@ -208,7 +208,19 @@ try {
       'Kết Đan · Sơ kỳ', 33, 90, 180, 'Trúc Cơ · Đại viên mãn', 28, true, 40, 31, 'Trúc Cơ · Trung kỳ',
       'Phàm nhân', 20, 0.06, 470, 1.125, '0.60', true, true, 7].join(',');
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
-    return got === want;
+    if (got !== want) return false;
+    // Đợt 2: Đột phá, nhiệm vụ tuần, thử thách Bình cảnh, microcopy.
+    const now = t0 + 30 * D + 72e5, p = H.hero({ workouts, exercises, body, sex: 'm', schedule: { 1: '' }, weekGoal: 2, now });
+    const pm = Object.fromEntries(p.meridians.map((x) => [x.key, x]));
+    const snap = H.snapshot(p), low = { ...snap, legs: [2, 3], chest: [2, 0] };
+    const ev = H.breakthroughs(low, p), q = H.quests({ workouts, exercises, profile: p, schedule: { 1: '' }, weekGoal: 2, now });
+    const got2 = [H.breakthroughs(null, p).length, H.breakthroughs(snap, p).length, ev.map((e) => `${e.key}:${e.realm}:${e.tribulation}`).join('/'), ev[0].from, ev[0].to, ev[0].real,
+      pm.legs.next.alt.r, pm.legs.next.alt.kg, p.challenge.key, p.challenge.pct,
+      q.quests.map((x) => `${x.id}:${x.meridian}:${x.done}/${x.goal}`).join('/'), q.done, H.quests({ workouts: [...workouts, W('4', 31, E('lr', S(12, 12)))], exercises, profile: p, schedule: {}, weekGoal: 2, now: now + D }).quests.map((x) => x.done).join('/'), H.term('start', true), H.term('rest', false)].join(',');
+    const want2 = [0, 0, 'legs:true:true/chest:false:false', 'Trúc Cơ · Đại viên mãn', 'Kết Đan · Sơ kỳ', 'Squat 1,67×BW · ~1RM 116,7 kg',
+      5, 154.5, 'biceps', 99, 'schedule:null:1/1/overload:shoulders:0/1/canCo:chest:0/1', 1, '2/1/0', 'Bế quan', 'Nghỉ'].join(',');
+    if (got2 !== want2) lines.push(`  ${got2}\n  ≠ ${want2}`);
+    return got2 === want2;
   });
   await step('Luật huy chương: chuỗi, mốc, tuần', async () => {
     const { medals } = await import('./js/medals.js');

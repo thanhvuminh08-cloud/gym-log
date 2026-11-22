@@ -13,6 +13,7 @@ export const TRIB_FROM = 3; // từ Kết Đan trở lên: đột phá = "độ 
 export const SHAKY = 85; // Căn cơ < 85% → "căn cơ lung lay"
 export const MAX_REPS = 12; // ~1RM chỉ tính tối đa 12 rep/set (set rep cao ước lượng quá tay)
 export const MAX_SETS = 40; // Linh khí: tối đa 40 set/buổi
+export const CHALLENGE_REPS = 5; // Bình cảnh: kèm mốc kg × 5 rep (dễ tập hơn thử 1RM)
 
 /** Ngưỡng ~1RM/cân nặng (nam) cho Luyện Khí → Hoá Thần. `lower` = thân dưới (nữ ×0,75, còn lại ×0,6). */
 export const STANDARDS = {
@@ -184,7 +185,9 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
     if (L && bw && ni < 5) {
       const ratio = thresholds(L.std, sex)[ni], eq = ratio * bw * L.f;
       const bwLift = STANDARDS[L.std].bw;
-      next = { realm: REALMS[ni + 1], ratio, exerciseId: ex.id, name: ex.name, kg: ceilHalf(Math.max(0, bwLift ? eq - bw : eq / L.hands)), added: !!bwLift, perHand: L.hands === 2 };
+      const kgAt = (r) => { const load = r === 1 ? eq : eq / (1 + r / 30); return ceilHalf(Math.max(0, bwLift ? load - bw : load / L.hands)); };
+      next = { realm: REALMS[ni + 1], ratio, exerciseId: ex.id, name: ex.name, kg: kgAt(1), added: !!bwLift, perHand: L.hands === 2,
+        alt: { r: CHALLENGE_REPS, kg: kgAt(CHALLENGE_REPS) } };
     }
     return { key: M.key, name: M.name, ...rk, ratio: R?.ratio != null ? r2(R.ratio) : null, best: R?.best || null, canCo, shaky: canCo != null && canCo < SHAKY, xp, next };
   });
@@ -193,10 +196,87 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
   const tuvi = rank(meridians.reduce((a, m, i) => a + m.p * MERIDIANS[i].w, 0) / wSum);
   const cc = meridians.map((m) => m.canCo).filter((v) => v != null);
   const canCo = cc.length ? Math.round(cc.reduce((a, b) => a + b, 0) / cc.length) : null;
+  // Thử thách Bình cảnh: mạch có mốc kg gần chạm nhất (phần đã đi trong cảnh giới cao nhất; hoà → trọng số lớn hơn).
+  const near = meridians.filter((m) => m.next?.kg != null)
+    .sort((a, b) => (b.p - b.realm.i) - (a.p - a.realm.i) || weight(b.key) - weight(a.key))[0];
   return {
     needsWeight: !bw, needsSex: sex !== 'm' && sex !== 'f', bw, sex,
     tuvi, canCo, shaky: canCo != null && canCo < SHAKY,
     linhKhi: { ...level(lk.total), parts: lk.parts },
     meridians,
+    challenge: near ? { key: near.key, name: near.name, label: near.label, pct: Math.round((near.p - near.realm.i) * 100), next: near.next } : null,
   };
 }
+
+const weight = (key) => MERIDIANS.find((m) => m.key === key)?.w || 0;
+const step = (r) => r.realm.i * 4 + r.phase.i;
+const fmt = (x) => x.toLocaleString('vi-VN', { maximumFractionDigits: 2 });
+
+/** Mốc "đã xem" để so Đột phá: {tuvi:[realm, phase], chest:[...], ...}. Lưu ở localStorage (view lo). */
+export function snapshot(profile) {
+  const s = { tuvi: [profile.tuvi.realm.i, profile.tuvi.phase.i] };
+  for (const m of profile.meridians) s[m.key] = [m.realm.i, m.phase.i];
+  return s;
+}
+
+/**
+ * Đột phá kể từ mốc đã xem. seen = null (lần đầu) → [] (chỉ lưu mốc, không ăn mừng).
+ * Trả về [{key ('tuvi'|mạch), name, from, to (label), realm (true = lên cảnh giới, false = lên kỳ), tribulation, real}],
+ * xếp quan trọng nhất trước: độ kiếp > lên cảnh giới > lên kỳ, Tu vi trước mạch.
+ */
+export function breakthroughs(seen, profile) {
+  if (!seen || typeof seen !== 'object') return [];
+  const items = [{ key: 'tuvi', name: 'Tu vi', ...profile.tuvi, real: `Công lực cấp ${profile.linhKhi.level}` }, ...profile.meridians.map((m) => ({
+    ...m, real: m.best ? `${m.best.name} ${fmt(m.ratio)}×BW · ~1RM ${fmt(m.best.kg)} kg` : m.key === 'core' ? `${fmt(m.xp)} Linh khí` : '',
+  }))];
+  const out = [];
+  for (const it of items) {
+    const [ri = 0, pi = 0] = seen[it.key] || [];
+    if (step(it) <= ri * 4 + pi) continue;
+    const realm = it.realm.i > ri;
+    out.push({ key: it.key, name: it.name, from: ri ? `${REALMS[ri]} · ${PHASES[pi]}` : REALMS[0], to: it.label, realm,
+      tribulation: realm && it.realm.i >= TRIB_FROM, real: it.real });
+  }
+  const score = (e) => (e.tribulation ? 4 : 0) + (e.realm ? 2 : 0) + (e.key === 'tuvi' ? 1 : 0);
+  return out.sort((a, b) => score(b) - score(a));
+}
+
+/**
+ * Nhiệm vụ tuần (T2–CN chứa `now`), 3 cái sinh từ dữ liệu, không lưu gì:
+ *  schedule — tập đủ số ngày theo lịch (không có lịch → weekGoal);
+ *  overload — vượt lần trước ở một bài của mạch yếu nhất (p thấp nhất, trừ Bụng);
+ *  canCo    — tập ≥1 buổi có mạch Căn cơ thấp nhất (chưa có Căn cơ → mạch lâu chưa tập nhất), khác mạch nhiệm vụ 2.
+ * Trả về {quests:[{id, title, detail, meridian, goal, done, complete}], done, total}.
+ */
+export function quests({ workouts = [], exercises = [], profile, schedule = {}, weekGoal = 3, now = Date.now() } = {}) {
+  const exMap = Object.fromEntries(exercises.map((e) => [e.id, e]));
+  const done = workouts.filter((w) => w.end && w.start <= now).sort((a, b) => a.start - b.start);
+  const wk = weekKey(now), week = done.filter((w) => weekKey(w.start) === wk);
+  const keyOf = (id) => MUSCLE[exMap[id]?.muscle]?.key;
+  const trains = (w, key) => w.entries.some((e) => keyOf(e.exerciseId) === key && doneSets(e).length);
+  const days = new Set(week.filter((w) => w.entries.some((e) => doneSets(e).length)).map((w) => new Date(w.start).toDateString()));
+  const named = (key) => profile.meridians.find((m) => m.key === key);
+  const list = [];
+
+  const planned = Object.keys(schedule || {}).length, goal1 = planned || Math.max(1, weekGoal || 0);
+  list.push({ id: 'schedule', title: `Tập đủ ${goal1} buổi tuần này`, detail: planned ? 'Theo lịch tập' : 'Theo mục tiêu tuần', meridian: null, goal: goal1, done: Math.min(goal1, days.size) });
+
+  const body = profile.meridians.filter((m) => m.key !== 'core');
+  const weak = [...body].sort((a, b) => a.p - b.p || weight(b.key) - weight(a.key))[0];
+  const beat = week.some((w) => analyzeWorkout(w, done).some((o) => o.res && keyOf(o.exerciseId) === weak.key));
+  const hint = weak.best?.name || weak.next?.name;
+  list.push({ id: 'overload', title: `Vượt lần trước ở mạch ${weak.name}`, detail: hint ? `Gợi ý: ${hint}` : `Mạch yếu nhất · ${weak.label}`, meridian: weak.key, goal: 1, done: beat ? 1 : 0 });
+
+  const rest = body.filter((m) => m.key !== weak.key);
+  const last = (key) => done.filter((w) => trains(w, key)).at(-1)?.start ?? -Infinity;
+  const withCc = rest.filter((m) => m.canCo != null).sort((a, b) => a.canCo - b.canCo || last(a.key) - last(b.key));
+  const low = withCc[0] || [...rest].sort((a, b) => last(a.key) - last(b.key) || weight(b.key) - weight(a.key))[0];
+  list.push({ id: 'canCo', title: `Thêm buổi cho mạch ${low.name}`, detail: low.canCo != null ? `Căn cơ ${low.canCo}%` : 'Lâu chưa tập', meridian: low.key, goal: 1, done: week.some((w) => trains(w, low.key)) ? 1 : 0 });
+
+  for (const q of list) q.complete = q.done >= q.goal;
+  return { quests: list, done: list.filter((q) => q.complete).length, total: list.length };
+}
+
+/** Microcopy tu tiên (settings.lore, mặc định tắt). term('start', on) → 'Bế quan' | 'Bắt đầu'. */
+export const LORE = { start: ['Bắt đầu', 'Bế quan'], rest: ['Nghỉ', 'Điều tức'], finish: ['Kết thúc', 'Xuất quan'] };
+export const term = (k, on) => LORE[k]?.[on ? 1 : 0] ?? k;

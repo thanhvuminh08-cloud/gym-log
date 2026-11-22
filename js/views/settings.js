@@ -72,7 +72,7 @@ export async function render(el) {
       return;
     }
     if (t.dataset.k) {
-      settings.set({ [t.dataset.k]: t.type === 'checkbox' ? t.checked : Number(t.value) || 0 });
+      settings.set({ [t.dataset.k]: t.type === 'checkbox' ? t.checked : t.type === 'number' ? Number(t.value) || 0 : t.value });
       toast('Đã lưu');
     }
     if (t.dataset.act === 'import' && t.files[0]) {

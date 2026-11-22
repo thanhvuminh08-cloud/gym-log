@@ -1,5 +1,5 @@
 import { all, put, del, activeWorkout } from '../db.js';
-import { h, uid, e1rm, toast, settings, exMap, fmtNum, celebrate } from '../util.js';
+import { h, uid, e1rm, toast, settings, exMap, fmtNum, celebrate, tap } from '../util.js';
 import { lastSets, records, doneSets } from '../stats.js';
 import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
@@ -135,7 +135,7 @@ export async function render(el) {
         if (lvl > (shown.get(e) || 0)) {
           shown.set(e, lvl); toast(res.msg, 3000);
           celebrate(el.querySelector(`.set[data-ei="${ei}"][data-si="${si}"]`), res.tier);
-        }
+        } else tap();
       }
       return;
     }

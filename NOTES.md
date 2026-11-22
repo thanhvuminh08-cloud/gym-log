@@ -15,6 +15,7 @@
 - Lịch tập (js/schedule.js): `settings.schedule = {getDay(): templateId | ""}` (có khoá = ngày tập, "" = tự do). `weekPlan` → state none/done/due/rest cho Hôm nay + 7 ô T2–CN done/today/missed/planned/rest. Chọn giáo án ở Cài đặt tự bật ngày đó; giáo án đã xoá → coi như tự do; nút tập tắt khi đang có buổi dở. Smoke sao lưu/khôi phục `gym.settings`.
 - Vòng nghỉ (js/timer.js): `--rest-progress` = % thời gian còn lại theo `gym.restStart`→`gym.restEnd` (±15 đổi cả tổng), `data-warn="true"` khi ≤10s.
 - Tu luyện (js/hero.js, hàm thuần): `hero()` → Tu vi, Thất mạch (cảnh giới theo ~1RM/cân nặng lúc tập, kỷ lục không rớt), Căn cơ 90 ngày, Bình cảnh (kg cần theo cân nặng hiện tại), Linh khí/Công lực. Hợp đồng ở cuối RPG.md.
+- Rung xong set: `tap()` (util.js) 25 ms theo cài đặt rung; set có huy chương mới chỉ rung `celebrate`. Tu luyện đợt 2 bước 1: `challenge`, `next.alt`, `snapshot/breakthroughs`, `quests`, `term` + `settings.lore` (hợp đồng cuối RPG.md).
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -42,8 +43,8 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
+- [cho Codex] Đợt 2 Tu luyện: màn Đột phá/Độ kiếp, nhiệm vụ tuần, thử thách Bình cảnh (× 5 rep), ô Cài đặt `lore` + `sex` — số giả theo "Hợp đồng đợt 2" cuối RPG.md (js/views/hero.js, home.js, settings.js, css).
 
-- [cho Claude] Thêm phản hồi rung nhẹ khi đánh dấu xong set (js/views/workout.js), theo cài đặt rung và tránh rung hai lần khi có huy chương.
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)

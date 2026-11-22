@@ -25,7 +25,7 @@ export function toast(msg, ms = 2200) {
 }
 
 const SKEY = 'gym.settings';
-const DEFAULTS = { rest: 90, sound: true, vibrate: true, weekGoal: 3, monthGoal: 12, schedule: {} };
+const DEFAULTS = { rest: 90, sound: true, vibrate: true, weekGoal: 3, monthGoal: 12, schedule: {}, lore: false };
 export const settings = {
   get() {
     try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SKEY) || '{}') }; } catch { return { ...DEFAULTS }; }
@@ -39,6 +39,11 @@ export const settings = {
 
 const calm = () => matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const BUZZ = { gold: [80, 60, 80, 60, 160], silver: [80, 60, 120], bronze: [90] };
+
+/** Rung nhẹ xác nhận thao tác (vd. xong set), theo cài đặt rung. */
+export function tap(ms = 25) {
+  if (settings.get().vibrate && navigator.vibrate) navigator.vibrate(ms);
+}
 
 /** Ăn mừng: rung theo cấp (nếu bật rung) + gắn `.celebrate[data-celebrate=tier]` ~1.2s cho Codex làm hiệu ứng. */
 export function celebrate(el, tier = 'bronze') {
