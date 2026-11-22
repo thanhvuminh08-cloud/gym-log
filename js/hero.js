@@ -94,11 +94,11 @@ export function ratioAt(p, t) {
 /** Số bài tối thiểu mỗi mạch phải luyện: cảnh giới mạch = trung bình 2 bài mạnh nhất (thiếu bài = 0). */
 export const PAIR = 2;
 
-/** Hư cảnh: mức tự khai chưa xác chứng chỉ tính tới Kết Đan · Đại viên mãn. */
+/** Hư cảnh: mức tự khai chưa xác chứng chỉ tính tới Luyện Cân · Viên mãn (p 3,9). */
 export const TEST_CAP = 3.9;
 /** Xác chứng: buổi thật đạt ≥ 90% mức khai (cùng quy đổi ~1RM chuẩn, hoặc giây/rep với Bụng). */
 export const VERIFY = 0.9;
-/** Mức khai bị hỏi lại ("Đạo hữu chắc chứ?"): từ Nguyên Anh trở lên. */
+/** Mức khai bị hỏi lại ("Đạo hữu chắc chứ?"): từ Luyện Cốt trở lên. */
 export const DOUBT_FROM = 4;
 /** Công lực khởi đầu theo thời gian tu đạo (Linh khí, ≈ cấp 1 / 11 / 19 / 27 / 33). */
 export const START_XP = { new: 0, novice: 15000, mid: 60000, veteran: 150000, elder: 250000 };
@@ -119,6 +119,17 @@ export function rank(p) {
   const r2 = (x) => Math.round(x * 1000) / 1000;
   return { p: r2(p), lv: Math.min(60, 1 + Math.floor(10 * p + 1e-9)), realm: { i, name: REALMS[i] }, phase: { i: ph, name: PHASES[ph] },
     label: i ? `${REALMS[i]} · ${PHASES[ph]}` : REALMS[0], tribulation: i >= TRIB_FROM };
+}
+
+/**
+ * Luyện thể — bậc của từng mạch (Tu vi được đúc lên từ 7 mạch nên mạch không dùng tên cảnh giới).
+ * Cùng ngưỡng p với rank(): Bế mạch → Luyện Bì → Luyện Nhục → Luyện Cân → Luyện Cốt → Luyện Tủy; độ thuần thục Sơ thành → Viên mãn.
+ */
+export const TEMPERS = ['Bế mạch', 'Luyện Bì', 'Luyện Nhục', 'Luyện Cân', 'Luyện Cốt', 'Luyện Tủy'];
+export const MASTERY = ['Sơ thành', 'Tiểu thành', 'Đại thành', 'Viên mãn'];
+export function temper(p) {
+  const r = rank(p), i = r.realm.i, ph = r.phase.i;
+  return { ...r, realm: { i, name: TEMPERS[i] }, phase: { i: ph, name: MASTERY[ph] }, label: i ? `${TEMPERS[i]} · ${MASTERY[ph]}` : TEMPERS[0], tribulation: false };
 }
 
 /** Công lực: lên từ cấp L sang L+1 cần 100 × L^1,5 Linh khí (cộng dồn), bắt đầu cấp 1. */
@@ -239,7 +250,7 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
     Object.assign(r, { p: use?.p ?? -1, ratio: use?.ratio ?? null, best: use?.best || null,
       unverified: fromTest && !r.verified, capped: fromTest && !r.verified && T.p > TEST_CAP });
   }
-  const liftView = (r) => ({ exerciseId: r.ex.id, name: r.ex.name, ...rank(r.p), ratio: r.ratio == null ? null : r2(r.ratio), kg: r.best?.kg ?? null,
+  const liftView = (r) => ({ exerciseId: r.ex.id, name: r.ex.name, ...temper(r.p), ratio: r.ratio == null ? null : r2(r.ratio), kg: r.best?.kg ?? null,
     reps: r.C ? r.best?.r ?? null : null, unit: r.C?.unit || null, tested: !!r.best?.tested, unverified: r.unverified, capped: r.capped });
 
   const meridians = MERIDIANS.map((M) => {
@@ -248,14 +259,14 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
       // Bụng: max(Linh khí mạch, TB 2 bài đo được) — người tập lâu khai Plank/Leg Raise không phải bắt đầu Phàm nhân.
       const cl = Object.values(rec).filter((r) => r.m === 'core' && r.p > 0).sort((a, b) => b.p - a.p), top = cl.slice(0, PAIR);
       const xpP = progress(xp, CORE_XP), testP = top.reduce((a, r) => a + r.p, 0) / PAIR;
-      const p = Math.max(xpP, testP), rk = rank(p), ni = rk.realm.i;
+      const p = Math.max(xpP, testP), rk = temper(p), ni = rk.realm.i;
       return { key: M.key, name: M.name, ...rk, ratio: null, best: null, canCo: null, shaky: false, xp, lifts: top.map(liftView), need: 0,
         unverified: testP > xpP && top.some((r) => r.unverified),
-        next: ni < 5 ? { realm: REALMS[ni + 1], xp: CORE_XP[ni], left: Math.max(0, CORE_XP[ni] - xp) } : null };
+        next: ni < 5 ? { realm: TEMPERS[ni + 1], xp: CORE_XP[ni], left: Math.max(0, CORE_XP[ni] - xp) } : null };
     }
     // Cảnh giới mạch = trung bình PAIR bài mạnh nhất (bài thiếu tính 0) → phải luyện đủ bài mới lên được.
     const all = Object.values(rec).filter((r) => r.m === M.key), lifts = all.filter((r) => r.p > 0).sort((a, b) => b.p - a.p);
-    const top = lifts.slice(0, PAIR), p = top.reduce((a, r) => a + r.p, 0) / PAIR, rk = rank(p);
+    const top = lifts.slice(0, PAIR), p = top.reduce((a, r) => a + r.p, 0) / PAIR, rk = temper(p);
     const nMax = Math.max(0, ...all.map((r) => r.n));
     const canCo = nMax ? Math.round(((recent[M.key] || 0) / nMax) * 100) : null;
     // Bình cảnh: bài cần nâng để mạch lên cảnh giới kế (1 rep, cân nặng hiện tại).
@@ -272,7 +283,7 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
       const pNeed = pair ? P : Math.max(2 * P - A.p, 1e-6);
       const ratio = ratioAt(Math.min(pNeed, 5.99), thresholds(L.std, sex)), eq = ratio * bw * L.f;
       const kgAt = (r) => { const load = r === 1 ? eq : eq / (1 + r / 30); return ceilHalf(Math.max(0, (load - L.bwf * bw) / L.hands)); };
-      next = { realm: REALMS[P], ratio: r2(ratio), exerciseId: ex.id, name: ex.name, kg: kgAt(1), added: L.bwf > 0, perHand: L.hands === 2, pair,
+      next = { realm: TEMPERS[P], ratio: r2(ratio), exerciseId: ex.id, name: ex.name, kg: kgAt(1), added: L.bwf > 0, perHand: L.hands === 2, pair,
         alt: { r: CHALLENGE_REPS, kg: kgAt(CHALLENGE_REPS) } };
     }
     return { key: M.key, name: M.name, ...rk, ratio: A?.ratio != null ? r2(A.ratio) : null, best: A?.best || null, canCo, shaky: canCo != null && canCo < SHAKY, xp,
@@ -289,7 +300,7 @@ export function hero({ workouts = [], exercises = [], body = [], sex, schedule =
       const one = goal * L.f, kgAt = (n) => ceilHalf(Math.max(0, ((n === 1 ? one : one / (1 + n / 30)) - L.bwf * bw) / L.hands));
       target = { kg: kgAt(1), alt: { r: CHALLENGE_REPS, kg: kgAt(CHALLENGE_REPS) }, added: L.bwf > 0, perHand: L.hands === 2 };
     }
-    return { exerciseId: r.ex.id, name: r.ex.name, meridian: r.m, ...rank(T.p), verified: r.verified, capped: !r.verified && T.p > TEST_CAP,
+    return { exerciseId: r.ex.id, name: r.ex.name, meridian: r.m, ...temper(T.p), verified: r.verified, capped: !r.verified && T.p > TEST_CAP,
       pct: T.eq ? Math.min(100, Math.round((r.realEq / T.eq) * 100)) : 0, target };
   });
 
@@ -338,15 +349,17 @@ export function breakthroughs(seen, profile) {
     // Phàm nhân không hiện kỳ → không ăn mừng "lên kỳ" bên trong Phàm nhân.
     if (!it.realm.i || step(it) <= (ri ? ri * 4 + pi : 0)) continue;
     const realm = it.realm.i > ri;
-    out.push({ key: it.key, name: it.name, from: ri ? `${REALMS[ri]} · ${PHASES[pi]}` : REALMS[0], to: it.label, realm,
-      tribulation: realm && it.realm.i >= TRIB_FROM, real: it.real });
+    const tv = it.key === 'tuvi', [RN, PN] = tv ? [REALMS, PHASES] : [TEMPERS, MASTERY];
+    // Tu vi: Đột phá / Độ kiếp. Mạch: Thối thể (luyện thể lên bậc) — không bao giờ độ kiếp.
+    out.push({ key: it.key, kind: tv ? 'tuvi' : 'temper', name: it.name, from: ri ? `${RN[ri]} · ${PN[pi]}` : RN[0], to: it.label, realm, level: it.realm.i,
+      tribulation: tv && realm && it.realm.i >= TRIB_FROM, real: it.real });
   }
   // Xác chứng: bài tự khai vừa được buổi thật chứng minh (mốc cũ chưa có danh sách → coi như chưa bài nào).
   const was = new Set(Array.isArray(seen.verified) ? seen.verified : []);
   for (const c of profile.claims || []) {
     if (!c.verified || was.has(c.exerciseId)) continue;
     const mer = profile.meridians.find((m) => m.key === c.meridian);
-    out.push({ key: 'verify', exerciseId: c.exerciseId, verify: true, name: `Xác chứng · ${c.name}`, from: 'Hư cảnh', to: c.label, realm: false, tribulation: false,
+    out.push({ key: 'verify', kind: 'verify', level: c.realm.i, exerciseId: c.exerciseId, verify: true, name: `Xác chứng · ${c.name}`, from: 'Hư cảnh', to: c.label, realm: false, tribulation: false,
       real: `Lời khai đã được chứng minh · mạch ${mer?.name || ''} ${mer?.label || ''}`.trim() });
   }
   const score = (e) => (e.tribulation ? 4 : 0) + (e.realm ? 2 : 0) + (e.verify ? 1.5 : 0) + (e.key === 'tuvi' ? 1 : 0);

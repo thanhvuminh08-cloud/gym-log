@@ -181,9 +181,9 @@ function profileForm({ needsWeight, needsSex }) {
 }
 
 export function breakthroughModal(event, { id = 'breakthrough', demo = false } = {}) {
-  const title = event.tribulation ? 'Độ kiếp' : event.verify ? 'Xác chứng' : 'Đột phá';
+  const title = event.tribulation ? 'Độ kiếp' : event.verify ? 'Xác chứng' : event.kind === 'temper' ? 'Thối thể' : 'Đột phá';
   const realm = event.to.split(' · ')[0];
-  const index = Math.max(0, REALMS.indexOf(realm));
+  const index = event.level ?? Math.max(0, REALMS.indexOf(realm));
   const key = h(id);
   return `<dialog id="${key}" class="breakthrough-modal modal" data-tribulation="${Boolean(event.tribulation)}"
     data-breakthrough="${h(event.key)}" aria-labelledby="${key}-title"${demo ? ' popover="auto"' : ''}>

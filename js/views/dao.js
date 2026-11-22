@@ -290,10 +290,10 @@ export async function render(el, [part] = []) {
       const why = missing(step) || (step === 4 && !G.validatePath(draft.dao.path, data.exercises).ok ? 'Mỗi mạch cần ít nhất 2 bài' : '');
       if (why) return toast(why);
       if (step === 5) {
-        // Khai lố (từ Nguyên Anh, hoặc > 15 rep) → hỏi lại; tu vi tự khai vẫn chỉ là hư cảnh cho tới khi xác chứng.
+        // Khai lố (từ Luyện Cốt, hoặc > 15 rep) → hỏi lại; tu vi tự khai vẫn chỉ là hư cảnh cho tới khi xác chứng.
         const sus = G.doubts({ dao: draft.dao, exercises: data.exercises, body: draft.weight > 0 ? [{ date: Date.now(), weight: draft.weight }] : data.body, sex: draft.sex });
         const list = sus.map((s) => `${s.name}: ${s.label}${s.reps > 15 ? ` (${s.reps} rep)` : ''}`).join('\n');
-        if (sus.length && !confirm(`Đạo hữu chắc chứ?\n${list}\n\nTu vi tự khai chỉ là hư cảnh (tối đa Kết Đan) cho tới khi tập thật đạt 90% mức khai.`)) return;
+        if (sus.length && !confirm(`Đạo hữu chắc chứ?\n${list}\n\nMức tự khai chỉ là hư cảnh (mạch tối đa Luyện Cân · Viên mãn) cho tới khi tập thật đạt 90% mức khai.`)) return;
       }
       goStep(step === 4 && skipsTest(draft) ? 6 : step + 1);
     } else if (act === 'daoSkip') {
