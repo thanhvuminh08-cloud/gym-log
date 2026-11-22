@@ -13,7 +13,7 @@ const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 const until = async (fn, ms = 3000) => { for (let t = 0; t < ms; t += 50) { const v = fn(); if (v) return v; await wait(50); } return null; };
 
 await new Promise((r) => { const q = indexedDB.deleteDatabase(DB); q.onsuccess = q.onerror = q.onblocked = r; });
-localStorage.removeItem('gym.restEnd');
+localStorage.removeItem('gym.restEnd'); localStorage.removeItem('gym.restStart');
 const seenBak = localStorage.getItem('gym.medalSeen'); localStorage.removeItem('gym.medalSeen');
 const setBak = localStorage.getItem('gym.settings'); localStorage.removeItem('gym.settings');
 frame.src = `index.html?db=${DB}#/`;
@@ -36,6 +36,20 @@ try {
     return !!(await until(() => $$('.set:not(.head)').length >= 3));
   });
   await step('Ghi set + đồng hồ nghỉ chạy', async () => { fillSets([60, 65]); await check(0); await check(1); return $$('.set.done').length === 2 && !!$('.rest-bar.show'); });
+  await step('Vòng nghỉ: --rest-progress, ±15, mở lại app, cảnh báo ≤10s', async () => {
+    const t = await w.eval("import('./js/timer.js')"), ls = w.localStorage, bar = $('.rest-bar');
+    const P = () => Number(bar.style.getPropertyValue('--rest-progress')), warn = () => bar.dataset.warn ?? '-';
+    t.start(60); const a = [P(), warn()];
+    bar.querySelector('[data-d="15"]').click(); const b = [P(), warn()];
+    const now = Date.now(); ls.setItem('gym.restStart', now - 52000); ls.setItem('gym.restEnd', now + 8000); t.resume(); // mở lại app, còn 8s / 60s
+    const c = [Math.round(P()), warn()];
+    ls.setItem('gym.restEnd', now + 30000); t.resume(); const d = warn();
+    t.stop(); const e = [warn(), ls.getItem('gym.restStart')];
+    const got = [...a, ...b, ...c, d, ...e, t.restProgress(0, 100, 25), t.restProgress(0, 100, 200), t.restProgress(5, 5, 0)].join(',');
+    const want = [100, '-', 100, '-', 13, 'true', '-', '-', null, 75, 0, 0].join(',');
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Kết thúc → trang chi tiết', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/history/'))); });
   await step('Lưu thành giáo án', async () => { (await until(() => $('[data-act=tpl]'))).click(); await wait(200); await go('#/templates'); return w.document.body.innerText.includes('Smoke A'); });
   await step('Tập lại từ giáo án, hiện số liệu lần trước', async () => {
@@ -231,7 +245,7 @@ try {
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
-  w.localStorage.removeItem('gym.restEnd');
+  w.localStorage.removeItem('gym.restEnd'); w.localStorage.removeItem('gym.restStart'); localStorage.removeItem('gym.restStart');
   for (const k of ['gym.lastBackup', 'gym.preRestore', 'gym.errors']) w.localStorage.removeItem(`${k}.${DB}`);
   if (seenBak === null) w.localStorage.removeItem('gym.medalSeen'); else w.localStorage.setItem('gym.medalSeen', seenBak);
   if (setBak === null) w.localStorage.removeItem('gym.settings'); else w.localStorage.setItem('gym.settings', setBak);

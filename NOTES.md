@@ -13,6 +13,7 @@
 - An toàn dữ liệu (js/safety.js): Hôm nay có thẻ `.backup-reminder` khi có buổi tập xong mới hơn lần sao lưu cuối và đã quá 7 ngày (`BACKUP_DAYS`). Khôi phục chạy `validateBackup` (db.js), hiện số bản ghi để xác nhận, lưu bản dự phòng vào localStorage `gym.preRestore` (nút "Hoàn tác khôi phục"), rồi `importAll` ghi nguyên khối trong 1 transaction. Lỗi chưa xử lý → toast + 10 lỗi gần nhất trong `gym.errors` (Cài đặt › Nhật ký lỗi, `.error-log`). Khoá localStorage thêm hậu tố `.<db>` khi `?db=` khác `gym`.
 - Thẻ thật (js/insights.js): `liftTotal(ws, ids)` tổng ~1RM tích luỹ (Tiến độ › thẻ Tổng = `mainLifts` Squat/Bench Press/Deadlift theo tên). `readinessAt/readiness` điểm 0–100 = 100 − nghỉ (<24h 20, <48h 8) − tải 7 ngày/TB tuần 28 ngày (>1,5 25, >1,3 12) − RPE TB buổi gần nhất trong 72h (≥9,5 15, ≥8,5 10, ≥7,5 5); delta so với hôm qua. `sessionCounts` buổi tuần (từ T2)/tháng, mục tiêu `settings.weekGoal` (3) / `monthGoal` (12). Smoke đọc `data-count` thay vì chữ (countUp dừng ở 0 khi khung ẩn).
 - Lịch tập (js/schedule.js): `settings.schedule = {getDay(): templateId | ""}` (có khoá = ngày tập, "" = tự do). `weekPlan` → state none/done/due/rest cho Hôm nay + 7 ô T2–CN done/today/missed/planned/rest. Chọn giáo án ở Cài đặt tự bật ngày đó; giáo án đã xoá → coi như tự do; nút tập tắt khi đang có buổi dở. Smoke sao lưu/khôi phục `gym.settings`.
+- Vòng nghỉ (js/timer.js): `--rest-progress` = % thời gian còn lại theo `gym.restStart`→`gym.restEnd` (±15 đổi cả tổng), `data-warn="true"` khi ≤10s.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -42,7 +43,6 @@ Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nh
   5. Trạng thái trống: minh hoạ + 1 câu hướng dẫn cho người mới ở Lịch sử, Giáo án, Tiến độ, Huy chương.
   6. Phản hồi chạm: trạng thái nhấn (`:active`) cho mọi nút/thẻ bấm được; vùng chạm ≥44px. Rung nhẹ khi xong set là logic → Claude.
 
-- [cho Claude] Gắn dữ liệu thật cho vòng nghỉ (js/timer.js): trên `.rest-bar`, cập nhật `--rest-progress` (số 0–100, tỉ lệ thời gian còn lại, gồm ±15 và mở lại app), đặt `data-warn="true"` khi còn ≤10 giây và xoá thuộc tính khi còn hơn 10 giây; thêm smoke cho các trạng thái này.
 - [cho Claude] Con Đường Tu Luyện (nhập vai tu tiên, số thật) — thiết kế ở `RPG.md`. Bước 1: `js/hero.js` hàm thuần + luật smoke + hợp đồng dữ liệu cho Codex. Làm sau khi Codex xong đợt UX (một agent mỗi lúc).
 
 ## Ý tưởng sau khi dùng thực tế

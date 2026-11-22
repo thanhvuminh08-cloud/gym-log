@@ -1,7 +1,8 @@
 import { settings } from './util.js';
 
 // Đồng hồ nghỉ: thanh cố định phía trên nav. Lưu thời điểm kết thúc để sống qua việc chuyển màn hình.
-const KEY = 'gym.restEnd';
+// gym.restStart giữ mốc bắt đầu để vòng nghỉ tính đúng tỉ lệ sau ±15 và khi mở lại app.
+const KEY = 'gym.restEnd', START = 'gym.restStart', WARN_S = 10;
 let tick, bar, ctx;
 
 function beep() {
@@ -17,7 +18,14 @@ function beep() {
 }
 
 function getEnd() { return Number(localStorage.getItem(KEY) || 0); }
-function setEnd(v) { v ? localStorage.setItem(KEY, v) : localStorage.removeItem(KEY); }
+function setEnd(v) { v ? localStorage.setItem(KEY, v) : (localStorage.removeItem(KEY), localStorage.removeItem(START)); }
+
+// Tỉ lệ thời gian còn lại 0–100 (hàm thuần, smoke kiểm).
+export function restProgress(start, end, now = Date.now()) {
+  const total = end - start;
+  if (!(total > 0)) return 0;
+  return Math.max(0, Math.min(100, Math.round(((end - now) / total) * 1000) / 10));
+}
 
 function ensureBar() {
   if (bar) return bar;
@@ -55,6 +63,9 @@ function update() {
     return stop();
   }
   ensureBar().classList.add('show');
+  const start = Number(localStorage.getItem(START)) || getEnd() - left * 1000;
+  bar.style.setProperty('--rest-progress', restProgress(start, getEnd()));
+  if (left <= WARN_S) bar.dataset.warn = 'true'; else delete bar.dataset.warn;
   bar.querySelector('.rest-time').textContent = `Nghỉ ${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
 }
 
@@ -62,7 +73,9 @@ export function start(seconds) {
   if (!seconds) return;
   // Unlock audio on user gesture (iOS)
   try { ctx ||= new (window.AudioContext || window.webkitAudioContext)(); ctx.resume(); } catch {}
-  setEnd(Date.now() + seconds * 1000);
+  const now = Date.now();
+  localStorage.setItem(START, now);
+  setEnd(now + seconds * 1000);
   resume();
 }
 
@@ -77,4 +90,5 @@ export function stop() {
   clearInterval(tick);
   setEnd(0);
   bar?.classList.remove('show');
+  if (bar) delete bar.dataset.warn;
 }
