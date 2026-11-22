@@ -1,12 +1,33 @@
 import { all, activeWorkout } from '../db.js';
-import { h, fmtDate, fmtDur, fmtNum } from '../util.js';
+import { h, fmtDate, fmtDur, fmtNum, exMap } from '../util.js';
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
+import { topLifts, muscleKey } from '../insights.js';
+import { sparkline, lineChart } from '../chart.js';
 
 const icon = (name) => `<svg aria-hidden="true"><use href="#i-${name}"/></svg>`;
+const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
+
+/** Thẻ mức tạ chính (~1RM) + tổng, mũi tên so với 30 ngày trước. */
+function strength({ lifts, total }, ex) {
+  return `<section class="strength">
+      <h2 class="section-heading">Sức mạnh <a href="#/progress/overview">Tổng quan</a></h2>
+      <div class="lift-cards">${lifts.map((l) => `
+        <a class="card lift-card" href="#/progress/ex/${encodeURIComponent(l.exerciseId)}" data-muscle="${muscleKey(ex[l.exerciseId])}">
+          <span class="lift-top"><b data-count="${l.max}">${fmtNum(l.max)}<small> kg</small></b>${trend(l.delta)}</span>
+          <small class="lift-name">${h(ex[l.exerciseId]?.name || 'Bài đã xoá')}</small>
+          ${sparkline(l.spark)}
+        </a>`).join('')}</div>
+      ${lifts.length > 1 ? `<a class="card lift-total" href="#/progress/overview">
+        <span class="lift-top"><b data-count="${total.max}">${fmtNum(total.max)}<small> kg</small></b>${trend(total.delta)}<small class="muted">Tổng ~1RM ${lifts.length} bài · so với 30 ngày trước</small></span>
+        ${lineChart(total.series.slice(-40), { unit: ' kg', area: true, head: false })}
+      </a>` : ''}
+    </section>`;
+}
 
 export async function render(el) {
-  const [cur, templates, done] = await Promise.all([activeWorkout(), all('templates'), finished()]);
+  const [cur, templates, done, exList] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises')]);
+  const ex = exMap(exList), top = topLifts(done);
   const weekAgo = Date.now() - 7 * 864e5;
   const week = done.filter((w) => w.start > weekAgo);
   const date = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }).format(Date.now());
@@ -35,6 +56,7 @@ export async function render(el) {
         <div><span class="tile-icon">${icon('dumbbell')}</span><b data-count="${week.reduce((a, w) => a + volume(w), 0)}">${fmtNum(week.reduce((a, w) => a + volume(w), 0))}<small> kg</small></b><small>Tổng khối lượng</small></div>
       </div>
     </section>
+    ${top.lifts.length ? strength(top, ex) : ''}
     <div class="dashboard-lists">
       <section>
         <h2 class="section-heading">Giáo án <a href="#/templates">Quản lý</a></h2>

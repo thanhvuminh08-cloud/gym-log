@@ -4,6 +4,7 @@ import { lastSets, records, doneSets } from '../stats.js';
 import { pickExercise } from '../picker.js';
 import * as timer from '../timer.js';
 import { compare, target, TIERS, RPE } from '../overload.js';
+import { muscleKey } from '../insights.js';
 
 async function newEntry(exerciseId, nSets, reps, rest) {
   const prev = await lastSets(exerciseId);
@@ -64,7 +65,7 @@ export async function render(el) {
         <button class="primary" data-act="finish">Kết thúc</button></div>
     </header>
     ${w.entries.map((e, ei) => `
-      <section class="card entry">
+      <section class="card entry" data-muscle="${muscleKey(ex[e.exerciseId])}">
         <div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b>
           <label class="muted small">Nghỉ <input type="number" inputmode="numeric" class="tiny" data-ei="${ei}" data-f="rest" value="${e.rest}">s</label>
           <button class="ghost icon" data-act="up" data-ei="${ei}" ${ei ? '' : 'disabled'}>↑</button>

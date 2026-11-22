@@ -1,15 +1,22 @@
 import { all, put, del } from '../db.js';
 import { h, uid, fmtDate, fmtShort, fmtNum, exMap, countUp } from '../util.js';
 import { finished, series, records } from '../stats.js';
-import { lineChart } from '../chart.js';
+import { lineChart, stackedBars, yearGridSvg } from '../chart.js';
 import { medals } from '../medals.js';
 import { TIER_LABEL } from '../overload.js';
+import { MUSCLE, yearGrid, years, weeklyVolume, inRange } from '../insights.js';
 
 const METRICS = { e1rm: '~1RM', top: 'Mức tạ cao nhất', vol: 'Khối lượng' };
-const state = { tab: 'ex', exId: '', metric: 'e1rm' };
+const RANGES = { 1: '1T', 3: '3T', 6: '6T', 12: '1N', 0: 'Tất cả' };
+const TABS = { overview: 'Tổng quan', ex: 'Bài tập', body: 'Cơ thể', medal: 'Huy chương' };
+const state = { tab: 'overview', exId: '', metric: 'e1rm', range: 6, year: new Date().getFullYear() };
 
-export async function render(el, [tab] = []) {
-  if (['ex', 'body', 'medal'].includes(tab)) state.tab = tab;
+/** Chú thích màu nhóm cơ: [[muscle, text]]. */
+const legend = (items) => `<div class="chips legend">${items.map(([m, t]) => `<span class="chip legend-chip" data-muscle="${MUSCLE[m].key}"><i class="dot" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${MUSCLE[m].color}"></i> ${h(m)}${t ? ` <b>${t}</b>` : ''}</span>`).join('')}</div>`;
+
+export async function render(el, [tab, exId] = []) {
+  if (TABS[tab]) state.tab = tab;
+  if (exId) state.exId = exId;
   const ex = exMap(await all('exercises'));
   const done = await finished();
   const counts = {};
@@ -20,7 +27,25 @@ export async function render(el, [tab] = []) {
   let seen; // mốc "đã xem huy chương", đọc 1 lần mỗi lần vào trang để đổi tab qua lại không mất dấu "mới"
   const draw = async () => {
     let body = '';
-    if (state.tab === 'ex') {
+    if (state.tab === 'overview') {
+      const ys = years(done), lo = Math.min(...ys), hi = Math.max(...ys);
+      const g = yearGrid(done, ex, state.year);
+      const wv = weeklyVolume(done, ex, 12);
+      const inWeeks = Object.keys(MUSCLE).filter((m) => wv.some((w) => w.byMuscle[m]));
+      body = `<section class="card year-card">
+          <div class="row year-nav"><button class="ghost icon" data-y="${state.year - 1}" ${state.year <= lo ? 'disabled' : ''} aria-label="Năm trước">‹</button>
+            <b class="grow" style="text-align:center">${state.year}</b>
+            <button class="ghost icon" data-y="${state.year + 1}" ${state.year >= hi ? 'disabled' : ''} aria-label="Năm sau">›</button></div>
+          <div class="year-total"><b data-count="${g.total}">${g.total}</b><small> ngày tập</small></div>
+          ${legend(Object.keys(MUSCLE).filter((m) => g.counts[m]).map((m) => [m, `${g.counts[m]} ngày`]))}
+          ${yearGridSvg(g)}
+        </section>
+        <section class="card volume-card">
+          <h2>Khối lượng 12 tuần</h2>
+          ${stackedBars(wv)}
+          ${legend(inWeeks.map((m) => [m, '']))}
+        </section>`;
+    } else if (state.tab === 'ex') {
       if (!used.length) body = `<section class="card empty-state">
         <span class="tile-icon"><svg aria-hidden="true"><use href="#i-trend"/></svg></span>
         <h2>Chưa có dữ liệu bài tập</h2>
@@ -28,9 +53,15 @@ export async function render(el, [tab] = []) {
       </section>`;
       else {
         const s = await series(state.exId), r = await records(state.exId);
+        const pts = inRange(s.map((p) => ({ t: p.t, v: p[state.metric] })), state.range);
+        const diff = pts.length > 1 ? pts.at(-1).v - pts[0].v : 0;
         body = `<select data-f="exId">${used.map((id) => `<option value="${h(id)}" ${id === state.exId ? 'selected' : ''}>${h(ex[id].name)} (${counts[id]})</option>`).join('')}</select>
+        <div class="max-box"><b data-count="${r.e1rm}">${fmtNum(r.e1rm)}<small> kg</small></b><small>Max hiện tại (~1RM)</small></div>
         <div class="chips">${Object.entries(METRICS).map(([k, v]) => `<button class="chip${k === state.metric ? ' on' : ''}" data-m="${k}">${v}</button>`).join('')}</div>
-        <section class="card">${lineChart(s.map((p) => ({ t: p.t, v: p[state.metric] })), { unit: ' kg' })}</section>
+        <div class="chips range">${Object.entries(RANGES).map(([k, v]) => `<button class="chip${Number(k) === state.range ? ' on' : ''}" data-range="${k}">${v}</button>`).join('')}</div>
+        <section class="card">
+          <div class="chart-head"><b>${pts.length ? fmtNum(pts.at(-1).v) : '–'} kg</b>${diff ? `<span class="trend ${diff > 0 ? 'up' : 'down'}">${diff > 0 ? '↑' : '↓'} ${fmtNum(Math.abs(diff))}</span>` : ''}<span class="muted"> ${pts.length} buổi${state.range ? ` · ${RANGES[state.range]}` : ''}</span></div>
+          ${lineChart(pts, { unit: ' kg', area: true, labels: true, head: false })}</section>
         <div class="stats"><div><b data-count="${r.e1rm}">${fmtNum(r.e1rm)}</b><small>~1RM tốt nhất</small></div><div><b data-count="${r.w}">${fmtNum(r.w)}</b><small>tạ nặng nhất</small></div><div><b data-count="${r.vol}">${fmtNum(r.vol)}</b><small>set tốt nhất (kg×rep)</small></div></div>`;
       }
     } else if (state.tab === 'medal') {
@@ -71,7 +102,7 @@ export async function render(el, [tab] = []) {
         ${b.slice().reverse().map((x) => `<div class="card row"><span class="grow">${fmtDate(x.date)}</span><b>${fmtNum(x.weight)} kg</b>${x.waist ? `<span class="muted">${fmtNum(x.waist)} cm</span>` : ''}<button class="ghost icon danger" data-del="${h(x.id)}">✕</button></div>`).join('')}`;
     }
     el.innerHTML = `<h1>Tiến độ</h1>
-      <div class="tabs"><button class="${state.tab === 'ex' ? 'on' : ''}" data-tab="ex">Bài tập</button><button class="${state.tab === 'body' ? 'on' : ''}" data-tab="body">Cơ thể</button><button class="${state.tab === 'medal' ? 'on' : ''}" data-tab="medal">Huy chương</button></div>${body}`;
+      <div class="tabs">${Object.entries(TABS).map(([k, v]) => `<button class="${state.tab === k ? 'on' : ''}" data-tab="${k}">${v}</button>`).join('')}</div>${body}`;
     countUp(el);
   };
 
@@ -81,6 +112,8 @@ export async function render(el, [tab] = []) {
     if (!b) return;
     if (b.dataset.tab) state.tab = b.dataset.tab;
     else if (b.dataset.m) state.metric = b.dataset.m;
+    else if (b.dataset.range) state.range = Number(b.dataset.range);
+    else if (b.dataset.y) state.year = Number(b.dataset.y);
     else if (b.dataset.del) { if (!confirm('Xoá số đo này?')) return; await del('body', b.dataset.del); }
     else return;
     draw();

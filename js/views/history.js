@@ -3,6 +3,7 @@ import { h, uid, fmtDate, fmtTime, fmtDur, fmtNum, e1rm, exMap, toast } from '..
 import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
 import { analyzeWorkout, TIER_LABEL } from '../overload.js';
+import { muscleKey } from '../insights.js';
 
 export async function render(el, [id]) {
   const ex = exMap(await all('exercises'));
@@ -38,7 +39,7 @@ async function detail(el, id, ex) {
   <div class="stats"><div><b data-count="${setCount(w)}">${setCount(w)}</b><small>set</small></div><div><b data-count="${volume(w)}">${fmtNum(volume(w))}</b><small>kg khối lượng</small></div><div><b data-count="${w.entries.length}">${w.entries.length}</b><small>bài</small></div>${nCmp ? `<div class="overload"><b>${nUp}/${nCmp}</b><small>bài vượt lần trước</small></div>` : ''}</div>
   ${w.entries.map((e, ei) => {
     const best = Math.max(...e.sets.map((s) => e1rm(s.w, s.r)));
-    return `<section class="card"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>
+    return `<section class="card" data-muscle="${muscleKey(ex[e.exerciseId])}"><div class="row"><b class="grow">${h(ex[e.exerciseId]?.name || '?')}</b><span class="muted small">~1RM ${fmtNum(best)}</span></div>
       ${tierRow(ov[ei])}
       <div class="small">${e.sets.map((s, i) => `<span class="pill">${i + 1}: ${fmtNum(s.w)}×${s.r}${s.rpe ? ` @${s.rpe}` : ''}</span>`).join('')}</div></section>`;
   }).join('')}
