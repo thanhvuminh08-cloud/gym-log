@@ -42,7 +42,7 @@ Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nh
   5. Trạng thái trống: minh hoạ + 1 câu hướng dẫn cho người mới ở Lịch sử, Giáo án, Tiến độ, Huy chương.
   6. Phản hồi chạm: trạng thái nhấn (`:active`) cho mọi nút/thẻ bấm được; vùng chạm ≥44px. Rung nhẹ khi xong set là logic → Claude.
 
-- [cho Claude] Hệ thống Tiến hoá (nhập vai, sci-fi nhưng số thật) — thiết kế ở `RPG.md`. Bước 1: `js/hero.js` hàm thuần + luật smoke + hợp đồng dữ liệu cho Codex. Làm sau khi Codex xong đợt UX (một agent mỗi lúc).
+- [cho Claude] Con Đường Tu Luyện (nhập vai tu tiên, số thật) — thiết kế ở `RPG.md`. Bước 1: `js/hero.js` hàm thuần + luật smoke + hợp đồng dữ liệu cho Codex. Làm sau khi Codex xong đợt UX (một agent mỗi lúc).
 
 ## Ý tưởng sau khi dùng thực tế
 - (ghi thêm ở đây khi tập)
