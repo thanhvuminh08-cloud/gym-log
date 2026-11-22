@@ -30,21 +30,20 @@
 - Hôm nay có thẻ nhắc sao lưu riêng. Cài đặt đặt nút hoàn tác cạnh ngày tạo bản dự phòng và trình bày từng lỗi thành một mục có thể xuống dòng.
 - Nền đầu trang chuyển xanh đậm, thẻ kính có viền mảnh, số lớn và biểu đồ có nhãn; màn Tập nhóm ô nhập theo dạng kg × rep @ RPE.
 - Thẻ Mục tiêu tập đánh dấu tuần/tháng đã đạt và dẫn đến nhóm ô số buổi ở đầu trang Cài đặt.
-- Lịch tập có bảy dòng T2–CN trong Cài đặt và thẻ mời đặt lịch cùng bản xem trước ba trạng thái ở Hôm nay.
+- Lịch tập có bảy dòng T2–CN trong Cài đặt và thẻ mời đặt lịch ở Hôm nay.
 - Màn Tập dùng nút đánh dấu 48 × 48 px, ô nhập cao 48 px và viền xanh chanh cho set chưa xong đầu tiên của mỗi bài; set đã xong mờ nhẹ.
 - Thanh nghỉ có vòng SVG cạnh số giây và kiểu cảnh báo vàng cho 10 giây cuối.
 - Tổng kết buổi có bốn thẻ số lớn và hiệu ứng xuất hiện cho huy chương, theo cài đặt giảm chuyển động.
 - Hôm nay và Tiến độ có khung chờ khi tải; nội dung khi đổi trang xuất hiện nhẹ nếu cho phép chuyển động.
 - Lịch sử, Giáo án, Tiến độ và Huy chương có minh hoạ và hướng dẫn khi chưa có dữ liệu.
+- Nút và liên kết dùng vùng chạm tối thiểu 44 px và có phản hồi khi nhấn.
 
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
-- [cho Codex] CSS `.schedule-preview`, `.schedule-examples` không còn dùng (đã bỏ bản xem trước ở Hôm nay); thẻ chưa đặt lịch giờ có `data-state="none"`.
-- [cho Codex] Đợt nâng cấp giao diện/UX — làm theo thứ tự, mỗi mục 1 commit `ui:`, giữ `data-*`/class logic, tôn trọng giảm chuyển động. Phần cần logic thì ghi lại "Việc chờ cho Claude":
-  6. Phản hồi chạm: trạng thái nhấn (`:active`) cho mọi nút/thẻ bấm được; vùng chạm ≥44px. Rung nhẹ khi xong set là logic → Claude.
 
 - [cho Codex] Con Đường Tu Luyện bước 2: trang Động phủ `#/hero` + thẻ trên Hôm nay, số liệu giả theo "Hợp đồng dữ liệu" cuối `RPG.md` (giữ `data-muscle` = key mạch). Làm sau đợt UX.
+- [cho Claude] Thêm phản hồi rung nhẹ khi đánh dấu xong set (js/views/workout.js), theo cài đặt rung và tránh rung hai lần khi có huy chương.
 - [cho Claude] Con Đường Tu Luyện bước 3 (sau khi Codex xong bước 2): nối `hero()` vào Động phủ, hỏi cân nặng/giới tính (`settings.sex`), smoke luồng.
 
 ## Ý tưởng sau khi dùng thực tế
