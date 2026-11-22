@@ -143,10 +143,40 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want && reportText(r).includes('Bench: 2 set');
   });
+  // Import trong iframe → cùng module với app, DB_NAME = gym-smoke.
+  const mod = (p) => w.eval(`import('./js/${p}')`);
+  await step('Hôm nay nhắc sao lưu khi chưa sao lưu', async () => { await go('#/'); return !!(await until(() => $('.backup-reminder'))); });
+  await step('Luật nhắc sao lưu', async () => {
+    const { backupDue } = await mod('safety.js'), D = 864e5, now = 100 * D, W = (end) => ({ end });
+    return backupDue(0, [W(now - D)], now) && !backupDue(0, [], now) && !backupDue(0, [{ end: null }], now)
+      && !backupDue(now - 3 * D, [W(now - D)], now) && backupDue(now - 8 * D, [W(now - D)], now) && !backupDue(now - 8 * D, [W(now - 9 * D)], now);
+  });
+  await step('Khôi phục: từ chối file hỏng, ghi nguyên khối, hoàn tác được', async () => {
+    const db = await mod('db.js'), sf = await mod('safety.js');
+    const bad = [null, { app: 'x' }, { app: 'gym', workouts: 'x' }, { app: 'gym', workouts: [{ id: 'a' }] }, { app: 'gym', templates: [{}] }, { app: 'gym' }, { app: 'gym', version: 99, body: [] }];
+    if (bad.some((d) => { try { db.validateBackup(d); return true; } catch { return false; } })) throw new Error('file hỏng lọt qua');
+    const before = (await db.all('workouts')).length;
+    if (!(await sf.snapshot())) throw new Error('không lưu được bản dự phòng');
+    await db.importAll({ app: 'gym', workouts: [], body: [{ id: 'b1', date: 1, weight: 70 }] });
+    const mid = (await db.all('workouts')).length, ex = (await db.all('exercises')).length;
+    await sf.undoRestore();
+    const after = (await db.all('workouts')).length;
+    if (before !== 2 || mid !== 0 || !ex || after !== 2) lines.push(`  ${before},${mid},${ex},${after}`);
+    return before === 2 && mid === 0 && ex > 0 && after === 2 && !sf.snapshotInfo();
+  });
+  await step('Nhật ký lỗi hiện ở Cài đặt, xoá được', async () => {
+    const sf = await mod('safety.js');
+    sf.logError(new Error('smoke-lỗi-thử'));
+    await go('#/settings');
+    const ok = !!(await until(() => $('.error-log')?.textContent.includes('smoke-lỗi-thử')));
+    $('[data-act=clearErrors]').click(); await wait(200);
+    return ok && !$('.error-log') && !sf.errorLog().length;
+  });
   await step('Không tràn ngang ở 375px',() => w.document.documentElement.scrollWidth <= 376);
   await step('Không có lỗi JS', () => (errors.length ? (lines.push('  ' + errors.join('\n  ')), false) : true));
 } finally {
   w.localStorage.removeItem('gym.restEnd');
+  for (const k of ['gym.lastBackup', 'gym.preRestore', 'gym.errors']) w.localStorage.removeItem(`${k}.${DB}`);
   if (seenBak === null) w.localStorage.removeItem('gym.medalSeen'); else w.localStorage.setItem('gym.medalSeen', seenBak);
   frame.src = 'about:blank'; await wait(100);
   indexedDB.deleteDatabase(DB);

@@ -1,7 +1,7 @@
 import { DEFAULT_EXERCISES } from './exercises.js';
 
 // ?db=<name> dùng DB riêng (smoke test không đụng dữ liệu thật)
-const DB_NAME = new URLSearchParams(location.search).get('db') || 'gym';
+export const DB_NAME = new URLSearchParams(location.search).get('db') || 'gym';
 const DB_VERSION = 1;
 export const STORES = ['exercises', 'templates', 'workouts', 'body'];
 
@@ -47,13 +47,37 @@ export async function exportAll() {
   return out;
 }
 
-export async function importAll(data) {
-  if (data?.app !== 'gym') throw new Error('File không đúng định dạng');
+/** Kiểm tra file sao lưu trước khi ghi; trả về số bản ghi mỗi store, lỗi → throw. */
+export function validateBackup(data) {
+  if (data?.app !== 'gym') throw new Error('File không phải bản sao lưu Gym Log');
+  if (data.version > DB_VERSION) throw new Error('File từ phiên bản app mới hơn, hãy cập nhật app');
+  const counts = {};
   for (const s of STORES) {
-    if (!Array.isArray(data[s])) continue;
-    await clear(s);
-    for (const v of data[s]) await put(s, v);
+    if (data[s] === undefined) continue;
+    if (!Array.isArray(data[s])) throw new Error(`Mục "${s}" hỏng`);
+    if (data[s].some((v) => !v || typeof v !== 'object' || typeof v.id !== 'string')) throw new Error(`Mục "${s}" có bản ghi thiếu id`);
+    counts[s] = data[s].length;
   }
+  if (data.workouts?.some((w) => typeof w.start !== 'number' || !Array.isArray(w.entries))) throw new Error('Có buổi tập bị hỏng');
+  if (!Object.keys(counts).length) throw new Error('File không có dữ liệu');
+  return counts;
+}
+
+/** Ghi đè nguyên khối trong 1 transaction: lỗi giữa chừng → không mất gì. */
+export async function importAll(data) {
+  validateBackup(data);
+  const stores = STORES.filter((s) => Array.isArray(data[s]));
+  const db = await open();
+  await new Promise((resolve, reject) => {
+    const t = db.transaction(stores, 'readwrite');
+    for (const s of stores) {
+      const o = t.objectStore(s);
+      o.clear();
+      for (const v of data[s]) o.put(v);
+    }
+    t.oncomplete = resolve;
+    t.onerror = t.onabort = () => reject(t.error || new Error('Khôi phục bị huỷ'));
+  });
 }
 
 export async function activeWorkout() {

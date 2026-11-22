@@ -10,6 +10,7 @@
 - RPE (logic): mỗi set có `rpe?` 6–10 (`select.rpe[data-f=rpe]`, thang `RPE` trong overload.js); `target()` dùng RPE nặng nhất ở mức tạ cao nhất lần trước: ≤6 → +5kg, 7 → +2,5kg, 8/không ghi → như cũ, 9 → +1 rep, 10 → giữ nguyên. Lịch sử hiện `@8`.
 - Hiệu ứng (logic): `celebrate(el, tier)` rung theo cấp (tôn trọng cài đặt rung) + gắn `.celebrate`; `countUp(root)` đếm `[data-count]` sau mỗi lần render; huy chương mới so với `localStorage gym.medalSeen` (lần đầu mở không đánh dấu).
 - Tổng quan (js/insights.js, hàm thuần): `MUSCLE` nhóm cơ → `key` (data-muscle: chest/back/shoulders/legs/biceps/triceps/core/other) + màu dự phòng; `yearGrid` 12 tháng × 31 ngày, màu = nhóm cơ nhiều set nhất trong ngày; `topLifts` 3 bài tập nhiều nhất, ~1RM + delta so với 30 ngày trước + tổng; `weeklyVolume` 12 tuần theo nhóm cơ. chart.js: `sparkline`, `stackedBars`, `yearGridSvg`, `lineChart({area, labels, head})`. Tiến độ có tab `#/progress/overview` (mặc định) và `#/progress/ex/<id>` (khoảng 1T/3T/6T/1N/Tất cả, ô Max). SVG có style inline dự phòng (width 100%, fill) vì `.dashboard svg` ép 20px.
+- An toàn dữ liệu (js/safety.js): Hôm nay có thẻ `.backup-reminder` khi có buổi tập xong mới hơn lần sao lưu cuối và đã quá 7 ngày (`BACKUP_DAYS`). Khôi phục chạy `validateBackup` (db.js), hiện số bản ghi để xác nhận, lưu bản dự phòng vào localStorage `gym.preRestore` (nút "Hoàn tác khôi phục"), rồi `importAll` ghi nguyên khối trong 1 transaction. Lỗi chưa xử lý → toast + 10 lỗi gần nhất trong `gym.errors` (Cài đặt › Nhật ký lỗi, `.error-log`). Khoá localStorage thêm hậu tố `.<db>` khi `?db=` khác `gym`.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -26,6 +27,7 @@
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. GitHub Pages v10 đã có CSS của `dae83be`. Bản cục bộ v16 đã qua kiểm tra bố cục trên Chrome ở 375 px.
+- [cho Codex] Làm đẹp thẻ nhắc sao lưu `.backup-reminder` ở Hôm nay (đang dùng tạm `card row dashboard-item` + icon layers) và mục `.error-log` / nút `undoRestore` trong Cài đặt (js/views/home.js, settings.js).
 
 ## Ý tưởng sau khi dùng thực tế
 - Nhắc lịch tập theo ngày trong tuần (iPhone không có thông báo nền khi không có server → chỉ nhắc trên trang Hôm nay).

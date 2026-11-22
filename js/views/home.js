@@ -4,6 +4,7 @@ import { finished, volume, setCount } from '../stats.js';
 import { startWorkout } from './workout.js';
 import { topLifts, muscleKey } from '../insights.js';
 import { sparkline, lineChart } from '../chart.js';
+import { lastBackup, backupDue } from '../safety.js';
 
 const icon = (name) => `<svg class="dashboard-icon" aria-hidden="true"><use href="#i-${name}"/></svg>`;
 const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
@@ -28,6 +29,7 @@ function strength({ lifts, total }, ex) {
 export async function render(el) {
   const [cur, templates, done, exList] = await Promise.all([activeWorkout(), all('templates'), finished(), all('exercises')]);
   const ex = exMap(exList), top = topLifts(done);
+  const last = lastBackup(), remind = backupDue(last, done);
   const weekAgo = Date.now() - 7 * 864e5;
   const week = done.filter((w) => w.start > weekAgo);
   const date = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }).format(Date.now());
@@ -48,6 +50,10 @@ export async function render(el) {
           : `<button class="primary" data-act="empty">${icon('plus')}Bắt đầu tập</button>`}
       </div>
     </section>
+    ${remind ? `<a class="card row dashboard-item backup-reminder" href="#/settings">
+      <span class="tile-icon">${icon('layers')}</span>
+      <div class="grow"><b>Nên sao lưu dữ liệu</b><div class="muted small">${last ? `Lần cuối ${fmtDate(last)}` : 'Chưa sao lưu lần nào'} · dữ liệu chỉ nằm trên máy này</div></div>
+    </a>` : ''}
     <section>
       <h2 class="section-heading">7 ngày qua <a href="#/report">Báo cáo tuần</a></h2>
       <div class="stats week-stats">

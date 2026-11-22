@@ -1,6 +1,16 @@
 import { seed } from './db.js';
 import * as timer from './timer.js';
-import { countUp } from './util.js';
+import { countUp, toast } from './util.js';
+import { logError } from './safety.js';
+
+// Bắt mọi lỗi chưa xử lý: ghi nhật ký (xem ở Cài đặt) + báo bằng toast, tối đa 1 toast/5 giây.
+let lastToast = 0;
+function onError(e) {
+  const msg = logError(e);
+  if (Date.now() - lastToast > 5000) { lastToast = Date.now(); toast('Có lỗi: ' + msg, 4000); }
+}
+addEventListener('error', (e) => onError(e.error || e.message));
+addEventListener('unhandledrejection', (e) => onError(e.reason));
 
 const ROUTES = {
   '': () => import('./views/home.js'),
@@ -32,6 +42,7 @@ async function route() {
     countUp(main);
   } catch (e) {
     console.error(e);
+    logError(e);
     main.innerHTML = `<p class="error">Lỗi: ${String(e.message || e)}</p>`;
   }
   window.scrollTo(0, 0);
