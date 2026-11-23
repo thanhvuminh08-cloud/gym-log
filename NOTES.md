@@ -39,6 +39,7 @@
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
 
 ## Giao diện
+- 23/11: Kho mẫu thử ImageGen ở `design/kinh-van-tran-phap/`, lấy đen mực và giấy ngà làm nền, ấn đỏ son, trận pháp vàng, kèm demo Động phủ động; chờ chốt gu trước khi đưa vào app.
 - Dùng nền xanh đen, điểm nhấn xanh chanh. Đặt nút bắt đầu hoặc tiếp tục tập ở đầu trang Hôm nay và lưu ảnh tạ trong cache offline.
 - Tab Huy chương dùng màu theo hạng, nhấn xanh chanh cho chuỗi và mức tạ, giữ ba cột thống kê trên điện thoại.
 - Ba nút trong Tiến độ dùng ba cột bằng nhau để nằm cùng một hàng ở 375px.
