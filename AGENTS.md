@@ -4,7 +4,8 @@ PWA cá nhân ghi buổi tập gym. 1 người dùng, dữ liệu IndexedDB trê
 
 ## Hai agent, người dùng điều phối
 - **Codex = giao diện**: `css/`, `index.html`, `assets/`, `icons/`, `manifest.webmanifest`, markup HTML trong `js/views/*`.
-- **Claude Code = logic**: các file còn lại trong `js/`, `sw.js`, `smoke.html`, xử lý sự kiện/dữ liệu trong `js/views/*`.
+- **Claude Code = logic**: các file còn lại trong `js/`, `sw.js`, xử lý sự kiện/dữ liệu trong `js/views/*`. Claude **chỉ code, không chạy test**.
+- **Codex = test**: giữ `smoke.html` (viết bước mới + chạy), kiểm mọi commit `logic:`; lỗi → 1 dòng `[cho Claude]` vào "Việc chờ".
 - Thay đổi không phải của bạn là của agent kia: không hoàn tác/viết lại. Cần bên kia làm gì → 1 dòng vào "Việc chờ" trong `NOTES.md`.
 - `js/views/*` là vùng chung: thấy `git status` có thay đổi chưa commit không phải của bạn → dừng, báo người dùng.
 - Markup phải giữ nguyên `data-*` (act, f, ei, si, id, i, tab, m, del, k) và class `.set .check .rest-bar .modal .pick-list` — logic dựa vào chúng.
@@ -14,11 +15,11 @@ PWA cá nhân ghi buổi tập gym. 1 người dùng, dữ liệu IndexedDB trê
 - Kiểm tra bằng **smoke test**, không chụp màn hình hàng loạt: `powershell -File serve.ps1`, mở `http://localhost:8080/smoke.html`, đọc dòng `SMOKE: PASS/FAIL` (dùng DB riêng, không đụng dữ liệu thật). Chỉ chụp 1 ảnh khi cần xem thẩm mỹ.
 - Không tạo lại ảnh đã có. Ảnh ≤ 200KB.
 - Trả lời người dùng ngắn; quyết định ghi 1 dòng vào `NOTES.md`.
-- Thêm luồng mới quan trọng → Claude bổ sung bước vào `smoke.html`.
+- Claude thêm luồng mới quan trọng → ghi `[cho Codex] test: <luồng cần kiểm, hàm/file>` vào "Việc chờ"; Codex bổ sung bước vào `smoke.html`.
 - Người dùng là người mới: **chủ động báo "nên mở chat mới"** khi xong một việc, khi đổi sang việc không liên quan, hoặc khi hội thoại đã dài. Trước đó commit + ghi việc dở vào `NOTES.md`, và đưa 1 câu mở đầu để dán vào chat mới.
 
 ## Kết thúc mỗi việc
-1. Smoke PASS. 2. Sửa file tĩnh → **tự** tăng `VERSION` trong `sw.js` (file mới → thêm vào `FILES`), ai sửa người đó tăng, không nhờ bên kia. 3. Commit nhỏ, tiền tố `ui:` (Codex) / `logic:` (Claude). 4. Hỏi người dùng 1 câu "push lên điện thoại?" — nên push sau mỗi việc PASS, không dồn commit.
+1. Codex: smoke PASS (Claude: bỏ bước này, ghi việc cần test vào "Việc chờ"). 2. Sửa file tĩnh → **tự** tăng `VERSION` trong `sw.js` (file mới → thêm vào `FILES`), ai sửa người đó tăng, không nhờ bên kia. 3. Commit nhỏ, tiền tố `ui:` (Codex) / `logic:` (Claude). 4. Push sau khi Codex test PASS: Claude báo người dùng "chuyển Codex test"; Codex hỏi 1 câu "push lên điện thoại?" — không dồn commit.
 
 ## Phối hợp hai agent
 - **Mỗi lúc chỉ một agent chạy.** Bắt đầu: `git status` phải sạch; có thay đổi chưa commit của bên kia → dừng, báo người dùng.
