@@ -39,6 +39,7 @@
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
 
 ## Giao diện
+- 23/11: Đưa mẫu V2 vào app với nền mực/giấy, tranh ImageGen trong `assets/ink/`, ấn son và chuyển động CSS. SW v68.
 - 23/11: Mẫu mỹ thuật V2 tại `design/kinh-van-v2/` có bố cục điện thoại, tranh ImageGen, chữ và icon đồng bộ, clip Động phủ lặp và demo ghi set–Đột phá; đang ở bước duyệt, chưa tích hợp.
 - 23/11: Kho mẫu thử ImageGen ở `design/kinh-van-tran-phap/`, lấy đen mực và giấy ngà làm nền, ấn đỏ son, trận pháp vàng, kèm demo Động phủ động; chờ chốt gu trước khi đưa vào app.
 - Dùng nền xanh đen, điểm nhấn xanh chanh. Đặt nút bắt đầu hoặc tiếp tục tập ở đầu trang Hôm nay và lưu ảnh tạ trong cache offline.

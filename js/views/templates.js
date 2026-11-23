@@ -24,7 +24,7 @@ export async function render(el, [id]) {
   const list = (await all('templates')).sort((a, b) => a.name.localeCompare(b.name));
   const { dao, schedule, weekGoal } = settings.get(), plan = cleanSchedule(schedule);
   const { label, icon, hint } = NAV.find((item) => item.key === 'cong-phap');
-  el.innerHTML = `<header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${hintLabel(label, hint)}</h1></header>
+  el.innerHTML = `<header class="section-masthead" data-ink-surface="cong-phap"><span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${hintLabel(label, hint)}</h1></header>
   <section class="card plan-overview">
     <h2>Bài theo mạch</h2>${pathPreview(dao, Object.values(ex))}
     <a class="btn ghost" href="#/nhap-mon${dao?.at ? '/4' : ''}">${dao?.at ? 'Sửa bài theo mạch' : termLabel('nhapMon')}</a>
@@ -90,7 +90,7 @@ async function edit(el, id, ex) {
   if (!t) { el.innerHTML = '<p>Không tìm thấy giáo án.</p>'; return; }
   const draw = () => {
     el.innerHTML = `<a href="#/cong-phap" class="small">← Công pháp</a>
-    <h1>${id === 'new' ? 'Giáo án mới' : 'Sửa giáo án'}</h1>
+    <h1 class="plan-editor-title">${id === 'new' ? 'Giáo án mới' : 'Sửa giáo án'}</h1>
     <input class="title-input" data-f="name" placeholder="Tên (vd: Push A)" value="${h(t.name)}">
     ${t.items.map((it, i) => `<div class="card" data-i="${i}">
       <div class="row"><b class="grow">${h(ex[it.exerciseId]?.name || '?')}</b>

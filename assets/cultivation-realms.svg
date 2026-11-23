@@ -6,20 +6,20 @@
       <stop offset="1" stop-color="#eabc75" stop-opacity="0"/>
     </radialGradient>
     <radialGradient id="jade">
-      <stop stop-color="#c0ffe0" stop-opacity=".77"/>
-      <stop offset=".52" stop-color="#78ceba" stop-opacity=".27"/>
-      <stop offset="1" stop-color="#78ceba" stop-opacity="0"/>
+      <stop stop-color="#ffe8e6" stop-opacity=".77"/>
+      <stop offset=".52" stop-color="#ceb3b1" stop-opacity=".27"/>
+      <stop offset="1" stop-color="#ceb3b1" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="robe" x2="0" y2="1">
-      <stop stop-color="#51706e"/>
-      <stop offset="1" stop-color="#0b1820"/>
+      <stop stop-color="#6c686b"/>
+      <stop offset="1" stop-color="#191518"/>
     </linearGradient>
     <g id="meditate">
-      <ellipse cx="110" cy="177" rx="57" ry="12" fill="#07151b" fill-opacity=".8"/>
+      <ellipse cx="110" cy="177" rx="57" ry="12" fill="#151114" fill-opacity=".8"/>
       <path d="M106 83c-6-3-5-10 0-12 4-8 13-6 14 1 5 5 1 11-4 12" fill="#111819"/>
       <path d="M110 79c11 0 16 7 16 16 0 11-7 22-16 22S94 106 94 95c0-9 5-16 16-16" fill="#caa185"/>
-      <path d="M94 95c-1-15 8-20 16-20s17 5 16 20l-7-3-4-8c-5 7-10 10-21 11" fill="#121b1d"/>
-      <path d="m101 109-4 9-13 7-13 26 14 6-30 13q-6 10 12 10h86q18 0 12-10l-30-13 14-6-13-26-13-7-4-9" fill="url(#robe)" stroke="#a1b3a1" stroke-width="1.1"/>
+      <path d="M94 95c-1-15 8-20 16-20s17 5 16 20l-7-3-4-8c-5 7-10 10-21 11" fill="#1c181b"/>
+      <path d="m101 109-4 9-13 7-13 26 14 6-30 13q-6 10 12 10h86q18 0 12-10l-30-13 14-6-13-26-13-7-4-9" fill="url(#robe)" stroke="#b1adb0" stroke-width="1.1"/>
       <path d="m97 118 13 19 13-19m-13 19v31m-35-17 22-3 13 8 13-8 22 3m-70 17 25-8m45 8-25-8" fill="none" stroke="#d9c498" stroke-opacity=".68" stroke-linecap="round"/>
       <path d="M97 148q9 0 13 8 4-8 13-8l-4 7h-18z" fill="#dabb9c"/>
     </g>
@@ -27,22 +27,22 @@
   <symbol id="realm-0" viewBox="0 0 220 210">
     <circle cx="110" cy="107" r="90" fill="url(#light)" opacity=".42"/>
     <path d="M42 169q68-23 136 0m-114 13q46-14 92 0" fill="none" stroke="#c5a67b" stroke-opacity=".56"/>
-    <path d="M51 162q-11-18-21-17m26 13q-5-18-3-25m112 31q10-18 25-23" fill="none" stroke="#8daa90" stroke-width="2" stroke-linecap="round"/>
+    <path d="M51 162q-11-18-21-17m26 13q-5-18-3-25m112 31q10-18 25-23" fill="none" stroke="#b69b99" stroke-width="2" stroke-linecap="round"/>
     <use href="#meditate"/>
   </symbol>
   <symbol id="realm-1" viewBox="0 0 220 210">
     <circle cx="110" cy="107" r="98" fill="url(#jade)"/>
-    <circle cx="110" cy="103" r="61" fill="none" stroke="#91d7bc" stroke-opacity=".55" stroke-dasharray="3 6"/>
-    <path d="M43 128q19-38 50-28m35-17q34-9 49 21M40 153q44 41 138-7" fill="none" stroke="#b3ecd3" stroke-opacity=".75" stroke-linecap="round"/>
-    <circle fill="#c8ffe0" cx="62" cy="90" r="2.5"/><circle fill="#c8ffe0" cx="154" cy="121" r="2.5"/>
+    <circle cx="110" cy="103" r="61" fill="none" stroke="#dabfbd" stroke-opacity=".55" stroke-dasharray="3 6"/>
+    <path d="M43 128q19-38 50-28m35-17q34-9 49 21M40 153q44 41 138-7" fill="none" stroke="#f2d7d5" stroke-opacity=".75" stroke-linecap="round"/>
+    <circle fill="#ffeae8" cx="62" cy="90" r="2.5"/><circle fill="#ffeae8" cx="154" cy="121" r="2.5"/>
     <use href="#meditate"/>
   </symbol>
   <symbol id="realm-2" viewBox="0 0 220 210">
     <circle cx="110" cy="107" r="102" fill="url(#jade)"/>
-    <g fill="none" stroke="#aae1c6">
+    <g fill="none" stroke="#e7ccca">
       <path d="m110 23 72 40v85l-72 40-72-40V63z" opacity=".74"/>
       <path d="m110 36 60 34v71l-60 34-60-34V70z" opacity=".44"/>
-      <path d="m110 23 5 5-5 5-5-5zM40 63l5 5-5 5-5-5zm140 0 5 5-5 5-5-5z" fill="#bde7c8"/>
+      <path d="m110 23 5 5-5 5-5-5zM40 63l5 5-5 5-5-5zm140 0 5 5-5 5-5-5z" fill="#f0d5d3"/>
     </g>
     <use href="#meditate"/>
   </symbol>

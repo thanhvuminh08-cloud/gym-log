@@ -1,0 +1,268 @@
+/* Kinh văn V2 */
+:root {
+  --bg: #101014;
+  --card: #151518;
+  --raised: #201f23;
+  --line: #423d41;
+  --text: #f5efe4;
+  --muted: #b8b0a9;
+  --accent: #f58b7a;
+  --accent-soft: #352525;
+  --accent-ink: #211516;
+  --cool: var(--accent);
+  --surface: var(--card);
+  --paper: #f1eee7;
+  --paper-ink: #262322;
+  --vermilion: #922f28;
+  --ceremony-gold: #dfc38b;
+  --r: 9px;
+  --nav-bottom: 0px;
+  --nav-height: calc(56px + env(safe-area-inset-bottom) + 2 * var(--nav-label-line));
+}
+
+body { background: var(--bg) url("../assets/ink/nen-muc.webp") center top / 640px auto; }
+body:has([data-ink-surface="ky"], [data-ink-surface="cong-phap"], .plan-editor-title) {
+  --bg: var(--paper);
+  --card: #faf7f0;
+  --raised: #e9e1d6;
+  --line: #cdc6ba;
+  --text: var(--paper-ink);
+  --muted: #6e665e;
+  --accent: var(--vermilion);
+  --cool: var(--vermilion);
+  --accent-ink: #fff7ee;
+  --accent-soft: #eddbd1;
+  --danger: #8e2829;
+  color: var(--text);
+  color-scheme: light;
+  background-image: url("../assets/ink/nen-giay.webp");
+}
+main { padding-inline: clamp(14px, 5vw, 24px); }
+h1, main h2 { font-family: var(--cultivation-serif); }
+h1 { letter-spacing: -.032em; }
+button, .btn, input, select, textarea { border-radius: 7px; }
+.card { box-shadow: none; }
+.primary { background: var(--vermilion); border-color: var(--vermilion); color: #faf7f0; }
+input[type="checkbox"] { accent-color: var(--vermilion); }
+.site-header { background: var(--bg); border-color: var(--line); }
+.site-bar { max-width: 720px; padding-inline: clamp(14px, 5vw, 24px); }
+.brand { font: 700 1.16rem/1.3 var(--cultivation-serif); letter-spacing: -.02em; }
+.brand-mark { background: url("../assets/ink/an-luyen-the.webp") center / contain no-repeat; }
+.site-nav {
+  inset: auto 0 0;
+  width: min(720px, 100%);
+  padding: 0 4px env(safe-area-inset-bottom);
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: var(--bg);
+  box-shadow: none;
+}
+.site-nav a {
+  position: relative;
+  align-self: stretch;
+  justify-content: center;
+  border-radius: 0;
+  padding: 4px 0;
+  font-size: clamp(.625rem, 2.8vw, .75rem);
+}
+.site-nav a small { color: var(--muted); font-size: .625rem; }
+.site-nav a.on { background: transparent; color: var(--accent); }
+.site-nav a.on::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 3px;
+  background: currentColor;
+  clip-path: polygon(0 0, 100% 0, 89% 67%, 7% 100%);
+}
+
+/* Cảnh Động phủ và lớp giấy chuyển động độc lập. */
+.ink-home-stage {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: space-between;
+  min-height: clamp(390px, 118vw, 560px);
+  margin: -22px calc(-1 * clamp(14px, 5vw, 24px)) 12px;
+  padding: 24px clamp(14px, 5vw, 24px) 14px;
+  overflow: hidden;
+  background:
+    linear-gradient(0deg, var(--bg) 1%, #101014ed 13%, transparent 48%),
+    linear-gradient(110deg, #101014ed, #10101480 36%, transparent 66%),
+    url("../assets/ink/dong-phu.webp") center 49% / cover no-repeat;
+}
+.ink-paper-drift { position: absolute; inset: 0; z-index: -1; pointer-events: none; }
+.ink-paper-drift span {
+  position: absolute;
+  top: 48%; left: 15%;
+  width: clamp(40px, 19vw, 100px); aspect-ratio: 1;
+  background: url("../assets/ink/giay-khong.webp") center / contain no-repeat;
+  opacity: .58;
+}
+.ink-paper-drift span + span { top: 63%; left: 69%; opacity: .32; }
+.dashboard-heading { display: grid; gap: 14px; justify-content: start; margin: 0; }
+.dashboard-heading h1 { color: var(--text); font-size: clamp(2.7rem, 11vw, 4.9rem); line-height: 1.02; }
+.dashboard-heading h1 em { display: block; font-weight: inherit; }
+.dashboard-heading h1 .term-hint { display: none; }
+.dashboard-heading p { color: var(--text); text-shadow: 0 1px 8px #101014; }
+.dashboard-heading p svg { color: var(--accent); }
+.ink-home-stage .sanctum-training {
+  min-height: 0;
+  margin: 0;
+  padding: 18px 0 0;
+  border: 0;
+  box-shadow: none;
+  background: none;
+}
+.ink-home-stage .sanctum-training::before,
+.ink-home-stage .sanctum-training::after { content: none; }
+.ink-home-stage .hero-content { width: 100%; }
+.ink-home-stage .hero-content h2 {
+  max-width: none;
+  color: var(--text);
+  font: 700 clamp(1.35rem, 5vw, 2.3rem)/1.25 var(--cultivation-serif);
+  text-wrap: initial;
+  text-shadow: 0 2px 9px #101014;
+}
+.ink-home-stage .training-actions .primary { flex: 1 1 auto; justify-content: start; }
+.ink-home-stage .training-actions .ghost { background: var(--raised); }
+a.card.dao-invite, .tuvi-strip, .sanctum-stats { background: var(--card); color: var(--text); border-color: var(--line); }
+.tuvi-strip { border-radius: var(--r); }
+.tuvi-strip-info strong { font-size: 1.25rem; }
+.cultivation-scroll { background: var(--paper); color: var(--paper-ink); border-color: #a59b8f; box-shadow: none; }
+.cultivation-scroll h2 { color: var(--vermilion); }
+.cultivation-scroll::before, .cultivation-scroll::after { content: none; }
+.quest-list p, .quest-sample { color: #63594f; }
+.quest-stamp { background: var(--paper); }
+.cultivation {
+  --ink-accent: var(--accent);
+  --gold: var(--text);
+  --ink-line: var(--line);
+  --mountains: linear-gradient(90deg, #101014ef, #10101442), url("../assets/ink/tang-thu.webp");
+}
+.cultivation-meter { background: #3d383b; }
+.cultivation-meter::-webkit-progress-bar { background: #3d383b; }
+.cultivation-meter::-webkit-progress-value { background: var(--accent); }
+.cultivation-meter::-moz-progress-bar { background: var(--accent); }
+.cultivation-cover { background-position: center, center 42%; }
+.cultivation-cover .cultivation-mist { display: none; }
+
+/* Công pháp, nhật ký, tiến độ và buổi tập. */
+[data-ink-surface] {
+  min-height: clamp(106px, 35vw, 165px);
+  padding: 18px 10px;
+  color: var(--text);
+  border-color: var(--line);
+  background: var(--ink-cover) center / cover no-repeat;
+}
+[data-ink-surface="cong-phap"] { --ink-cover: linear-gradient(90deg, #f1eee7 15%, #f1eee7ed 43%, transparent), url("../assets/ink/cong-phap.webp"); }
+[data-ink-surface="ky"] { --ink-cover: linear-gradient(90deg, #f1eee7 15%, #f1eee7ed 43%, transparent), url("../assets/ink/tu-luyen-ky.webp"); }
+[data-ink-surface="tang-thu"] { --ink-cover: linear-gradient(90deg, #101014 4%, #101014d9 46%, transparent), url("../assets/ink/tang-thu.webp"); }
+[data-ink-surface="be-quan"], .workout-start .start-scheduled { --ink-cover: linear-gradient(90deg, #101014 4%, #101014b8 46%, transparent), url("../assets/ink/be-quan.webp"); }
+.workout-start .start-scheduled { background: var(--ink-cover) center / cover no-repeat; }
+.section-masthead h1 { color: var(--text); }
+[data-ink-surface] .tile-icon { display: none; }
+.section-tabs { border: 0; border-radius: 0; background: transparent; border-bottom: 1px solid var(--line); }
+.section-tabs a { color: var(--muted); border-radius: 0; }
+.section-tabs .on { background: transparent; color: var(--accent); box-shadow: inset 0 -2px var(--accent); }
+.plan-schedule, .plan-goals, .workout-start > .card:not(.start-scheduled) { background: var(--card); border-color: var(--line); }
+.plan-schedule h2, .plan-goals h2 { color: var(--text); }
+.workout-controls { padding-top: 8px; }
+.entry > .row:first-child > b { font: 700 1.09rem/1.25 var(--cultivation-serif); }
+.set .check { border-color: #726972; }
+.set.done .check:not(.pr) { background: #63332e; color: var(--text); border-color: #ce7463; }
+.set.done :is(input, .rpe) { background: var(--raised); border-color: var(--line); }
+.rest-bar { --rest-color: #f58b7a; color: #f5efe4; background: #292223; border-color: #855044; border-radius: 9px; }
+.rest-bar button { color: inherit; background: #292223; border-color: #665453; }
+.rest-bar[data-warn="true"] { --rest-color: #ffb6a6; background: #382424; border-color: #bb7967; }
+.sheet {
+  --bg: #101014; --text: #f5efe4; --muted: #b8b0a9;
+  --line: #534e54; --raised: #201f23; --accent: #f58b7a; --accent-ink: #211516;
+  color: var(--text); background: #18181c; color-scheme: dark;
+  border-radius: 16px 16px 0 0;
+}
+.sheet::before {
+  content: ""; width: 38px; height: 4px; flex: none;
+  margin: 0 auto 12px; border-radius: 99px; background: #787477;
+}
+.sheet h2, .sheet > .row:first-child > strong { font-family: var(--cultivation-serif); }
+.pick-list .item { border-width: 0 0 1px; border-radius: 0; background: transparent; }
+.chip { border-radius: 6px; }
+.chart, .chart.has-area { background: transparent; }
+.chart path.line { filter: none; }
+.chart-head b { font-family: var(--cultivation-serif); }
+.settings-title { margin-bottom: 4px; font-size: clamp(1.65rem, 6vw, 2.3rem); }
+.danger-zone { color: var(--text); background: #22191b; border-color: #7e4c47; }
+.danger-zone h2 { color: var(--accent); }
+
+/* Nhập môn và nghi lễ. */
+.dao-cover {
+  min-height: clamp(220px, 58vw, 350px);
+  background: linear-gradient(125deg, #101014f0, transparent), url("../assets/ink/nhap-mon.webp") center 50% / cover no-repeat;
+  box-shadow: none;
+}
+.dao-cover h1 { color: var(--text); }
+.recap {
+  --text: #f5efe4; --muted: #b8b0a9; --line: #423d41;
+  --bg: #101014; --card: #151518; --surface: var(--card); --raised: #201f23;
+  --accent: #f58b7a; --accent-soft: #352525; --ink-accent: #f58b7a;
+  --ink-line: var(--line);
+  color: var(--text); background: var(--card); border-color: var(--line); color-scheme: dark;
+  box-shadow: none;
+}
+.recap :is(.recap-linhkhi, .recap-tuvi, .recap-next) { background: var(--raised); }
+.recap :is(.recap-header h2, h3), .recap-gain > strong { color: var(--text); text-shadow: none; }
+.recap-progress .cultivation-meter::-webkit-progress-value { background: var(--accent); }
+.recap-progress .cultivation-meter::-moz-progress-bar { background: var(--accent); }
+
+.breakthrough-modal.modal {
+  --text: #f5efe4; --muted: #b8b0a9; --ink-accent: #dfc38b;
+  --ceremony-art: url("../assets/ink/dot-pha.webp");
+  --ceremony-light: #dfc38b; --ceremony-halo: #d3a66c4f;
+  width: min(455px, 100%); max-height: 100dvh;
+  color: var(--text); background: #101014; border: 1px solid #63594c; border-radius: 9px;
+}
+.breakthrough-modal[data-tribulation="true"] {
+  --ceremony-art: url("../assets/ink/do-kiep.webp");
+  --ceremony-light: #eee9e2; --ceremony-halo: #eee9e233;
+}
+.breakthrough-modal::backdrop { background: #09090beb; }
+.breakthrough-scene { background: #101014; }
+.breakthrough-celestial {
+  height: clamp(220px, 52dvh, 470px);
+  background: linear-gradient(0deg, #101014, transparent 33%), var(--ceremony-art) center 46% / cover no-repeat;
+}
+.breakthrough-celestial::before { width: min(66%, 290px); opacity: .55; }
+.breakthrough-figure { width: clamp(55px, 20%, 90px); right: 12px; opacity: .65; }
+.breakthrough-celestial .cultivation-seal { right: auto; left: 14px; bottom: 8%; }
+.breakthrough-content { padding: 10px 16px max(16px, env(safe-area-inset-bottom)); }
+.breakthrough-content h2 { color: var(--text); }
+.breakthrough-close { width: 100%; color: var(--text); background: #302822; border-color: #947b53; }
+.breakthrough-real { background: #201f23; }
+@media (max-width: 480px) {
+  .breakthrough-modal.modal { border: 0; border-radius: 0; }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .ink-paper-drift span { animation: ink-paper-sway 8s ease-in-out infinite; }
+  .ink-paper-drift span + span { animation-delay: -3s; animation-duration: 11s; }
+  .section-masthead[data-ink-surface], .ink-home-stage .dashboard-heading { animation: ink-reveal .46s ease-out; }
+  .breakthrough-celestial::before { animation: ink-formation 1.7s cubic-bezier(.2,.68,.25,1) both; }
+  .breakthrough-content { animation: ink-in .48s .3s ease-out both; }
+  .set.is-set-sealed { --burst: #f58b7a; }
+}
+@keyframes ink-paper-sway {
+  0%, 100% { transform: translate(-14%, 8%) rotate(-16deg); }
+  50% { transform: translate(20%, -22%) rotate(19deg); }
+}
+@keyframes ink-reveal {
+  from { clip-path: polygon(0 0, 18% 0, 0 100%); opacity: .55; }
+  to { clip-path: polygon(0 0, 115% 0, 100% 100%, 0 100%); opacity: 1; }
+}
+@keyframes ink-formation {
+  from { transform: scale(.44) rotate(-62deg); opacity: 0; }
+  62% { opacity: .82; }
+  to { transform: scale(1) rotate(0); opacity: .55; }
+}

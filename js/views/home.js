@@ -18,7 +18,7 @@ function trainingCard(cur, plan, template, first) {
   const scheduled = plan.state === 'due' && template;
   return `<section class="workout-hero sanctum-training" data-schedule-today data-state="${plan.state}"${first ? ' data-first-run' : ''}>
     <div class="hero-content">
-      <div class="training-schedule">${icon('calendar')}<span>${scheduleLabels[plan.state]}</span>
+      <div class="training-schedule">${icon('date')}<span>${scheduleLabels[plan.state]}</span>
         ${plan.state === 'none' ? '<a href="#/cong-phap">Đặt lịch</a>' : ''}</div>
       ${cur ? `<h2>${h(cur.name)}</h2>` : scheduled ? `<h2>${h(template.name)}</h2>` : first ? '<h2>Ghi buổi tập đầu tiên</h2>' : ''}
       ${plan.state === 'due' && !cur && !template ? '<p>Tập tự do</p>' : ''}
@@ -45,8 +45,11 @@ export async function render(el) {
 
   const draw = (p) => {
     el.innerHTML = `<div class="dashboard">
-      <header class="dashboard-heading"><h1>${hintLabel(NAV[0].label, NAV[0].hint)}</h1><p>${icon('calendar')}<span>${h(date)}</span></p></header>
+      <div class="ink-home-stage">
+        <div class="ink-paper-drift" aria-hidden="true"><span></span><span></span></div>
+      <header class="dashboard-heading"><h1>${hintLabel('Động <em>phủ</em>', NAV[0].hint)}</h1><p>${icon('date')}<span>${h(date)}</span></p></header>
       ${trainingCard(cur, plan, template, !cur && !done.length)}
+      </div>
       ${!settings.get().dao && !settings.get().daoSkip ? `<a class="card row dao-invite" href="#/nhap-mon">
         ${icon('layers')}<span class="grow"><b>${termLabel('nhapMon')}</b><small class="muted">Tuỳ chọn · chọn bài theo mạch, tự sinh giáo án và lịch tập</small></span>${icon('chevron')}
       </a>` : ''}

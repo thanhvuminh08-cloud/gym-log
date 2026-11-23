@@ -44,7 +44,7 @@ export async function startWorkout({ template, from } = {}) {
 
 export function workoutStartView({ scheduled = null, templates = [], last = null } = {}) {
   return `<section class="workout-start" aria-labelledby="workout-start-title">
-    <header class="section-masthead"><span class="tile-icon"><svg aria-hidden="true"><use href="#i-dumbbell"/></svg></span>
+    <header class="section-masthead" data-ink-surface="be-quan"><span class="tile-icon"><svg aria-hidden="true"><use href="#i-dumbbell"/></svg></span>
       <h1 id="workout-start-title">${termLabel('start')}</h1>
     </header>
     ${scheduled ? `<section class="card start-scheduled">
@@ -122,7 +122,8 @@ export async function render(el) {
 
   const draw = () => {
     el.innerHTML = `
-    <header class="top">
+    <div class="section-masthead" data-ink-surface="be-quan"><h1>Bế quan</h1></div>
+    <header class="top workout-controls">
       <input class="title-input" data-f="name" aria-label="Tên buổi tập" value="${h(w.name)}">
       <div class="row"><span class="muted" id="elapsed"></span><span class="grow"></span>
         <button class="ghost danger" data-act="discard">Huỷ</button>

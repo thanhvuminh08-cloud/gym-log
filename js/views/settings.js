@@ -12,6 +12,7 @@ export async function render(el) {
   const persisted = (await navigator.storage?.persisted?.()) ?? false;
 
   el.innerHTML = `${archiveHeader('settings')}
+  <h2 class="settings-title">Cài đặt</h2>
   <p class="muted small">Lịch tập và mục tiêu tuần nằm ở <a href="#/cong-phap">${termLabel('congPhap')}</a>.</p>
   <h2 id="rest-settings">Đồng hồ nghỉ</h2>
   <section class="card settings-options" aria-labelledby="rest-settings">
