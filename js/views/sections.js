@@ -19,8 +19,8 @@ const archive = [
 
 function sectionHeader(key, links, active) {
   const { label, icon, hint: note } = NAV.find((item) => item.key === key);
-  return `<header class="section-masthead" data-ink-surface="${key}">
-    <span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${hintLabel(label, note)}</h1>
+  return `<header class="section-masthead" data-ink-surface="${active === 'settings' ? 'settings' : key}">
+    <span class="tile-icon"><svg aria-hidden="true"><use href="#${icon}"/></svg></span><h1>${active === 'settings' ? 'Cài đặt' : hintLabel(label, note)}</h1>
   </header><div class="tabs section-tabs" role="navigation" aria-label="${label}">
     ${links.map(([id, href, title]) => `<a href="${href}" data-tab="${id}"${id === active ? ' class="on" aria-current="page"' : ''}>${title}</a>`).join('')}
   </div>`;

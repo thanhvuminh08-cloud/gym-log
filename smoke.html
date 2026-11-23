@@ -215,6 +215,28 @@ try {
     return got === 'true,true,2,1,true' && !!score && /^\d+$/.test(score.textContent) && Number(score.textContent) <= 100
       && !!$('[data-readiness-chart] svg.spark');
   });
+  await step('Tông mực tối giữ xuyên trang và bật lớp ảnh động theo cài đặt chuyển động', async () => {
+    const isDark = (el) => el && Math.max(...w.getComputedStyle(el).backgroundColor.match(/\d+/g).slice(0, 3).map(Number)) < 60;
+    const wantsMotion = w.matchMedia('(prefers-reduced-motion: no-preference)').matches;
+    await go('#/');
+    const quests = await until(() => $('[data-quests]'));
+    if (!isDark(quests) || !w.getComputedStyle(quests).backgroundImage.includes('nhiem-vu-tuan.webp')) {
+      throw new Error('Bảng Nhiệm vụ tuần chưa dùng nền mực tối');
+    }
+    for (const [route, surface, cover, motion] of [
+      ['#/cong-phap', 'cong-phap', 'cong-phap.webp', 'tro-muc-dong.webp'],
+      ['#/ky', 'ky', 'tu-luyen-ky.webp', 'lat-giay-dong.webp'],
+    ]) {
+      await go(route);
+      const heading = await until(() => $(`[data-ink-surface="${surface}"]`));
+      if (!heading || !isDark(w.document.body) || !isDark($('.site-nav'))
+        || !w.getComputedStyle(heading).backgroundImage.includes(cover)
+        || w.getComputedStyle(heading, '::after').backgroundImage.includes(motion) !== wantsMotion) {
+        throw new Error(`Sai nền hoặc lớp chuyển động tại ${route}`);
+      }
+    }
+    return true;
+  });
   await step('Tổng quan: thẻ Tổng ~1RM SBD dùng dữ liệu thật', async () => {
     await go('#/progress/overview'); const v = await until(() => $('[data-strength-total-value]'));
     const ok = Number(v?.dataset.count) > 70 && $('[data-strength-total]').textContent.includes('Bench') && !$('.sample-label');
