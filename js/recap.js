@@ -13,7 +13,7 @@ const weekStart = (t) => { const d = new Date(dayStart(t)); d.setDate(d.getDate(
  * Tổng kết buổi w. Đầu vào: w (đã xong), workouts, exercises, body, templates, settings {sex, schedule, weekGoal, dao}.
  * Trả về {
  *   needsWeight, needsSex          — thiếu thì hỏi một lần ngay trên trang (mạch tạ chưa tính được khi thiếu cân nặng);
- *   pham: 'gold'|'silver'|'bronze'|null — phẩm cao nhất trong buổi;
+ *   pham: 'gold'|'silver'|'bronze'|null — phẩm cao nhất trong buổi; baseline: true khi mọi bài đều tập lần đầu (buổi làm mốc, chưa có gì để so);
  *   linhKhi: {gain, level, levelUp, into, need, pct};
  *   tuvi: {from, to, up, opened, of};
  *   meridians: [{key, name, xp (Linh khí mạch nhận), from, to, up, opened (mạch mới khai)}] — mạch có tập trong buổi;
@@ -45,11 +45,12 @@ export function recap(w, { workouts = [], exercises = [], body = [], templates =
   const was = new Set(qb.quests.filter((q) => q.complete).map((q) => q.id));
   const doneQuests = qa.quests.filter((q) => q.complete && !was.has(q.id)).map(({ id, title, detail }) => ({ id, title, detail }));
 
-  const tiers = analyzeWorkout(w, workouts.filter((x) => x.end)).map((o) => o.res?.tier).filter(Boolean);
+  const cmp = analyzeWorkout(w, workouts.filter((x) => x.end));
+  const tiers = cmp.map((o) => o.res?.tier).filter(Boolean), baseline = cmp.length > 0 && cmp.every((o) => o.first);
   const pham = tiers.sort((a, b) => RANK[b] - RANK[a])[0] || null;
   const L = after.linhKhi, L0 = before.linhKhi;
   return {
-    needsWeight, needsSex, pham,
+    needsWeight, needsSex, pham, baseline,
     linhKhi: { gain: L.xp - L0.xp, level: L.level, levelUp: L.level > L0.level, into: L.into, need: L.need, pct: L.pct },
     tuvi: { from: before.tuvi.label, to: after.tuvi.label, up: after.tuvi.label !== before.tuvi.label && after.tuvi.p > before.tuvi.p, opened: after.tuvi.opened, of: after.tuvi.of },
     meridians: needsWeight ? meridians.map((m) => ({ ...m, from: null, to: null, up: false, opened: false })) : meridians,

@@ -33,6 +33,7 @@
 - O1 hỏi cân nặng + O2 tổng kết (Claude, 23/11): `js/recap.js` `recap(w, ctx)` so hồ sơ trước/sau buổi (Phẩm, +Linh khí/Công lực, Tu vi, mạch có tập: Linh khí + khai/lên bậc, Đột phá, nhiệm vụ vừa xong) + `nextSession` (lịch → giáo án Công pháp xoay vòng/lâu chưa dùng → mạch lâu chưa tập). Trang `#/ky/<id>` có thẻ `[data-recap]` "Thu hoạch"; thiếu cân nặng/giới tính → form `profileForm` ngay trong thẻ (lưu xong vẽ lại). Markup tạm, chưa CSS.
 - O3 một nơi cho thân thể (Claude, 23/11): Động phủ + Thất mạch bỏ form, thay bằng dòng `profileHint` `[data-profile-hint=weight|sex]` dẫn tới Thân trọng (`#/tang-thu/body`) hoặc Cài đặt. Form chỉ còn ở trang tổng kết (hỏi một lần). Nhập môn bước 2: đã có giới tính + cân nặng → chỉ hiện 1 dòng `[data-dao-known]`, không hỏi lại.
 - O6 dọn sót (Claude, 23/11): Tổng quan bỏ thẻ `.lift-total` (Tổng ~1RM top 3 bài) vì trùng thẻ "Tổng" SBD; Trắc linh căn điền sẵn set tốt nhất từ lịch sử (`G.historyTests`, chỉ để hiện, sửa được, lưu khi Tiếp tục).
+- O7 (Claude, 23/11): chỉ giữ một chuỗi là Đạo tâm (tuần liên tiếp) — Động phủ đổi ô Liên kích → Đạo tâm `N tuần`, Công đức bạ bỏ ô Liên kích, Thu hoạch bỏ dòng Liên kích, Từ điển ẩn `streak` (dữ liệu `medals().streak` giữ). Linh khí ghi một kiểu `into / need` (Thất mạch). Buổi mà mọi bài đều tập lần đầu: `recap().baseline` → nhãn "Buổi đầu · làm mốc" `[data-recap-baseline]` thay Phẩm.
 
 ## Triển khai
 - GitHub Pages từ nhánh `main` (repo thanhvuminh08-cloud/gym-log) → https://thanhvuminh08-cloud.github.io/gym-log/. Cập nhật điện thoại = tăng `VERSION` sw.js + commit + `git push` (chỉ push khi người dùng đồng ý).
@@ -71,6 +72,7 @@ Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nh
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 - [cho Codex] Style "Khu nguy hiểm" + nút Đặt lại app trong Cài đặt (`section.danger-zone`, `[data-act=resetAll]`, js/views/settings.js) — hiện chỉ markup tối thiểu.
+- [cho Codex] test O7 + O6: smoke bước 'Động phủ giữ mục tiêu tuần và Liên kích' cần đổi sang Đạo tâm (home.js `.sanctum-stats`); kiểm Công đức bạ không còn Liên kích, Từ điển không có Liên kích; `recap().baseline` true khi mọi bài lần đầu, false khi có bài so được (js/recap.js, history.js `[data-recap-baseline]`); Thất mạch Linh khí ghi `into / need`. O6: `G.historyTests` đã có bước smoke.
 
 
 ## Ý tưởng sau khi dùng thực tế

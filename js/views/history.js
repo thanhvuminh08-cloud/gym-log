@@ -5,7 +5,7 @@ import { startWorkout } from './workout.js';
 import { analyzeWorkout } from '../overload.js';
 import { muscleKey } from '../insights.js';
 import { medals } from '../medals.js';
-import { gloss, hint, term } from '../lore.js';
+import { hint, term } from '../lore.js';
 import { hintLabel, journalHeader, phamSeal, termLabel } from './sections.js';
 import { recap } from '../recap.js';
 import { profileForm, bindProfileForm } from './hero.js';
@@ -60,8 +60,7 @@ async function detail(el, id, ex) {
       <small>${nCmp ? 'Bài vượt lần trước' : 'Chưa có lần trước'}</small>
     </div>
   </div>
-  ${ledger.streak.cur || stones.length ? `<section class="card ledger-summary">
-    ${ledger.streak.cur ? `<b>${hintLabel(term('streak', ledger.streak.cur), hint('streak'))}</b><small class="gloss">${gloss('streak')}</small>` : ''}
+  ${stones.length ? `<section class="card ledger-summary">
     ${stones.length ? `<h3>${hintLabel(`${term('milestone')} mới`, hint('milestone'))}</h3><ul>${stones.map((item) => `<li>${h(ex[item.exerciseId]?.name || 'Bài đã xoá')} · ${fmtNum(item.reached.kg)} kg</li>`).join('')}</ul>` : ''}
     <a class="btn ghost" href="#/ky/cong-duc">${termLabel('ledger')}</a>
   </section>` : ''}
@@ -95,11 +94,11 @@ async function detail(el, id, ex) {
 }
 
 function recapView(rc) {
-  const { linhKhi, tuvi, next, pham, breakthroughs, quests, meridians } = rc;
+  const { linhKhi, tuvi, next, pham, baseline, breakthroughs, quests, meridians } = rc;
   return `<section class="card recap" data-recap aria-labelledby="recap-title">
     <header class="recap-header">
       <h2 id="recap-title">Thu hoạch</h2>
-      ${pham ? `<div class="tier small recap-pham" data-tier="${h(pham)}">${phamSeal()}<strong>${termLabel(pham)}</strong></div>` : ''}
+      ${pham ? `<div class="tier small recap-pham" data-tier="${h(pham)}">${phamSeal()}<strong>${termLabel(pham)}</strong></div>` : baseline ? '<div class="tier small recap-pham" data-recap-baseline><strong>Buổi đầu · làm mốc</strong></div>' : ''}
     </header>
     <div class="recap-linhkhi" data-recap-linhkhi>
       <span class="recap-formation" aria-hidden="true"></span>

@@ -316,10 +316,10 @@ export function heroView(profile, { preview = false, weekly = SAMPLE_QUESTS, cha
     <section class="card cultivation-panel">
       <div class="cultivation-section-heading">
         <h2>${hintLabel(`${term('congLuc')} cấp ${linhKhi.level}`, hint('congLuc'))}</h2>
-        <span><b data-count="${linhKhi.xp}">${fmtNum(linhKhi.xp)}</b> ${termLabel('linhKhi')}</span>
+        <span><b data-count="${linhKhi.into}">${fmtNum(linhKhi.into)}</b> / ${fmtNum(linhKhi.need)} ${termLabel('linhKhi')}</span>
       </div>
       <progress class="cultivation-meter" value="${linhKhi.into}" max="${linhKhi.need}" aria-label="Linh khí tới cấp tiếp theo"></progress>
-      <p class="muted small">${fmtNum(linhKhi.into)} / ${fmtNum(linhKhi.need)} Linh khí tới cấp ${linhKhi.level + 1}</p>
+      <p class="muted small">Tới cấp ${linhKhi.level + 1}</p>
       ${linhKhi.parts?.dao > 0 ? `<p class="cultivation-prior-qi"><b>${fmtNum(linhKhi.parts.dao)} Linh khí</b> · Tu vi tích luỹ trước khi nhập môn</p>` : ''}
     </section>
     ${statusCard(profile)}

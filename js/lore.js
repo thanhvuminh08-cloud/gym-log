@@ -85,4 +85,5 @@ export const hint = (k) => DICT[k]?.[1] ?? '';
 export const gloss = (k) => DICT[k]?.[2] ?? '';
 
 /** Toàn bộ từ điển cho trang "Từ điển" (Tàng thư): [{ key, term, hint, gloss }] theo thứ tự trên. */
-export const GLOSSARY = Object.entries(DICT).map(([key, [t, hn, g]]) => ({ key, term: t, hint: hn, gloss: g }));
+// Liên kích (streak) không còn hiện ở đâu (O7: chỉ giữ Đạo tâm) → không đưa vào Từ điển.
+export const GLOSSARY = Object.entries(DICT).filter(([key]) => key !== 'streak').map(([key, [t, hn, g]]) => ({ key, term: t, hint: hn, gloss: g }));

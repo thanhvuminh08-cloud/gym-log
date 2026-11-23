@@ -38,7 +38,7 @@ export async function render(el) {
   const now = Date.now();
   const { schedule, weekGoal } = settings.get(), plan = weekPlan(schedule, done, now);
   const template = templates.find((t) => t.id === plan.templateId);
-  const { week } = sessionCounts(done, now), { streak } = medals(done, now);
+  const { week } = sessionCounts(done, now), { weeks } = medals(done, now);
   const target = Object.keys(schedule || {}).length || Math.max(1, Math.round(weekGoal) || 1); // có lịch → số ngày theo lịch
   const last = lastBackup(), remind = backupDue(last, done);
   const date = new Intl.DateTimeFormat('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }).format(now);
@@ -57,7 +57,7 @@ export async function render(el) {
           <a href="#/cong-phap" data-session-goals data-session-goal="week"${week >= target ? ' data-done' : ''}>
             <small>Buổi tuần này</small><b data-session-goal-count><span data-session-count data-count="${week}">${week}</span> / ${target}</b>
           </a>
-          <a href="#/ky/cong-duc">${termLabel('streak')}<b class="streak-multiplier"><span data-count="${streak.cur}">${streak.cur}</span></b></a>
+          <a href="#/ky/cong-duc">${termLabel('weeks')}<b class="streak-multiplier"><span data-count="${weeks.cur}">${weeks.cur}</span><small> tuần</small></b></a>
         </div>
         ${profileHint(p)}
       </div>

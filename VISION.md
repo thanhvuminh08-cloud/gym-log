@@ -183,3 +183,4 @@ Chi tiết cảnh giới, Thất mạch, Linh khí, Nhập môn, Luyện thể: 
 - ✅ 23/11 O1 (hỏi cân nặng/giới tính một lần ngay ở tổng kết) + O2 phần dữ liệu xong (Claude, `js/recap.js`). Còn: giao diện thẻ Thu hoạch (Codex, Việc chờ) → O3 (bỏ form Động phủ/Thất mạch, giới tính về Cài đặt).
 - ✅ 23/11 O3 xong (Claude): bỏ form Động phủ/Thất mạch (dòng dẫn tới Thân trọng/Cài đặt), Nhập môn không hỏi lại khi đã có. Còn: style dòng dẫn (Codex, Việc chờ).
 - ✅ 23/11 O6 (Claude): bỏ "Tổng ~1RM" lặp ở Tổng quan; Trắc linh căn điền sẵn từ lịch sử. Còn mở: 3 thứ "chuỗi" (Liên kích, Đạo tâm, streak nhiệm vụ) và Linh khí 2 cách ghi — chờ người dùng chọn.
+- ✅ 23/11 O7 (Claude, người dùng duyệt): chỉ giữ chuỗi Đạo tâm; Linh khí ghi một kiểu `into / need`; buổi toàn bài mới → "Buổi đầu · làm mốc". Chờ Codex test.
