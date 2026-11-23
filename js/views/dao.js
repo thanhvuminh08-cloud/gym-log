@@ -236,10 +236,14 @@ function state(step, { exercises, body, workouts, s }, now = Date.now()) {
   const known = ['m', 'f'].includes(s.sex) && latest?.weight > 0;
   if (known) Object.assign(draft, { sex: s.sex, weight: latest.weight });
   const b = draft.weight > 0 ? [...body, { date: now, weight: draft.weight }] : body;
+  const tests = G.testList(d.path, exercises);
+  // Trắc linh căn: bài chưa khai thì điền sẵn set tốt nhất từ lịch sử (vẫn sửa được). Chỉ để hiện, lưu khi "Tiếp tục".
+  const told = new Set((d.tested || []).map((t) => t.exerciseId));
+  const shown = step === 5 ? { ...d, tested: [...(d.tested || []), ...G.historyTests(tests, workouts).filter((t) => !told.has(t.exerciseId))] } : d;
   return {
-    step, dao: d, sex: draft.sex, weight: draft.weight, known, editing: G.entered(s),
+    step, dao: shown, sex: draft.sex, weight: draft.weight, known, editing: G.entered(s),
     groups: G.pathOptions(exercises), validation: G.validatePath(d.path, exercises),
-    tests: G.testList(d.path, exercises),
+    tests,
     result: step === 6 ? G.assess({ dao, exercises, body: b, sex: draft.sex, workouts, now }) : null,
     plan: step === 6 ? G.buildPlan(d, exercises) : null,
     exerciseNames: Object.fromEntries(exercises.map(({ id, name }) => [id, name])),

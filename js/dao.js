@@ -105,6 +105,25 @@ export function testList(path = {}, exercises = []) {
   }));
 }
 
+/**
+ * Điền sẵn Trắc linh căn từ lịch sử: set tốt nhất đã xong của mỗi bài trong `tests`
+ * (bài tạ: ~1RM cao nhất với 1–30 rep; Bụng: r lớn nhất ≤ 600). Bài chưa tập → bỏ qua. [{exerciseId, w, r}]
+ */
+export function historyTests(tests = [], workouts = []) {
+  const want = new Map(tests.map((t) => [t.exerciseId, t]));
+  const best = {};
+  for (const w of workouts) if (w.end) for (const e of w.entries || []) {
+    const t = want.get(e.exerciseId);
+    if (t) for (const s of e.sets || []) {
+      const wt = +s.w || 0, r = Math.round(+s.r || 0);
+      if (!s.done || r < 1 || r > (t.core ? 600 : 30) || (!t.core && !(wt > 0) && !t.bodyweight)) continue;
+      const score = t.core ? r : (wt > 0 ? wt * (r === 1 ? 1 : 1 + r / 30) : r / 1000);
+      if (!best[e.exerciseId] || score > best[e.exerciseId].score) best[e.exerciseId] = { exerciseId: e.exerciseId, w: t.core ? 0 : wt, r, score };
+    }
+  }
+  return Object.values(best).map(({ score: _, ...x }) => x);
+}
+
 /** Lời khai đáng ngờ (từ Nguyên Anh trở lên, hoặc > 15 rep với bài tạ) → hỏi lại "Đạo hữu chắc chứ?". */
 export function doubts({ dao, exercises = [], body = [], sex, now = Date.now() } = {}) {
   const p = hero({ exercises, body, sex, dao: { ...dao, at: dao?.at ?? now }, now: Math.max(now, dao?.at ?? now) });

@@ -407,6 +407,22 @@ try {
     if (got !== want) lines.push(`  ${got}\n  ≠ ${want}`);
     return got === want;
   });
+  await step('Trắc linh căn điền sẵn từ lịch sử: set tốt nhất (~1RM), bỏ set chưa xong/buổi dở/>30 rep, Plank theo giây', async () => {
+    const G = await import('./js/dao.js'), { DEFAULT_EXERCISES: ex } = await import('./js/exercises.js');
+    const id = (n) => ex.find((e) => e.name === n).id;
+    const tl = G.testList({ legs: [id('Squat')], chest: [id('Bench Press (đòn)')], back: [id('Pull-up')], core: [id('Plank')] }, ex);
+    const S = (w, r, done = true) => ({ w, r, done });
+    const ws = [
+      { id: 'a', start: 1, end: 2, entries: [{ exerciseId: id('Squat'), sets: [S(100, 5), S(120, 1), S(200, 5, false)] }, { exerciseId: id('Plank'), sets: [S(0, 60), S(0, 90)] }] },
+      { id: 'b', start: 3, end: 4, entries: [{ exerciseId: id('Squat'), sets: [S(110, 3)] }, { exerciseId: id('Pull-up'), sets: [S(0, 12), S(10, 5)] }, { exerciseId: id('Bench Press (đòn)'), sets: [S(40, 40)] }] },
+      { id: 'c', start: 5, end: null, entries: [{ exerciseId: id('Squat'), sets: [S(150, 5)] }] },
+    ];
+    const r = Object.fromEntries(G.historyTests(tl, ws).map((t) => [ex.find((e) => e.id === t.exerciseId).name, `${t.w}×${t.r}`]));
+    // Squat: 110×3 (~121) > 120×1 (120) > 100×5 (~116.7); 200×5 chưa xong và 150×5 ở buổi dở bị bỏ. Bench 40×40 > 30 rep → bỏ.
+    const got = JSON.stringify(Object.entries(r).sort()), want = JSON.stringify(Object.entries({ Squat: '110×3', Plank: '0×90', 'Pull-up': '10×5' }).sort());
+    if (got !== want) lines.push(`  ${got} ≠ ${want}`);
+    return got === want;
+  });
   await step('Hư cảnh & Xác chứng: khai lố bị giới hạn + hỏi lại, Công lực khởi đầu, đo Bụng, tập thật 90% → Xác chứng', async () => {
     const H = await import('./js/hero.js'), G = await import('./js/dao.js'), { DEFAULT_EXERCISES: ex } = await import('./js/exercises.js');
     const id = (n) => ex.find((e) => e.name === n).id, now = new Date(2026, 2, 2, 9).getTime(), D = 864e5;

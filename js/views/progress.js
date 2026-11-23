@@ -17,8 +17,8 @@ const legend = (items) => `<div class="chips legend">${items.map(([m, t]) => `<s
 
 const trend = (d) => (d > 0 ? `<span class="trend up">↑ ${fmtNum(d)}</span>` : d < 0 ? `<span class="trend down">↓ ${fmtNum(-d)}</span>` : '');
 
-/** Thẻ mức tạ chính (~1RM) + tổng, mũi tên so với 30 ngày trước. */
-function strength({ lifts, total }, ex) {
+/** Thẻ mức tạ chính (~1RM), mũi tên so với 30 ngày trước. Tổng chỉ ở thẻ "Tổng" (SBD) — không lặp. */
+function strength({ lifts }, ex) {
   return `<section class="strength">
       <h2>Sức mạnh</h2>
       <div class="lift-cards">${lifts.map((l) => `
@@ -27,10 +27,6 @@ function strength({ lifts, total }, ex) {
           <small class="lift-name">${h(ex[l.exerciseId]?.name || 'Bài đã xoá')}</small>
           ${sparkline(l.spark)}
         </a>`).join('')}</div>
-      ${lifts.length > 1 ? `<div class="card lift-total">
-        <span class="lift-top"><b data-count="${total.max}">${fmtNum(total.max)}<small> kg</small></b>${trend(total.delta)}<small class="muted">Tổng ~1RM ${lifts.length} bài · so với 30 ngày trước</small></span>
-        ${lineChart(total.series.slice(-40), { unit: ' kg', area: true, labels: true, head: false })}
-      </div>` : ''}
     </section>`;
 }
 
