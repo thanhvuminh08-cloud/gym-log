@@ -89,6 +89,11 @@ try {
     if (!ok) lines.push(`  ${rc?.textContent.replace(/\s+/g, ' ')}`);
     return ok;
   });
+  await step('O7: Buổi đầu có nhãn làm mốc, không có Phẩm hay Liên kích', () => {
+    const recap = $('[data-recap]');
+    return recap?.querySelector('[data-recap-baseline]')?.textContent.trim() === 'Buổi đầu · làm mốc'
+      && !recap.querySelector('[data-tier]') && !recap.textContent.includes('Liên kích');
+  });
   await step('Lưu thành giáo án', async () => { (await until(() => $('[data-act=tpl]'))).click(); await wait(200); await go('#/templates'); return w.document.body.innerText.includes('Smoke A'); });
   await step('Tập lại từ giáo án, hiện số liệu lần trước', async () => {
     await go('#/cong-phap'); (await until(() => $('button[data-id]'))).click();
@@ -114,6 +119,11 @@ try {
   await step('Toast cổ vũ khi vượt', () => $$('.toast').some((t) => t.textContent.includes('PR mới')));
   await step('Kết thúc buổi 2', async () => { $('[data-act=finish]').click(); return !!(await until(() => w.location.hash.startsWith('#/ky/'))); });
   await step('Tổng kết: huy chương vàng + 1/1 bài vượt', async () => !!(await until(() => $('.tier[data-tier=gold]'))) && $('.overload')?.textContent.includes('1/1'));
+  await step('O7: Buổi có bài để so hiện Phẩm, bỏ nhãn làm mốc và Liên kích', () => {
+    const recap = $('[data-recap]');
+    return !!recap?.querySelector('.recap-pham[data-tier=gold]')
+      && !recap.querySelector('[data-recap-baseline]') && !recap.textContent.includes('Liên kích');
+  });
   await step('Âm: phẩm mới phamKim (không kèm setXong), Xuất quan khi lưu buổi, Điều tức hết giờ hetGio', async () => {
     const S = await w.eval(`import('./js/sfx.js')`), p = S.played.join(',');
     const pham = /phamKim,xuatQuan$/.test(p.replace(/,(dotPha|loiKiep|thoiThe|xacChung|nhiemVu)/g, ''));
@@ -205,8 +215,12 @@ try {
     if (got !== want) lines.push(`  ${got} ≠ ${want}`);
     return got === want;
   });
-  await step('Động phủ giữ mục tiêu tuần và Liên kích; Khí huyết chỉ ở Thất mạch', async () => {
+  await step('Động phủ giữ mục tiêu tuần và Đạo tâm; Khí huyết chỉ ở Thất mạch', async () => {
     await go('#/'); const wk = await until(() => $('[data-session-goal=week]'));
+    const streak = $('.sanctum-stats .streak-multiplier');
+    const stats = $('.sanctum-stats');
+    if (!stats?.textContent.includes('Đạo tâm') || stats.textContent.includes('Liên kích')
+      || !streak?.textContent.trim().endsWith(' tuần')) return false;
     // Đọc data-count, không đọc chữ: số đang chạy hiệu ứng đếm từ 0.
     const got = [!$('[data-readiness-score]'), !!wk?.querySelector('[data-session-goal-count]')?.textContent.includes(' / '), $('[data-session-count]')?.dataset.count,
       $('.sanctum-stats .streak-multiplier [data-count]')?.dataset.count, !$('.lift-card, .cultivation-meridian, .cultivation-challenge')].join(',');
@@ -214,6 +228,30 @@ try {
     await go('#/tang-thu/that-mach'); const score = await until(() => $('[data-readiness-score]'));
     return got === 'true,true,2,1,true' && !!score && /^\d+$/.test(score.textContent) && Number(score.textContent) <= 100
       && !!$('[data-readiness-chart] svg.spark');
+  });
+  await step('O7: Thất mạch hiện Linh khí theo into / need của cấp hiện tại', async () => {
+    await go('#/tang-thu/that-mach');
+    const meter = await until(() => $('.cultivation-panel progress[aria-label="Linh khí tới cấp tiếp theo"]'));
+    const { loadProfile } = await w.eval("import('./js/views/hero.js')");
+    const { fmtNum } = await w.eval("import('./js/util.js')");
+    const { linhKhi } = await loadProfile(Date.now(), { detail: true });
+    const label = meter?.previousElementSibling?.querySelector(':scope > span');
+    const count = label?.querySelector('b[data-count]');
+    return !!count && Number(count.dataset.count) === linhKhi.into
+      && label.textContent.trim().split('/').length === 2
+      && count.nextSibling?.textContent.trim() === `/ ${fmtNum(linhKhi.need)}`
+      && label.textContent.includes('Linh khí')
+      && meter.value === linhKhi.into && meter.max === linhKhi.need;
+  });
+  await step('O7: Công đức bạ giữ Đạo tâm, Từ điển bỏ Liên kích', async () => {
+    await go('#/ky/cong-duc');
+    const ledger = await until(() => $('.stats.streaks'));
+    if (!ledger?.querySelector('.streak')?.textContent.includes('Đạo tâm')
+      || ledger.textContent.includes('Liên kích') || ledger.querySelectorAll('.streak').length !== 1) return false;
+    await go('#/tang-thu/library/tu-dien');
+    const dictionary = await until(() => $('.glossary'));
+    return !!dictionary?.querySelector('[data-term=weeks]') && !dictionary.querySelector('[data-term=streak]')
+      && !dictionary.textContent.includes('Liên kích');
   });
   await step('Tông mực tối giữ xuyên trang và bật lớp ảnh động theo cài đặt chuyển động', async () => {
     const isDark = (el) => el && Math.max(...w.getComputedStyle(el).backgroundColor.match(/\d+/g).slice(0, 3).map(Number)) < 60;
@@ -643,6 +681,12 @@ try {
     const w1 = mk('w1', t0, [['b', 60]]), w2 = mk('w2', t0 + 2 * D, [['b', 80], ['i', 70]]);
     const ctx = { workouts: [w1, w2], exercises, body: [{ id: 'x', date: t0 + 5 * D, weight: 75 }], settings: { sex: 'm' } };
     const r = R.recap(w2, ctx), ch = r.meridians.find((m) => m.key === 'chest');
+    const first = R.recap(w1, ctx);
+    const allNew = mk('w3', t0 + 3 * D, [['i', 60], ['s', 90]]);
+    const multipleFirst = R.recap(allNew, { ...ctx, workouts: [w1, allNew] });
+    if (first.baseline !== true || multipleFirst.baseline !== true || r.baseline !== false) {
+      throw new Error(`baseline sai: một bài mới=${first.baseline}, nhiều bài mới=${multipleFirst.baseline}, có bài so được=${r.baseline}`);
+    }
     const noW = R.recap(w2, { ...ctx, body: [] });
     const sch = R.recap(w2, { ...ctx, templates: [{ id: 'T', name: 'Đẩy', items: [1, 2] }], settings: { sex: 'm', schedule: { 5: 'T' } } }).next;
     const tpl = R.recap(w2, { ...ctx, templates: [{ id: 'T', name: 'Đẩy', items: [1, 2] }] }).next;

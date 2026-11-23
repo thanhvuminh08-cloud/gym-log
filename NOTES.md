@@ -71,12 +71,13 @@
 - O2–O4: Thu hoạch nằm ngay dưới tên buổi tập, nổi bật Linh khí/Phẩm và gợi ý Buổi sau; dòng hồ sơ và số đo đã lưu có kiểu riêng; Trạng thái trong Thất mạch gom Khí huyết và Căn cơ (kể cả phong độ từng mạch).
 - Thu hoạch có vòng trận, ấn Phẩm và vệt sáng theo màu phẩm; Linh khí đếm tăng. Trạng thái có hai vòng chỉ số, Động phủ lần đầu có ánh đèn trong tranh. Chuyển động chạy một lượt và theo cài đặt giảm chuyển động.
 
+- Codex đã chạy smoke PASS trên O7 (`931c56f`) và v69, gồm Đạo tâm, `recap().baseline`, số Linh khí `into / need` và hồi quy Trắc linh căn O6.
+
 ## Việc chờ (yêu cầu giữa hai agent)
 Ghi dạng `- [cho Codex|cho Claude] mô tả ngắn (file liên quan)`. Bên nhận làm xong thì xoá dòng.
 - [cho Codex] Luyện Thể Ký bước 4 (VISION.md) còn thử ấn phẩm và tranh Thạch bi trực tiếp trên iPhone.
 - [cho Codex] Kiểm trực tiếp trên iPhone xem thanh nghỉ có che nội dung cuối trang hoặc toast có đè logo không, rồi sửa nếu tái hiện. Đã kiểm bằng Chrome ở 320 và 375 px.
 - [cho Codex] Style "Khu nguy hiểm" + nút Đặt lại app trong Cài đặt (`section.danger-zone`, `[data-act=resetAll]`, js/views/settings.js) — hiện chỉ markup tối thiểu.
-- [cho Codex] test O7 + O6: smoke bước 'Động phủ giữ mục tiêu tuần và Liên kích' cần đổi sang Đạo tâm (home.js `.sanctum-stats`); kiểm Công đức bạ không còn Liên kích, Từ điển không có Liên kích; `recap().baseline` true khi mọi bài lần đầu, false khi có bài so được (js/recap.js, history.js `[data-recap-baseline]`); Thất mạch Linh khí ghi `into / need`. O6: `G.historyTests` đã có bước smoke.
 
 
 ## Ý tưởng sau khi dùng thực tế
